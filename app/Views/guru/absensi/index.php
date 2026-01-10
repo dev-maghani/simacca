@@ -183,6 +183,11 @@
 
                                     $total = 0;
                                     $hadir = 0;
+
+                                    echo '<pre>';
+                                    print_r($item);
+                                    echo '</pre>';
+
                                     foreach ($detailStats as $stat) {
                                         $total += $stat['total'];
                                         if ($stat['status'] == 'hadir') {
