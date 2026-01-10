@@ -62,7 +62,7 @@ class AbsensiController extends BaseController
         // Get absensi by guru
         $absensi = $this->absensiModel->getByGuru($guruId, $tanggal);
 
-        $absensiId = $absensi['id'] ?? null;
+        $absensiId = $absensi['id'];
         // Get all classes taught by this teacher
         $kelasOptions = $this->getKelasOptions($guruId);
 
