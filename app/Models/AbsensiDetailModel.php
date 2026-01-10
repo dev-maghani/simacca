@@ -113,12 +113,15 @@ class AbsensiDetailModel extends Model
             'izin'  => 0,
             'sakit' => 0,
             'alpa'  => 0,
-            'total' => 0,
+            'total_sesi' => 0,
         ];
 
         foreach ($result as $row) {
-            $statistik[$row['status']] = $row['jumlah'];
-            $statistik['total'] += $row['jumlah'];
+            $status = strtolower($row['status']);
+            if (isset($statistik[$status])) {
+                $statistik[$status] = (int) $row['jumlah'];
+                $statistik['total_sesi'] += (int) $row['jumlah'];
+            }
         }
 
         return $statistik;
@@ -189,5 +192,40 @@ class AbsensiDetailModel extends Model
             ->where('absensi_id', $id)
             ->groupBy('status')
             ->findAll();
+    }
+
+    /**
+     * Rekap per kelas untuk periode tanggal tertentu
+     */
+    public function getRekapPerKelas(string $from, string $to, ?int $kelasId = null): array
+    {
+        $builder = $this->db->table('absensi_detail ad')
+            ->select('k.nama_kelas, 
+                SUM(CASE WHEN ad.status = "hadir" THEN 1 ELSE 0 END) as hadir,
+                SUM(CASE WHEN ad.status = "izin" THEN 1 ELSE 0 END) as izin,
+                SUM(CASE WHEN ad.status = "sakit" THEN 1 ELSE 0 END) as sakit,
+                SUM(CASE WHEN ad.status = "alpa" THEN 1 ELSE 0 END) as alpa,
+                COUNT(*) as total_sesi')
+            ->join('absensi a', 'a.id = ad.absensi_id')
+            ->join('jadwal_mengajar jm', 'jm.id = a.jadwal_mengajar_id')
+            ->join('kelas k', 'k.id = jm.kelas_id')
+            ->where('a.tanggal >=', $from)
+            ->where('a.tanggal <=', $to)
+            ->groupBy('k.id')
+            ->orderBy('k.nama_kelas', 'ASC');
+
+        if (!empty($kelasId)) {
+            $builder->where('k.id', $kelasId);
+        }
+
+        $rows = $builder->get()->getResultArray();
+        foreach ($rows as &$r) {
+            $r['hadir'] = (int)($r['hadir'] ?? 0);
+            $r['izin'] = (int)($r['izin'] ?? 0);
+            $r['sakit'] = (int)($r['sakit'] ?? 0);
+            $r['alpa'] = (int)($r['alpa'] ?? 0);
+            $r['total_sesi'] = (int)($r['total_sesi'] ?? 0);
+        }
+        return $rows;
     }
 }
