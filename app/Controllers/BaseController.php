@@ -65,7 +65,7 @@ abstract class BaseController extends Controller
         }
 
         return [
-            'id'            => session()->get('userId'),
+            'id'            => session()->get('user_id') ?? session()->get('userId'),
             'username'      => session()->get('username'),
             'role'          => session()->get('role'),
             'email'         => session()->get('email'),
@@ -121,11 +121,21 @@ abstract class BaseController extends Controller
             'siswa'         => 'Siswa'
         ];
 
+        // Ensure $role is a valid string before accessing array
+        if (empty($role) || !is_string($role)) {
+            return 'Unknown';
+        }
+
         return $roleNames[$role] ?? 'Unknown';
     }
 
     protected function isAbsensiEditable($absensi)
     {
+        // Check if $absensi is array and has created_at key
+        if (!is_array($absensi) || !isset($absensi['created_at'])) {
+            return false;
+        }
+
         $createdAt = strtotime($absensi['created_at']);
         $now = time();
         $diffHours = ($now - $createdAt) / 3600;
