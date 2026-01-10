@@ -158,7 +158,8 @@ class AuthController extends BaseController
     /**
      * Logout process
      */
-    public function Logout() {
+    public function Logout()
+    {
         // Destroy session
         session()->destroy();
 
@@ -169,19 +170,20 @@ class AuthController extends BaseController
     /**
      * Forgot password page
      */
-    public function forgotPassword() {
+    public function forgotPassword()
+    {
         $data = [
             'title' => 'Lupa Password - ' . $this->appName
         ];
 
         return view('auth/forgot_password', $data);
-        
     }
 
     /**
      * Process forgot password
      */
-    public function processForgotPassword() {
+    public function processForgotPassword()
+    {
         // Implement forgot password logic here
         // This is a basic implementation
 
@@ -199,7 +201,8 @@ class AuthController extends BaseController
     /**
      * Reset password page
      */
-    public function resetPassword($token = null) {
+    public function resetPassword($token = null)
+    {
         if (!$token) {
             return redirect()->to('/forgot-password')->with('error', 'Token tidak valid');
         }
@@ -215,14 +218,15 @@ class AuthController extends BaseController
     /**
      * Process reset password
      */
-    public function processResetPassword() {
+    public function processResetPassword()
+    {
         // Implement reset password logic here
         // This is a basic implementation
 
         $token = $this->request->getPost('token');
         $passsword = $this->request->getPost('password');
         $confirm_password = $this->request->getPost('confirm_password');
-        
+
 
         if ($passsword !== $confirm_password) {
             return redirect()->back()->withInput()->with('error', 'Password tidak sama');
@@ -237,7 +241,8 @@ class AuthController extends BaseController
     /**
      * Change password page (for logged in users)
      */
-    public function changePassword() {
+    public function changePassword()
+    {
         // Check if user is logged in
         if (!session()->get('isLoggedIn')) {
             return redirect()->to('/login')->with('error', 'Silahkan login terlebih dahulu');
@@ -253,7 +258,8 @@ class AuthController extends BaseController
     /**
      * Process change password
      */
-    public function processChangePassword() {
+    public function processChangePassword()
+    {
         // Check if user is logged in
         if (!session()->get('isLoggedIn')) {
             return redirect()->to('/login')->with('error', 'Silahkan login terlebih dahulu');
@@ -307,7 +313,8 @@ class AuthController extends BaseController
     /**
      * Access denied page
      */
-    public function accessDenied() {
+    public function accessDenied()
+    {
         $data = [
             'title' => 'Akses Ditolak - ' . $this->appName
         ];
