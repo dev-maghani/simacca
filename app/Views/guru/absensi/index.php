@@ -189,13 +189,13 @@
                                         if ($stat['status'] == 'hadir') {
                                             $hadir = $stat['jumlah'];
                                         }
-                                        echo '<pre>';
-                                        print_r($guru);
-                                        echo '</pre>';
                                     }
 
                                     $percentage = $total > 0 ? round(($hadir / $total) * 100, 0) : 0;
                                     ?>
+                                    <pre>
+                                        <?= print_r($guru); ?>
+                                    </pre>
                                     <div class="flex items-center">
                                         <div class="w-16 bg-gray-200 rounded-full h-2 mr-2">
                                             <div class="bg-green-500 h-2 rounded-full" style="width: <?= $percentage; ?>%"></div>
