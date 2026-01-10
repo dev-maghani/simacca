@@ -94,28 +94,20 @@ class AbsensiModel extends Model
      */
     public function getByGuru($guruId, $startDate = null, $endDate = null)
     {
-        // $builder = $this->select('absensi.*,
-        //                         mata_pelajaran.nama_mapel,
-        //                         kelas.nama_kelas')
-        //     ->join('jadwal_mengajar', 'jadwal_mengajar.id = absensi.jadwal_mengajar_id')
-        //     ->join('mata_pelajaran', 'mata_pelajaran.id = jadwal_mengajar.mata_pelajaran_id')
-        //     ->join('kelas', 'kelas.id = jadwal_mengajar.kelas_id')
-        //     ->where('jadwal_mengajar.guru_id', $guruId)
-        //     ->orderBy('absensi.tanggal', 'DESC');
-        // if ($startDate && $endDate) {
-        //     $builder->where("absensi.tanggal BETWEEN '$startDate' AND '$endDate'");
-        // }
-
-        // return $builder->findAll();
         $builder = $this->select('absensi.*,
                             guru.nama_lengkap as nama_guru,
                             mata_pelajaran.nama_mapel,
-                            kelas.nama_kelas')
+                            kelas.nama_kelas,
+                            COUNT(absensi_detail.id) as total_siswa,
+                            SUM(CASE WHEN absensi_detail.status = "hadir" THEN 1 ELSE 0 END) as hadir,
+                            ROUND((SUM(CASE WHEN absensi_detail.status = "hadir" THEN 1 ELSE 0 END) / COUNT(absensi_detail.id)) * 100, 0) as percentage')
             ->join('jadwal_mengajar', 'jadwal_mengajar.id = absensi.jadwal_mengajar_id')
             ->join('guru', 'guru.id = jadwal_mengajar.guru_id')
             ->join('mata_pelajaran', 'mata_pelajaran.id = jadwal_mengajar.mata_pelajaran_id')
             ->join('kelas', 'kelas.id = jadwal_mengajar.kelas_id')
+            ->join('absensi_detail', 'absensi_detail.absensi_id = absensi.id', 'left')
             ->where('jadwal_mengajar.guru_id', $guruId)
+            ->groupBy('absensi.id')
             ->orderBy('absensi.tanggal', 'DESC');
 
         if ($startDate && $endDate) {

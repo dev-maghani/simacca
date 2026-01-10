@@ -177,27 +177,19 @@
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap">
                                     <?php
-                                    $detailStats = $this->absensiDetailModel->getDetailStats($item['id']);
-                                    $total = 0;
-                                    $hadir = 0;
-
-                                    foreach ($detailStats as $stat) {
-                                        $total += $stat['total'];
-                                        if ($stat['status'] == 'hadir') {
-                                            $hadir = $stat['jumlah'];
-                                        }
-                                    }
-
-                                    $percentage = $total > 0 ? round(($hadir / $total) * 100, 0) : 0;
+                                    // Get stats from item if available
+                                    $percentage = isset($item['percentage']) ? $item['percentage'] : 0;
+                                    $hadir = isset($item['hadir']) ? $item['hadir'] : 0;
+                                    $total = isset($item['total_siswa']) ? $item['total_siswa'] : 0;
                                     ?>
                                     <div class="flex items-center">
                                         <div class="w-16 bg-gray-200 rounded-full h-2 mr-2">
-                                            <div class="bg-green-500 h-2 rounded-full" style="width: <?= $percentage; ?>%"></div>
+                                            <div class="bg-green-500 h-2 rounded-full" style="width: <?= $percentage ?>%"></div>
                                         </div>
-                                        <span class="text-sm text-gray-700"><?= $percentage; ?>%</span>
+                                        <span class="text-sm text-gray-700"><?= $percentage ?>%</span>
                                     </div>
                                     <div class="text-xs text-gray-500 mt-1">
-                                        <?= $hadir; ?>/<?= $total; ?> siswa
+                                        <?= $hadir ?>/<?= $total ?> siswa
                                     </div>
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
