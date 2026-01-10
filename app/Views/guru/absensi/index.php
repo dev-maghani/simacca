@@ -184,15 +184,16 @@
                                     $total = 0;
                                     $hadir = 0;
 
-                                    echo '<pre>';
-                                    print_r($item);
-                                    echo '</pre>';
+
 
                                     foreach ($detailStats as $stat) {
                                         $total += $stat['total'];
                                         if ($stat['status'] == 'hadir') {
                                             $hadir = $stat['jumlah'];
                                         }
+                                        echo '<pre>';
+                                        print_r($stat);
+                                        echo '</pre>';
                                     }
 
                                     $percentage = $total > 0 ? round(($hadir / $total) * 100, 0) : 0;
