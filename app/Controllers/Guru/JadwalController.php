@@ -3,11 +3,58 @@
 namespace App\Controllers\Guru;
 
 use App\Controllers\BaseController;
+use App\Models\JadwalMengajarModel;
+use App\Models\GuruModel;
 
 class JadwalController extends BaseController
 {
+    protected $jadwalModel;
+    protected $guruModel;
+
+    public function __construct()
+    {
+        $this->jadwalModel = new JadwalMengajarModel();
+        $this->guruModel = new GuruModel();
+    }
+
     public function index()
     {
-        return view('guru/jadwal/index');
+        // Get guru data from session
+        $userId = session()->get('user_id');
+        $guru = $this->guruModel->getByUserId($userId);
+
+        if (!$guru) {
+            return redirect()->to('/guru/dashboard')->with('error', 'Data guru tidak ditemukan');
+        }
+
+        // Get jadwal mengajar untuk guru yang sedang login
+        $jadwal = $this->jadwalModel->getByGuru($guru['id']);
+
+        // Group jadwal by hari
+        $jadwalByHari = [
+            'Senin' => [],
+            'Selasa' => [],
+            'Rabu' => [],
+            'Kamis' => [],
+            'Jumat' => [],
+            'Sabtu' => []
+        ];
+
+        foreach ($jadwal as $item) {
+            $jadwalByHari[$item['hari']][] = $item;
+        }
+
+        // Get jadwal hari ini
+        $jadwalHariIni = $this->jadwalModel->getJadwalHariIni($guru['id']);
+
+        $data = [
+            'title' => 'Jadwal Mengajar',
+            'guru' => $guru,
+            'jadwal' => $jadwal,
+            'jadwalByHari' => $jadwalByHari,
+            'jadwalHariIni' => $jadwalHariIni
+        ];
+
+        return view('guru/jadwal/index', $data);
     }
 }
