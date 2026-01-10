@@ -184,15 +184,13 @@
                                     $total = 0;
                                     $hadir = 0;
 
-
-
                                     foreach ($detailStats as $stat) {
                                         $total += $stat['total'];
                                         if ($stat['status'] == 'hadir') {
                                             $hadir = $stat['jumlah'];
                                         }
                                         echo '<pre>';
-                                        print_r($stat);
+                                        print_r($guru);
                                         echo '</pre>';
                                     }
 
