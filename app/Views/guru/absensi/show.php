@@ -266,7 +266,10 @@ function confirmDelete(id) {
 }
 
 // Auto print if print parameter exists
-<?php if ($this->request->getGet('print') == 'true'): ?>
+<?php 
+$request = \Config\Services::request();
+if ($request->getGet('print') == 'true'): 
+?>
 window.onload = function() {
     window.print();
 }

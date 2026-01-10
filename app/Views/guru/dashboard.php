@@ -11,10 +11,7 @@
                 <div class="flex items-center mt-2">
                     <div class="flex items-center mt-1 text-sm opacity-80">
                         <i class="fas fa-chalkboard-teacher mr-2"></i>
-                        <?php
-                        // $mapel = $this->mapelModel->find($guru['mata_pelajaran_id'] ?? 0);
-                        echo $mapel ? $mapel['nama_mapel'] : 'Mata Pelajaran belum diatur';
-                        ?>
+                        <?= isset($mapel['nama_mapel']) ? $mapel['nama_mapel'] : 'Mata Pelajaran belum diatur' ?>
                     </div>
                     <div class="mx-4 opacity-80">|</div>
                     <div class="flex items-center text-sm opacity-80">
@@ -389,10 +386,7 @@
                         <div class="flex items-center text-sm text-gray-600">
                             <i class="fas fa-book mr-3 w-5"></i>
                             <span>
-                                <?php
-                                // $mapel = $this->mapelModel->find($guru['mata_pelajaran_id'] ?? 0);
-                                echo $mapel ? $mapel['nama_mapel'] : 'Belum diatur';
-                                ?>
+                                <?= isset($mapel['nama_mapel']) ? $mapel['nama_mapel'] : 'Belum diatur' ?>
                             </span>
                         </div>
                         <?php if ($guru['is_wali_kelas'] && $guru['kelas_id']): ?>
