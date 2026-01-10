@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><?= $title ?? 'Sistem Absensi'; ?> - <?= get_role_name(); ?></title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <!-- flatpickr CSS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+    <!-- optional theme (pilih atau hapus) -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/themes/airbnb.css">
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#3B82F6',
+                        secondary: '#6B7280',
+                        success: '#10B981',
+                        warning: '#F59E0B',
+                        danger: '#EF4444',
+                        info: '#3ABFF8'
+                    }
+                }
+            }
+        }
+    </script>
+    <?= $this->renderSection('styles'); ?>
+</head>
+
+<body class="bg-gray-100">
+    <!-- navigation -->
+    <nav class="bg-white shadow-lg">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between h-16">
+                <div class="flex">
+                    <!-- Logo -->
+                    <div class="flex-shrink-0 flex items-center">
+                        <i class="fas fa-graduation-cap flex items-center"></i>
+                        <span class="text-xl font-bold text-gray-800"><?= $title ?? 'test'; ?></span>
+                    </div>
+
+                    <div class="flex items-center sm:hidden">
+                        <button type="button" id="mobile-menu-button"
+                            class="inline-flex items-center justify-center p-2 rounded-md text-gray-700 hover:text-indigo-600 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-indigo-500">
+                            <span class="sr-only">Open main menu</span>
+                            <i class="fas fa-bars text-lg"></i>
+                        </button>
+                    </div>
+
+                    <!-- Desktop Menu -->
+                    <div class="hidden sm:ml-6 sm:flex sm:space-x-8">
+                        <?php if (is_logged_in()) : ?>
+                            <?php $menu = get_sidebar_menu(); ?>
+                            <?php foreach ($menu as $item): ?>
+                                <?php if (isset($item['submenu'])) : ?>
+                                    <!-- Dropdwon Menu -->
+                                    <div class="relative group">
+                                        <button class="text-gray-700 hover:text-indigo-600 px-3 py-2 text-sm font-medium flex items-center">
+                                            <?= $item['title']; ?>
+                                            <i class="fas fa-chevron-down ml-1 text-xs"></i>
+                                        </button>
+                                        <div class="absolute hidden group-hover:block bg-white shadow-lg rounded-md mt-1 py-2 z-50">
+                                            <?php foreach ($item['submenu'] as $subitem): ?>
+                                                <a href="<?= base_url($subitem['url']); ?>"
+                                                    class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 whitespace-nowrap">
+                                                    <?= $subitem['title']; ?>
+                                                </a>
+                                            <?php endforeach; ?>
+                                        </div>
+                                    </div>
+                                <?php else: ?>
+                                    <a href="<?= base_url($item['url']); ?>"
+                                        class="text-gray-700 hover:text-indigo-600 px-3 py-2 text-sm font-medium">
+                                        <?= $item['title']; ?>
+                                    </a>
+                                <?php endif; ?>
+                            <?php endforeach; ?>
+                        <?php endif; ?>
+                    </div>
+                </div>
+
+                <!-- Right side -->
+                <div class="flex items-center">
+                    <?php if (is_logged_in()): ?>
+                        <!-- User Menu -->
+                        <div class="relative ml-3">
+                            <div class="flex items-center space-x-4">
+                                <div class="text-right hidden md:block">
+                                    <p class="text-sm font-medium text-gray-900"><?= session()->get('nama_lengkap'); ?></p>
+                                    <p class="text-xs text-gray-500"><?= get_role_name(); ?></p>
+                                </div>
+                                <div class="relative">
+                                    <button type="button" id="user-menu-button"
+                                        class="flex items-center text-sm rounded-full focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                                        <span class="sr-only">Open user menu</span>
+                                        <div class="h-8 w-8 rounded-full bg-indigo-100 flex items-center justify-center">
+                                            <i class="fas fa-user text-indigo-600"></i>
+                                        </div>
+                                    </button>
+
+                                    <!-- Dropdown menu -->
+                                    <div id="user-dropdown" class="hidden absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 z-50">
+                                        <a href="<?= base_url('profile'); ?>"
+                                            class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                                            <i class="fas fa-user-circle mr-2"></i> Profil
+                                        </a>
+                                        <a href="<?= base_url('change-password'); ?>"
+                                            class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                                            <i class="fas fa-key mr-2"></i> Ubah Password
+                                        </a>
+                                        <div class="border-t border-gray-100"></div>
+                                        <a href="<?= base_url('logout'); ?>"
+                                            class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                                            <i class="fas fa-sign-out-alt mr-2"></i> Logout
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    <?php else: ?>
+                        <a href="<?= base_url('login'); ?>"
+                            class="text-gray-700 hover:text-indigo-600 px-3 py-2 text-sm font-medium">
+                            Login
+                        </a>
+                    <?php endif; ?>
+                </div>
+            </div>
+        </div>
+        <!-- Modile Menu -->
+
+
+        <!-- Mobile Menu - perbaiki struktur -->
+        <div class="sm:hidden hidden" id="mobile-menu">
+            <div class="px-2 pt-2 pb-3 space-y-1">
+                <?php if (is_logged_in()): ?>
+                    <?php $menu = get_sidebar_menu(); ?>
+                    <?php foreach ($menu as $item): ?>
+                        <?php if (isset($item['submenu'])): ?>
+                            <div class="px-3 py-2 font-medium text-gray-700">
+                                <?= $item['title']; ?>
+                            </div>
+                            <?php foreach ($item['submenu'] as $subitem): ?>
+                                <a href="<?= base_url($subitem['url']); ?>"
+                                    class="block pl-6 pr-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                                    <?= $subitem['title']; ?>
+                                </a>
+                            <?php endforeach; ?>
+                        <?php else: ?>
+                            <a href="<?= base_url($item['url']); ?>"
+                                class="block px-3 py-2 text-base font-medium text-gray-700 hover:text-indigo-600 hover:bg-gray-50">
+                                <?= $item['title']; ?>
+                            </a>
+                        <?php endif; ?>
+                    <?php endforeach; ?>
+                <?php endif; ?>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="py-6">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <!-- Page Header -->
+            <!-- <div class="mb-6">
+                <h1 class="text-2xl font-bold text-gray-900"><?= $pageTitle ?? $title ?? 'Test'; ?></h1>
+                <?php if (isset($pageDescription)): ?>
+                    <p class="mt-1 text-sm text-gray-600"><?= $pageDescription; ?></p>
+                <?php endif; ?>
+            </div> -->
+
+            <!-- Flash Messages -->
+            <?php if (session()->getFlashdata('success')): ?>
+                <div class="mb-4 bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded relative" role="alert">
+                    <span class="block sm:inline"><?= session()->getFlashdata('success'); ?></span>
+                </div>
+            <?php endif; ?>
+            <?php if (session()->getFlashdata('error')): ?>
+                <div class="mb-4 bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative" role="alert">
+                    <span class="block sm:inline"><?= session()->getFlashdata('error'); ?></span>
+                </div>
+            <?php endif; ?>
+            <?php if (session()->getFlashdata('errors')): ?>
+                <div class="mb-4 bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative" role="alert">
+                    <ul class="list-disc list-inside">
+                        <?php foreach (session()->getFlashdata('errors') as $error): ?>
+                            <li><?= $error; ?></li>
+                        <?php endforeach; ?>
+                    </ul>
+                </div>
+            <?php endif; ?>
+
+            <!-- Content -->
+            <?= $this->renderSection('content'); ?>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-white border-t border-gray-200">
+        <div class="max-w-7xl mx-auto py-4 px-4 sm:px-6 lg:px-8">
+            <div class="text-center text-sm text-gray-500">
+                <p>&copy;<?= date('Y'); ?> SIMACCA. All rights reserved.</p>
+                <p class="mt-1">v1.0.0 - <?= get_role_name(); ?></p>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        const mobileMenuButton = document.getElementById('mobile-menu-button');
+        if (mobileMenuButton) {
+            mobileMenuButton.addEventListener('click', function() {
+                const mobileMenu = document.getElementById('mobile-menu');
+                mobileMenu.classList.toggle('hidden');
+            });
+        }
+        // User dropdown toggle
+        document.getElementById('user-menu-button').addEventListener('click', function() {
+            const dropdown = document.getElementById('user-dropdown');
+            dropdown.classList.toggle('hidden');
+        });
+
+        // Close dropdown when clicking outside
+        document.addEventListener('click', function(event) {
+            const dropdown = document.getElementById('user-dropdown');
+            const button = document.getElementById('user-menu-button');
+
+            if (!button.contains(event.target) && !dropdown.contains(event.target)) {
+                dropdown.classList.add('hidden');
+            }
+        });
+
+        // Auto-hide flash messages after 5 seconds
+        setTimeout(() => {
+            const flashMessages = document.querySelectorAll('[role="alert"]');
+            flashMessages.forEach(message => {
+                message.style.transition = 'opacity 0.5s';
+                message.style.opacity = '0';
+                setTimeout(() => message.remove(), 500);
+            });
+        }, 5000);
+    </script>
+
+    <?= $this->renderSection('scripts'); ?>
+
+    <!-- flatpickr JS -->
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // inisialisasi flatpickr untuk semua input dengan class .timepicker
+            flatpickr('.timepicker', {
+                enableTime: true,
+                noCalendar: true, // hanya time picker
+                dateFormat: "H:i", // output: 24-hour HH:MM
+                time_24hr: true, // paksa 24 jam
+                minuteIncrement: 1,
+                allowInput: true // memungkinkan input manual (tetapi flatpickr tetap mengatur format)
+            });
+
+            // Validasi jam selesai harus > jam mulai (format HH:MM)
+            function toMinutes(hhmm) {
+                if (!hhmm) return null;
+                const parts = hhmm.split(':');
+                if (parts.length !== 2) return null;
+                const h = parseInt(parts[0], 10);
+                const m = parseInt(parts[1], 10);
+                if (Number.isNaN(h) || Number.isNaN(m)) return null;
+                return h * 60 + m;
+            }
+
+            const jamMulaiEl = document.getElementById('jam_mulai');
+            const jamSelesaiEl = document.getElementById('jam_selesai');
+
+            if (jamMulaiEl && jamSelesaiEl) {
+                // cek setiap ada perubahan
+                function validateRange() {
+                    const jm = toMinutes(jamMulaiEl.value);
+                    const js = toMinutes(jamSelesaiEl.value);
+                    if (jm !== null && js !== null && js <= jm) {
+                        // reset dan beri peringatan
+                        alert('Jam selesai harus lebih besar dari jam mulai!');
+                        // kosongkan value jam selesai
+                        jamSelesaiEl.value = '';
+                        // jika menggunakan flatpickr instance, update UI flatpickr
+                        if (jamSelesaiEl._flatpickr) jamSelesaiEl._flatpickr.clear();
+                    }
+                }
+
+                jamMulaiEl.addEventListener('change', validateRange);
+                jamSelesaiEl.addEventListener('change', validateRange);
+
+                // juga validasi saat form submit (tambahan safety server-side)
+                const form = jamMulaiEl.closest('form');
+                if (form) {
+                    form.addEventListener('submit', function(e) {
+                        const jm = toMinutes(jamMulaiEl.value);
+                        const js = toMinutes(jamSelesaiEl.value);
+                        if (jm === null || js === null) {
+                            e.preventDefault();
+                            alert('Mohon isi jam dengan format HH:MM (24 jam).');
+                        } else if (js <= jm) {
+                            e.preventDefault();
+                            alert('Jam selesai harus lebih besar dari jam mulai!');
+                        }
+                    });
+                }
+            }
+        });
+    </script>
+
+</body>
+
+</html>
