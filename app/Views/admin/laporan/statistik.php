@@ -58,11 +58,15 @@
     <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <div>
             <h3 class="text-sm text-gray-700 mb-2">Kehadiran 7 Hari Terakhir</h3>
-            <canvas id="chartLine"></canvas>
+            <div class="chart-container" style="position:relative; height:300px;">
+                <canvas id="chartLine"></canvas>
+            </div>
         </div>
         <div>
             <h3 class="text-sm text-gray-700 mb-2">Distribusi Kehadiran</h3>
-            <canvas id="chartPie"></canvas>
+            <div class="chart-container" style="position:relative; height:300px;">
+                <canvas id="chartPie"></canvas>
+            </div>
         </div>
     </div>
 </div>
@@ -71,40 +75,58 @@
 <?= $this->section('scripts'); ?>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
-const chartData = <?= json_encode($chartData ?? ['attendanceLine' => ['labels'=>[], 'data'=>[]], 'attendancePie' => ['labels'=>[], 'data'=>[], 'colors'=>[]]]); ?>;
+(function() {
+    const chartData = <?= json_encode($chartData ?? ['attendanceLine' => ['labels'=>[], 'data'=>[]], 'attendancePie' => ['labels'=>[], 'data'=>[], 'colors'=>[]]]); ?>;
 
-const ctxLine = document.getElementById('chartLine').getContext('2d');
-new Chart(ctxLine, {
-    type: 'line',
-    data: {
-        labels: chartData.attendanceLine.labels,
-        datasets: [{
-            label: 'Sesi',
-            data: chartData.attendanceLine.data,
-            borderColor: '#3B82F6',
-            backgroundColor: 'rgba(59, 130, 246, 0.1)',
-            borderWidth: 2,
-            tension: 0.4,
-            fill: true
-        }]
-    },
-    options: {
-        responsive: true,
-        maintainAspectRatio: false
+    let lineChartInstance = null;
+    let pieChartInstance = null;
+
+    function initCharts() {
+        const lineCanvas = document.getElementById('chartLine');
+        const pieCanvas = document.getElementById('chartPie');
+        if (!lineCanvas || !pieCanvas) return;
+
+        const ctxLine = lineCanvas.getContext('2d');
+        const ctxPie = pieCanvas.getContext('2d');
+
+        // Destroy previous instances if exist to prevent size stacking
+        if (lineChartInstance) { lineChartInstance.destroy(); }
+        if (pieChartInstance) { pieChartInstance.destroy(); }
+
+        lineChartInstance = new Chart(ctxLine, {
+            type: 'line',
+            data: {
+                labels: chartData.attendanceLine.labels,
+                datasets: [{
+                    label: 'Sesi',
+                    data: chartData.attendanceLine.data,
+                    borderColor: '#3B82F6',
+                    backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                    borderWidth: 2,
+                    tension: 0.4,
+                    fill: true
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false
+            }
+        });
+
+        pieChartInstance = new Chart(ctxPie, {
+            type: 'pie',
+            data: {
+                labels: chartData.attendancePie.labels,
+                datasets: [{
+                    data: chartData.attendancePie.data,
+                    backgroundColor: chartData.attendancePie.colors,
+                }]
+            },
+            options: { responsive: true, maintainAspectRatio: false }
+        });
     }
-});
 
-const ctxPie = document.getElementById('chartPie').getContext('2d');
-new Chart(ctxPie, {
-    type: 'pie',
-    data: {
-        labels: chartData.attendancePie.labels,
-        datasets: [{
-            data: chartData.attendancePie.data,
-            backgroundColor: chartData.attendancePie.colors,
-        }]
-    },
-    options: { responsive: true, maintainAspectRatio: false }
-});
+    document.addEventListener('DOMContentLoaded', initCharts);
+})();
 </script>
 <?= $this->endSection(); ?>
