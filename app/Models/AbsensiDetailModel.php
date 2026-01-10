@@ -116,7 +116,7 @@ class AbsensiDetailModel extends Model
             'total' => 0,
         ];
 
-        foreach ($$result as $row) {
+        foreach ($result as $row) {
             $statistik[$row['status']] = $row['jumlah'];
             $statistik['total'] += $row['jumlah'];
         }
