@@ -77,7 +77,6 @@ class AbsensiController extends BaseController
             'kelasOptions' => $kelasOptions,
             'guru' => $guru,
             'stats' => $this->getAbsensiStats($guruId, $tanggal),
-            'detailStats' => $this->absensiDetailModel->getDetailStats($absensiId)
         ];
 
         return view('guru/absensi/index', $data);

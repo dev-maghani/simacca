@@ -153,9 +153,6 @@
                     <?php else: ?>
                         <?php $no = 1; ?>
                         <?php foreach ($absensi as $item): ?>
-                            <pre>
-                                <?= print_r($item); ?>
-                            </pre>
                             <tr class="hover:bg-gray-50">
                                 <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500"><?= $no++; ?></td>
                                 <td class="px-6 py-4 whitespace-nowrap">
@@ -180,7 +177,7 @@
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap">
                                     <?php
-                                    
+                                    $detailStats = $this->absensiDetailModel->getDetailStats($item['id']);
                                     $total = 0;
                                     $hadir = 0;
 
@@ -193,9 +190,6 @@
 
                                     $percentage = $total > 0 ? round(($hadir / $total) * 100, 0) : 0;
                                     ?>
-                                    <pre>
-                                        <?= print_r($guru); ?>
-                                    </pre>
                                     <div class="flex items-center">
                                         <div class="w-16 bg-gray-200 rounded-full h-2 mr-2">
                                             <div class="bg-green-500 h-2 rounded-full" style="width: <?= $percentage; ?>%"></div>
