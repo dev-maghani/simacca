@@ -436,7 +436,7 @@
                                 <td class="center"><?= $jadwal['jumlah_sakit']; ?></td>
                                 <td class="center"><?= $jadwal['jumlah_izin']; ?></td>
                                 <td class="center"><?= $jadwal['jumlah_alpa']; ?></td>
-                                <td class="catatan-cell <?= !empty($jadwal['catatan_khusus']) ? 'left' : 'center'; ?>"><?= esc($jadwal['catatan_khusus'] ?: '-'); ?></td>
+                                <td class="catatan-cell <?= !empty($jadwal['catatan_khusus']) ? 'center' : 'left'; ?>"><?= esc($jadwal['catatan_khusus'] ?: '-'); ?></td>
                                 <td class="foto-cell">
                                     <?php if (!empty($jadwal['foto_dokumentasi'])): ?>
                                         <img src="<?= base_url('files/jurnal/' . $jadwal['foto_dokumentasi']); ?>" alt="Foto">
