@@ -12,16 +12,16 @@
         }
 
         body {
-            font-family: 'Times New Roman', Times, serif;
-            font-size: 12pt;
-            line-height: 1.6;
+            font-family: 'Arial', sans-serif;
+            font-size: 9pt;
+            line-height: 1.4;
             color: #000;
-            padding: 20mm;
+            padding: 15mm;
         }
 
         @page {
-            size: A4;
-            margin: 15mm;
+            size: A4 portrait;
+            margin: 10mm 8mm;
         }
 
         @media print {
@@ -39,33 +39,34 @@
         /* Header */
         .header {
             text-align: center;
-            margin-bottom: 30px;
+            margin-bottom: 15px;
             border-bottom: 3px double #000;
-            padding-bottom: 15px;
+            padding-bottom: 10px;
         }
 
         .header h1 {
-            font-size: 18pt;
+            font-size: 14pt;
             font-weight: bold;
-            margin-bottom: 5px;
+            margin-bottom: 3px;
             text-transform: uppercase;
         }
 
         .header h2 {
-            font-size: 16pt;
+            font-size: 12pt;
             font-weight: bold;
-            margin-bottom: 3px;
+            margin-bottom: 2px;
         }
 
         .header p {
-            font-size: 11pt;
+            font-size: 9pt;
         }
 
         .header .period-box {
             display: inline-block;
             border: 2px solid #000;
-            padding: 8px 20px;
-            margin-top: 10px;
+            padding: 5px 15px;
+            margin-top: 8px;
+            font-size: 9pt;
         }
 
         /* Info Section */
@@ -91,20 +92,24 @@
         .data-table {
             width: 100%;
             border-collapse: collapse;
-            margin-bottom: 20px;
+            margin-bottom: 15px;
+            font-size: 8pt;
         }
 
         .data-table th,
         .data-table td {
             border: 1px solid #000;
-            padding: 8px 6px;
+            padding: 4px 3px;
             text-align: left;
+            vertical-align: middle;
         }
 
         .data-table th {
-            background-color: #f0f0f0;
+            background-color: #e0e0e0;
             font-weight: bold;
             text-align: center;
+            font-size: 8pt;
+            line-height: 1.2;
         }
 
         .data-table .center {
@@ -116,7 +121,24 @@
         }
 
         .data-table tbody tr:nth-child(even) {
-            background-color: #fafafa;
+            background-color: #f9f9f9;
+        }
+
+        .data-table .foto-cell {
+            text-align: center;
+            padding: 2px;
+        }
+
+        .data-table .foto-cell img {
+            max-width: 40px;
+            max-height: 40px;
+            object-fit: cover;
+        }
+
+        .data-table .catatan-cell {
+            font-size: 7pt;
+            max-width: 80px;
+            word-wrap: break-word;
         }
 
         /* Status Badge */
@@ -150,52 +172,53 @@
 
         /* Summary Section */
         .summary-section {
-            margin-top: 20px;
-            margin-bottom: 30px;
+            margin-top: 10px;
+            margin-bottom: 10px;
         }
 
         .summary-box {
             border: 2px solid #000;
-            padding: 15px;
+            padding: 8px;
             background-color: #f9f9f9;
         }
 
         .summary-box h3 {
-            font-size: 14pt;
-            margin-bottom: 10px;
+            font-size: 10pt;
+            margin-bottom: 5px;
             text-align: center;
         }
 
         .summary-grid {
             display: grid;
             grid-template-columns: repeat(5, 1fr);
-            gap: 10px;
+            gap: 5px;
             text-align: center;
         }
 
         .summary-item {
-            padding: 10px;
+            padding: 5px;
             border: 1px solid #ccc;
             background-color: #fff;
         }
 
         .summary-item .label {
-            font-size: 10pt;
+            font-size: 8pt;
             color: #666;
-            margin-bottom: 5px;
+            margin-bottom: 2px;
         }
 
         .summary-item .value {
-            font-size: 18pt;
+            font-size: 12pt;
             font-weight: bold;
             color: #000;
         }
 
         /* Signature Section */
         .signature-section {
-            margin-top: 50px;
+            margin-top: 20px;
             display: table;
             width: 100%;
+            font-size: 8pt;
         }
 
         .signature-box {
@@ -203,15 +226,15 @@
             width: 50%;
             text-align: center;
             vertical-align: top;
-            padding: 0 20px;
+            padding: 0 10px;
         }
 
         .signature-box p {
-            margin-bottom: 5px;
+            margin-bottom: 3px;
         }
 
         .signature-box .name {
-            margin-top: 60px;
+            margin-top: 40px;
             font-weight: bold;
             text-decoration: underline;
         }
@@ -308,59 +331,73 @@
     </div>
 
     <!-- Info -->
-    <div class="info-section">
-        <p><strong>Total Sesi Pembelajaran:</strong> <?= count($laporanData); ?> Sesi</p>
-        <p><strong>Tanggal Cetak:</strong> <?= date('d F Y, H:i'); ?> WIB</p>
+    <div class="info-section" style="font-size: 8pt; margin-bottom: 10px;">
+        <table style="width: 100%;">
+            <tr>
+                <td style="width: 50%;"><strong>Total Sesi Pembelajaran:</strong> <?= count($laporanData); ?> Sesi</td>
+                <td style="width: 50%; text-align: right;"><strong>Tanggal Cetak:</strong> <?= date('d/m/Y H:i'); ?> WIB</td>
+            </tr>
+        </table>
     </div>
 
     <!-- Data Table -->
     <table class="data-table">
         <thead>
             <tr>
-                <th style="width: 40px;">No</th>
-                <th style="width: 90px;">Tanggal</th>
-                <th style="width: 80px;">Jam</th>
-                <th>Kelas</th>
-                <th>Mata Pelajaran</th>
-                <th>Guru</th>
-                <th style="width: 50px;" class="center">H</th>
-                <th style="width: 50px;" class="center">S</th>
-                <th style="width: 50px;" class="center">I</th>
-                <th style="width: 50px;" class="center">A</th>
+                <th style="width: 25px;">No</th>
+                <th style="width: 55px;">Kelas</th>
+                <th style="width: 50px;">Jam<br>Mulai</th>
+                <th style="width: 95px;">Nama Guru<br>Mapel</th>
+                <th style="width: 85px;">Mata<br>Pelajaran</th>
+                <th style="width: 85px;">Nama<br>Wali Kelas</th>
+                <th style="width: 28px;">H</th>
+                <th style="width: 28px;">S</th>
+                <th style="width: 28px;">I</th>
+                <th style="width: 28px;">A</th>
+                <th style="width: 90px;">Catatan Khusus</th>
+                <th style="width: 45px;">Foto</th>
+                <th style="width: 85px;">Guru Piket<br>Pengganti</th>
             </tr>
         </thead>
         <tbody>
             <?php if (!empty($laporanData)): ?>
                 <?php $no = 1; ?>
                 <?php foreach ($laporanData as $row): ?>
-                    <?php
-                    $total_siswa = $row['jumlah_hadir'] + $row['jumlah_sakit'] + $row['jumlah_izin'] + $row['jumlah_alpa'];
-                    ?>
                     <tr>
                         <td class="center"><?= $no++; ?></td>
-                        <td class="center"><?= date('d/m/Y', strtotime($row['tanggal'])); ?></td>
-                        <td class="center"><?= substr($row['jam_mulai'], 0, 5); ?> - <?= substr($row['jam_selesai'], 0, 5); ?></td>
-                        <td><?= esc($row['nama_kelas']); ?></td>
+                        <td class="center"><?= esc($row['nama_kelas']); ?></td>
+                        <td class="center"><?= substr($row['jam_mulai'], 0, 5); ?></td>
+                        <td><?= esc($row['nama_guru']); ?></td>
                         <td><?= esc($row['nama_mapel']); ?></td>
-                        <td><?= esc($row['nama_guru']); ?><?php if ($row['nama_guru_pengganti']): ?><br><span class="text-small" style="color: #666;">(Pengganti: <?= esc($row['nama_guru_pengganti']); ?>)</span><?php endif; ?></td>
+                        <td><?= esc($row['nama_wali_kelas'] ?? '-'); ?></td>
                         <td class="center"><?= $row['jumlah_hadir']; ?></td>
                         <td class="center"><?= $row['jumlah_sakit']; ?></td>
                         <td class="center"><?= $row['jumlah_izin']; ?></td>
                         <td class="center"><?= $row['jumlah_alpa']; ?></td>
+                        <td class="catatan-cell"><?= esc($row['catatan_khusus'] ?? '-'); ?></td>
+                        <td class="foto-cell">
+                            <?php if (!empty($row['foto_dokumentasi'])): ?>
+                                <img src="<?= base_url('writable/uploads/' . $row['foto_dokumentasi']); ?>" alt="Foto">
+                            <?php else: ?>
+                                -
+                            <?php endif; ?>
+                        </td>
+                        <td><?= esc($row['nama_guru_pengganti'] ?? '-'); ?></td>
                     </tr>
                 <?php endforeach; ?>
                 
                 <!-- Total Row -->
                 <tr style="background-color: #e5e7eb; font-weight: bold;">
-                    <td colspan="6" class="right" style="padding-right: 10px;">TOTAL</td>
+                    <td colspan="6" class="right" style="padding-right: 5px;">TOTAL</td>
                     <td class="center"><?= $totalStats['hadir']; ?></td>
                     <td class="center"><?= $totalStats['sakit']; ?></td>
                     <td class="center"><?= $totalStats['izin']; ?></td>
                     <td class="center"><?= $totalStats['alpa']; ?></td>
+                    <td colspan="3"></td>
                 </tr>
             <?php else: ?>
                 <tr>
-                    <td colspan="10" class="center" style="padding: 20px; color: #999;">
+                    <td colspan="13" class="center" style="padding: 20px; color: #999;">
                         Tidak ada data absensi dalam periode ini
                     </td>
                 </tr>
@@ -369,27 +406,21 @@
     </table>
 
     <!-- Keterangan -->
-    <div class="info-section">
+    <div class="info-section" style="font-size: 8pt; margin-top: 8px;">
         <p><strong>Keterangan:</strong></p>
-        <table style="margin-left: 20px; margin-top: 5px;">
+        <table style="margin-left: 15px; margin-top: 3px; font-size: 8pt;">
             <tr>
-                <td style="width: 30px;">H</td>
-                <td style="width: 10px;">:</td>
-                <td>Hadir</td>
-            </tr>
-            <tr>
-                <td>S</td>
-                <td>:</td>
-                <td>Sakit</td>
-            </tr>
-            <tr>
-                <td>I</td>
-                <td>:</td>
-                <td>Izin</td>
-            </tr>
-            <tr>
-                <td>A</td>
-                <td>:</td>
+                <td style="width: 25px;">H</td>
+                <td style="width: 8px;">:</td>
+                <td style="width: 100px;">Hadir</td>
+                <td style="width: 25px;">S</td>
+                <td style="width: 8px;">:</td>
+                <td style="width: 100px;">Sakit</td>
+                <td style="width: 25px;">I</td>
+                <td style="width: 8px;">:</td>
+                <td style="width: 100px;">Izin</td>
+                <td style="width: 25px;">A</td>
+                <td style="width: 8px;">:</td>
                 <td>Alpa (Tanpa Keterangan)</td>
             </tr>
         </table>
@@ -402,14 +433,14 @@
             <div class="name">
                 (.....................................)
             </div>
-            <p style="margin-top: 5px; font-size: 10pt;">NIP. ...................................</p>
+            <p style="margin-top: 3px; font-size: 7pt;">NIP. ...................................</p>
         </div>
         <div class="signature-box">
             <p><?= date('d F Y'); ?><br>Administrator</p>
             <div class="name">
                 (.....................................)
             </div>
-            <p style="margin-top: 5px; font-size: 10pt;">NIP. ...................................</p>
+            <p style="margin-top: 3px; font-size: 7pt;">NIP. ...................................</p>
         </div>
     </div>
 
