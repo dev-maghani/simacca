@@ -104,6 +104,32 @@
 
                     <input type="hidden" name="jadwal_mengajar_id" value="<?= $jadwal['id']; ?>">
                 <?php else: ?>
+                    <!-- Mode Selection -->
+                    <div class="mb-6">
+                        <label class="block text-sm font-semibold text-gray-700 mb-3">
+                            <i class="fas fa-question-circle mr-2 text-blue-500"></i>
+                            Mode Input Absensi
+                        </label>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <button type="button" id="modeOwnSchedule" 
+                                    class="mode-btn active flex items-center justify-center px-6 py-4 border-2 border-blue-500 bg-blue-50 rounded-xl transition-all hover:shadow-md">
+                                <div class="text-center">
+                                    <i class="fas fa-chalkboard-teacher text-2xl text-blue-600 mb-2"></i>
+                                    <p class="font-bold text-gray-800">Jadwal Saya Sendiri</p>
+                                    <p class="text-xs text-gray-600 mt-1">Mengajar sesuai jadwal reguler</p>
+                                </div>
+                            </button>
+                            <button type="button" id="modeSubstitute" 
+                                    class="mode-btn flex items-center justify-center px-6 py-4 border-2 border-gray-300 bg-white rounded-xl transition-all hover:shadow-md hover:border-purple-300">
+                                <div class="text-center">
+                                    <i class="fas fa-user-plus text-2xl text-purple-600 mb-2"></i>
+                                    <p class="font-bold text-gray-800">Guru Pengganti</p>
+                                    <p class="text-xs text-gray-600 mt-1">Menggantikan guru lain</p>
+                                </div>
+                            </button>
+                        </div>
+                    </div>
+
                     <!-- Jadwal Selection Form -->
                     <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                         <div>
@@ -119,7 +145,7 @@
                         </div>
                         <div>
                             <label for="jadwal_id" class="block text-sm font-medium text-gray-700 mb-2">
-                                Jadwal
+                                <span id="jadwalLabel">Jadwal</span>
                             </label>
                             <select id="jadwal_id" name="jadwal_id" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
                                 <option value="">Pilih Jadwal</option>
@@ -482,11 +508,56 @@
     </script>
 <?php endif; ?>
 <script>
+    // Mode selection state
+    let isSubstituteMode = false;
+
+    // Handle mode selection
+    document.getElementById('modeOwnSchedule').addEventListener('click', function() {
+        isSubstituteMode = false;
+        updateModeUI();
+        // Reset jadwal selection
+        document.getElementById('jadwal_id').innerHTML = '<option value="">Pilih Jadwal</option>';
+        document.getElementById('hari').value = '';
+    });
+
+    document.getElementById('modeSubstitute').addEventListener('click', function() {
+        isSubstituteMode = true;
+        updateModeUI();
+        // Reset jadwal selection
+        document.getElementById('jadwal_id').innerHTML = '<option value="">Pilih Jadwal</option>';
+        document.getElementById('hari').value = '';
+    });
+
+    function updateModeUI() {
+        const ownBtn = document.getElementById('modeOwnSchedule');
+        const subBtn = document.getElementById('modeSubstitute');
+        const jadwalLabel = document.getElementById('jadwalLabel');
+
+        if (isSubstituteMode) {
+            // Substitute mode active
+            ownBtn.classList.remove('border-blue-500', 'bg-blue-50');
+            ownBtn.classList.add('border-gray-300', 'bg-white');
+            
+            subBtn.classList.remove('border-gray-300', 'bg-white');
+            subBtn.classList.add('border-purple-500', 'bg-purple-50');
+            
+            jadwalLabel.innerHTML = '<i class="fas fa-exchange-alt mr-1 text-purple-500"></i> Jadwal yang Digantikan';
+        } else {
+            // Own schedule mode active
+            ownBtn.classList.remove('border-gray-300', 'bg-white');
+            ownBtn.classList.add('border-blue-500', 'bg-blue-50');
+            
+            subBtn.classList.remove('border-purple-500', 'bg-purple-50');
+            subBtn.classList.add('border-gray-300', 'bg-white');
+            
+            jadwalLabel.textContent = 'Jadwal';
+        }
+    }
+
     // Handle jadwal selection
     document.getElementById('hari').addEventListener('change', function() {
         const hari = this.value;
         const jadwalSelect = document.getElementById('jadwal_id');
-        console.log(hari);
 
         if (!hari) {
             jadwalSelect.innerHTML = '<option value="">Pilih Hari terlebih dahulu</option>';
@@ -495,7 +566,9 @@
 
         jadwalSelect.innerHTML = '<option value="">Memuat jadwal...</option>';
 
-        fetch(`<?= base_url('guru/absensi/getJadwalByHari'); ?>?hari=${hari}`, {
+        const url = `<?= base_url('guru/absensi/getJadwalByHari'); ?>?hari=${hari}&substitute=${isSubstituteMode}`;
+
+        fetch(url, {
                 headers: {
                     'X-Requested-With': 'XMLHttpRequest'
                 }
@@ -506,7 +579,12 @@
                     let options = '<option value="">Pilih Jadwal</option>';
                     data.jadwal.forEach(jadwal => {
                         const waktu = `${jadwal.jam_mulai.substr(0, 5)} - ${jadwal.jam_selesai.substr(0, 5)}`;
-                        options += `<option value="${jadwal.id}">${jadwal.nama_mapel} - ${jadwal.nama_kelas} (${waktu})</option>`;
+                        if (data.isSubstitute && jadwal.nama_guru) {
+                            // Show teacher name for substitute mode
+                            options += `<option value="${jadwal.id}">${jadwal.nama_mapel} - ${jadwal.nama_kelas} (${waktu}) - Guru: ${jadwal.nama_guru}</option>`;
+                        } else {
+                            options += `<option value="${jadwal.id}">${jadwal.nama_mapel} - ${jadwal.nama_kelas} (${waktu})</option>`;
+                        }
                     });
                     jadwalSelect.innerHTML = options;
 
@@ -519,7 +597,8 @@
                         window.location.href = targetUrl;
                     });
                 } else {
-                    jadwalSelect.innerHTML = '<option value="">Tidak ada jadwal untuk hari ini</option>';
+                    const noDataMsg = isSubstituteMode ? 'Tidak ada jadwal di hari ini' : 'Tidak ada jadwal untuk hari ini';
+                    jadwalSelect.innerHTML = `<option value="">${noDataMsg}</option>`;
                 }
             })
             .catch(error => {

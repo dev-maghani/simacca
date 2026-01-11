@@ -183,11 +183,24 @@ class AbsensiController extends BaseController
         $jadwalId = $this->request->getPost('jadwal_mengajar_id');
         $tanggal = $this->request->getPost('tanggal');
 
-        // Verify jadwal belongs to this teacher
+        // Verify jadwal exists
         $jadwal = $this->jadwalModel->find($jadwalId);
-        if (!$jadwal || $jadwal['guru_id'] != $guru['id']) {
+        if (!$jadwal) {
             $this->session->setFlashdata('error', 'Jadwal tidak valid.');
             return redirect()->back()->withInput();
+        }
+
+        // Determine if this is substitute mode
+        $isSubstituteMode = ($jadwal['guru_id'] != $guru['id']);
+        
+        // Set guru_pengganti_id based on mode
+        $guruPenggantiId = null;
+        if ($isSubstituteMode) {
+            // Substitute mode: current teacher is the substitute
+            $guruPenggantiId = $guru['id'];
+        } else {
+            // Normal mode: can optionally have a substitute (from form input)
+            $guruPenggantiId = $this->request->getPost('guru_pengganti_id') ?: null;
         }
 
         // Check if absensi already exists
@@ -203,7 +216,7 @@ class AbsensiController extends BaseController
             'pertemuan_ke' => $this->request->getPost('pertemuan_ke'),
             'materi_pembelajaran' => $this->request->getPost('materi_pembelajaran'),
             'created_by' => $userId,
-            'guru_pengganti_id' => $this->request->getPost('guru_pengganti_id') ?: null,
+            'guru_pengganti_id' => $guruPenggantiId,
             'created_at' => date('Y-m-d H:i:s')
         ];
 
@@ -577,11 +590,30 @@ class AbsensiController extends BaseController
             return $this->response->setJSON(['success' => false, 'message' => 'Hari diperlukan']);
         }
 
-        $jadwal = $this->jadwalModel->getByGuru($guru['id'], $hari);
+        // Check if this is for substitute teacher mode
+        $isSubstitute = $this->request->getGet('substitute') === 'true';
+
+        if ($isSubstitute) {
+            // Get ALL schedules for this day (for substitute teachers)
+            $jadwal = $this->jadwalModel->select('jadwal_mengajar.*, 
+                                                mata_pelajaran.nama_mapel, 
+                                                kelas.nama_kelas,
+                                                guru.nama_lengkap as nama_guru')
+                ->join('mata_pelajaran', 'mata_pelajaran.id = jadwal_mengajar.mata_pelajaran_id')
+                ->join('kelas', 'kelas.id = jadwal_mengajar.kelas_id')
+                ->join('guru', 'guru.id = jadwal_mengajar.guru_id')
+                ->where('hari', $hari)
+                ->orderBy('jam_mulai', 'ASC')
+                ->findAll();
+        } else {
+            // Get only this teacher's schedules
+            $jadwal = $this->jadwalModel->getByGuru($guru['id'], $hari);
+        }
 
         return $this->response->setJSON([
             'success' => true,
-            'jadwal' => $jadwal
+            'jadwal' => $jadwal,
+            'isSubstitute' => $isSubstitute
         ]);
     }
 
