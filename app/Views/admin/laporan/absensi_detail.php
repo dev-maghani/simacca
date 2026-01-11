@@ -135,15 +135,12 @@
                             <td class="px-2 py-2 text-sm text-gray-900 border border-gray-300">
                                 <?php if (!empty($row['catatan_khusus'])): ?>
                                     <div class="max-w-xs print-max-w-full">
-                                        <p class="text-gray-700 print-text-xs" title="<?= esc($row['catatan_khusus']); ?>">
+                                        <p class="text-gray-700 print-text-xs <?= ($row['catatan_khusus'] !== '-') ? 'text-left' : 'text-center'; ?>" title="<?= esc($row['catatan_khusus']); ?>">
                                             <?= esc(strlen($row['catatan_khusus']) > 50 ? substr($row['catatan_khusus'], 0, 50) . '...' : $row['catatan_khusus']); ?>
                                         </p>
                                     </div>
                                 <?php else: ?>
-                                    <!-- - -->
-                                    <div class="max-w-xs print-max-w-full text-center">
-                                        -
-                                    </div>
+                                    -
                                 <?php endif; ?>
                             </td>
                             <td class="px-2 py-2 text-center text-sm border border-gray-300">
