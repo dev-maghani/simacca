@@ -16,7 +16,7 @@ class JurnalKbmModel extends Model
         'absensi_id',
         'tujuan_pembelajaran',
         'kegiatan_pembelajaran',
-        'media_ajar',
+        'media_alat',
         'penilaian',
         'catatan_khusus',
         'created_at'

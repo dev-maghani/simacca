@@ -94,7 +94,7 @@ class JurnalController extends BaseController
             'absensi_id' => 'required|numeric',
             'tujuan_pembelajaran' => 'required',
             'kegiatan_pembelajaran' => 'required',
-            'media_ajar' => 'permit_empty|string',
+            'media_alat' => 'permit_empty|string',
             'penilaian' => 'permit_empty|string',
             'catatan_khusus' => 'permit_empty|string'
         ];
@@ -121,7 +121,7 @@ class JurnalController extends BaseController
             'absensi_id' => $absensiId,
             'tujuan_pembelajaran' => $this->request->getPost('tujuan_pembelajaran'),
             'kegiatan_pembelajaran' => $this->request->getPost('kegiatan_pembelajaran'),
-            'media_ajar' => $this->request->getPost('media_ajar'),
+            'media_alat' => $this->request->getPost('media_ajar'),
             'penilaian' => $this->request->getPost('penilaian'),
             'catatan_khusus' => $this->request->getPost('catatan_khusus'),
             'created_at' => date('Y-m-d H:i:s')
@@ -178,7 +178,7 @@ class JurnalController extends BaseController
         $rules = [
             'tujuan_pembelajaran' => 'required',
             'kegiatan_pembelajaran' => 'required',
-            'media_ajar' => 'permit_empty|string',
+            'media_alat' => 'permit_empty|string',
             'penilaian' => 'permit_empty|string',
             'catatan_khusus' => 'permit_empty|string'
         ];
@@ -204,7 +204,7 @@ class JurnalController extends BaseController
         $data = [
             'tujuan_pembelajaran' => $this->request->getPost('tujuan_pembelajaran'),
             'kegiatan_pembelajaran' => $this->request->getPost('kegiatan_pembelajaran'),
-            'media_ajar' => $this->request->getPost('media_ajar'),
+            'media_alat' => $this->request->getPost('media_ajar'),
             'penilaian' => $this->request->getPost('penilaian'),
             'catatan_khusus' => $this->request->getPost('catatan_khusus')
         ];
