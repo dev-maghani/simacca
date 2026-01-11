@@ -289,7 +289,6 @@
         <i class="fas fa-print"></i> Cetak Dokumen
     </button>
 
-    <?= print_r($jurnal); ?>
     <div class="container">
         <!-- Header dengan Logo -->
         <div class="header">
@@ -395,7 +394,7 @@
             <div class="signature-box">
                 <p>Guru Mata Pelajaran</p>
                 <p class="name"><?= esc($jurnal['nama_guru']) ?></p>
-                <p class="nip">NIP. ................</p>
+                <p class="nip">NIP. <?= esc($jurnal['nip']) ?></p>
             </div>
         </div>
 
