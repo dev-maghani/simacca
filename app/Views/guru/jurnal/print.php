@@ -108,7 +108,7 @@
 
         /* Student Info */
         .student-info {
-            margin: 20px 0;
+            margin: 10px 0;
             padding-left: 50px;
         }
 
