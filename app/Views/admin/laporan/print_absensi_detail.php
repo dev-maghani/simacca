@@ -399,15 +399,15 @@
     </div>
 
     <!-- Header -->
-    <!-- <div class="header">
-    </div> -->
-    <h1>Laporan Absensi Pembelajaran</h1>
-    <strong>Tanggal:</strong> <?= date('d F Y', strtotime($tanggal)); ?>
-    <?php if ($kelasId): ?>
-        <br><strong>Kelas:</strong> <?= esc($kelasList[$kelasId] ?? '-'); ?>
-    <?php else: ?>
-        <br><strong>Semua Kelas</strong>
-    <?php endif; ?>
+    <div style="text-align: center;">
+        <h1>Laporan Absensi Pembelajaran</h1>
+        <strong>Tanggal:</strong> <?= date('d F Y', strtotime($tanggal)); ?>
+        <?php if ($kelasId): ?>
+            <br><strong>Kelas:</strong> <?= esc($kelasList[$kelasId] ?? '-'); ?>
+        <?php else: ?>
+            <br><strong>Semua Kelas</strong>
+        <?php endif; ?>
+    </div>
 
     <!-- Summary Section -->
     <div class="summary-section">
