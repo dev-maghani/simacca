@@ -208,7 +208,7 @@ class JurnalController extends BaseController
             'jurnal' => $jurnal
         ];
 
-        return view('guru/jurnal/edit', $data);
+        return view('guru/jurnal/edit_simple', $data);
     }
 
     public function show($jurnalId)
@@ -244,52 +244,108 @@ class JurnalController extends BaseController
 
     public function update($jurnalId)
     {
+        helper('security');
+        
         // Validasi input
         $rules = [
-            'tujuan_pembelajaran' => 'required',
             'kegiatan_pembelajaran' => 'required',
-            'media_alat' => 'permit_empty|string',
-            'penilaian' => 'permit_empty|string',
-            'catatan_khusus' => 'permit_empty|string'
+            'catatan_khusus' => 'permit_empty|string',
+            'foto_dokumentasi' => 'permit_empty|uploaded[foto_dokumentasi]|max_size[foto_dokumentasi,5120]|is_image[foto_dokumentasi]'
         ];
 
         if (!$this->validate($rules)) {
-            return $this->response->setJSON([
-                'status' => 'error',
-                'message' => 'Validasi gagal',
-                'errors' => $this->validator->getErrors()
-            ]);
+            session()->setFlashdata('error', 'Validasi gagal: ' . implode(', ', $this->validator->getErrors()));
+            return redirect()->back()->withInput();
         }
 
         // Cek apakah jurnal ada
         $jurnal = $this->jurnalModel->find($jurnalId);
         if (!$jurnal) {
-            return $this->response->setJSON([
-                'status' => 'error',
-                'message' => 'Data jurnal tidak ditemukan'
-            ]);
+            session()->setFlashdata('error', 'Data jurnal tidak ditemukan');
+            return redirect()->to('/guru/jurnal');
         }
 
-        // Update jurnal (tanpa update absensi_id)
+        // Prepare update data
         $data = [
-            'tujuan_pembelajaran' => $this->request->getPost('tujuan_pembelajaran'),
             'kegiatan_pembelajaran' => $this->request->getPost('kegiatan_pembelajaran'),
-            'media_alat' => $this->request->getPost('media_ajar'),
-            'penilaian' => $this->request->getPost('penilaian'),
-            'catatan_khusus' => $this->request->getPost('catatan_khusus')
+            'catatan_khusus' => $this->request->getPost('catatan_khusus') ?: '-',
         ];
 
-        if ($this->jurnalModel->update($jurnalId, $data)) {
-            return $this->response->setJSON([
-                'status' => 'success',
-                'message' => 'Jurnal KBM berhasil diperbarui'
-            ]);
-        } else {
-            return $this->response->setJSON([
-                'status' => 'error',
-                'message' => 'Gagal memperbarui jurnal KBM',
-                'errors' => $this->jurnalModel->errors()
-            ]);
+        // Handle foto deletion
+        $removeFoto = $this->request->getPost('remove_foto');
+        if ($removeFoto == '1' && !empty($jurnal['foto_dokumentasi'])) {
+            // Delete old photo file
+            $oldPhotoPath = WRITEPATH . 'uploads/jurnal/' . $jurnal['foto_dokumentasi'];
+            if (file_exists($oldPhotoPath)) {
+                unlink($oldPhotoPath);
+            }
+            $data['foto_dokumentasi'] = null;
+        }
+
+        // Handle foto upload/replace
+        $file = $this->request->getFile('foto_dokumentasi');
+        
+        if ($file && $file->isValid() && !$file->hasMoved()) {
+            // Validate file with security helper
+            $allowedTypes = [
+                'image/jpeg',
+                'image/jpg', 
+                'image/png',
+                'image/gif'
+            ];
+            
+            $validation = validate_file_upload($file, $allowedTypes, 5242880); // 5MB
+            
+            if (!$validation['valid']) {
+                session()->setFlashdata('error', $validation['error']);
+                return redirect()->back()->withInput();
+            }
+            
+            // Delete old photo if exists
+            if (!empty($jurnal['foto_dokumentasi'])) {
+                $oldPhotoPath = WRITEPATH . 'uploads/jurnal/' . $jurnal['foto_dokumentasi'];
+                if (file_exists($oldPhotoPath)) {
+                    unlink($oldPhotoPath);
+                }
+            }
+            
+            // Generate unique filename
+            $fotoName = 'jurnal_' . time() . '_' . uniqid() . '.' . $file->getExtension();
+            
+            // Move file to uploads directory
+            try {
+                $file->move(WRITEPATH . 'uploads/jurnal', $fotoName);
+                $data['foto_dokumentasi'] = $fotoName;
+            } catch (\Exception $e) {
+                log_message('error', 'Failed to upload jurnal foto: ' . $e->getMessage());
+                session()->setFlashdata('error', 'Gagal mengupload foto dokumentasi');
+                return redirect()->back()->withInput();
+            }
+        }
+
+        // Update jurnal
+        try {
+            if ($this->jurnalModel->update($jurnalId, $data)) {
+                session()->setFlashdata('success', 'Jurnal KBM berhasil diperbarui');
+                return redirect()->to('/guru/jurnal');
+            } else {
+                // Rollback: delete uploaded file if database update fails
+                if (isset($fotoName) && file_exists(WRITEPATH . 'uploads/jurnal/' . $fotoName)) {
+                    unlink(WRITEPATH . 'uploads/jurnal/' . $fotoName);
+                }
+                
+                session()->setFlashdata('error', 'Gagal memperbarui jurnal KBM');
+                return redirect()->back()->withInput();
+            }
+        } catch (\Exception $e) {
+            // Rollback: delete uploaded file if error occurs
+            if (isset($fotoName) && file_exists(WRITEPATH . 'uploads/jurnal/' . $fotoName)) {
+                unlink(WRITEPATH . 'uploads/jurnal/' . $fotoName);
+            }
+            
+            $safeMessage = safe_error_message($e, 'Gagal memperbarui jurnal KBM');
+            session()->setFlashdata('error', $safeMessage);
+            return redirect()->back()->withInput();
         }
     }
 
