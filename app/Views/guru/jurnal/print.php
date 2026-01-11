@@ -395,7 +395,7 @@
             <div class="signature-box">
                 <p>Guru Mata Pelajaran</p>
                 <p class="name"><?= esc($jurnal['nama_guru']) ?></p>
-                <!-- <p class="nip">NIP. <?= esc($jurnal['nip']) ?></p> -->
+                <p class="nip">NIP. ................</p>
             </div>
         </div>
 
