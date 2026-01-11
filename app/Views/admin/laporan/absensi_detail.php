@@ -446,8 +446,8 @@
 
         /* Image in print */
         .print-table img {
-            max-width: 40px !important;
-            max-height: 40px !important;
+            max-width: 100px !important;
+            max-height: 100px !important;
             object-fit: cover;
         }
 
