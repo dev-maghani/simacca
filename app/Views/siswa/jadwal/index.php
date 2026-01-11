@@ -29,7 +29,7 @@
         <div class="border-b border-gray-200">
             <nav class="flex overflow-x-auto -mb-px">
                 <?php 
-                $days = ['Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
+                $days = ['Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat'];
                 foreach ($days as $day): 
                     $isToday = ($day === $hariIni);
                     $hasSchedule = !empty($jadwalByDay[$day]);

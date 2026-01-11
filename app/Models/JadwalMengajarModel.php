@@ -64,7 +64,7 @@ class JadwalMengajarModel extends Model
         ],
         'hari' => [
             'required' => 'Hari wajib dipilih',
-            'in_list' => 'Hari harus Senin, Selasa, Rabu, Kamis, Jumat, atau Sabtu'
+            'in_list' => 'Hari harus Senin, Selasa, Rabu, Kamis, atau Jumat'
         ],
         'jam_mulai' => [
             'required' => 'Jam mulai wajib diisi',
@@ -199,7 +199,6 @@ class JadwalMengajarModel extends Model
             'Wednesday' => 'Rabu',
             'Thursday'  => 'Kamis',
             'Friday'    => 'Jumat',
-            'Saturday'  => 'Sabtu',
         ];
 
         $hariInggris = date('l');
@@ -263,7 +262,6 @@ class JadwalMengajarModel extends Model
             'Rabu' => 'Rabu',
             'Kamis' => 'Kamis',
             'Jumat' => 'Jumat',
-            'Sabtu' => 'Sabtu'
         ];
     }
 

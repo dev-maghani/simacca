@@ -100,7 +100,6 @@ class DashboardModel extends Model
             'Wednesday' => 'Rabu',
             'Thursday'  => 'Kamis',
             'Friday'    => 'Jumat',
-            'Saturday'  => 'Sabtu',
         ];
 
         $hariIni = $hariIndonesia[date('l')];

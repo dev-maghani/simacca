@@ -518,7 +518,7 @@ class JadwalController extends BaseController
                     }
 
                     // Validate hari
-                    $hariValid = ['Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu', 'Minggu'];
+                    $hariValid = ['Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat'];
                     if (!in_array($hari, $hariValid)) {
                         throw new \Exception("Hari tidak valid: {$hari}");
                     }
@@ -669,7 +669,7 @@ class JadwalController extends BaseController
         $instructionSheet = $spreadsheet->createSheet();
         $instructionSheet->setTitle('Petunjuk');
         $instructionSheet->setCellValue('A1', 'PETUNJUK IMPORT JADWAL MENGAJAR');
-        $instructionSheet->setCellValue('A3', '1. HARI: Senin, Selasa, Rabu, Kamis, Jumat, Sabtu, Minggu');
+        $instructionSheet->setCellValue('A3', '1. HARI: Senin, Selasa, Rabu, Kamis, Jumat');
         $instructionSheet->setCellValue('A4', '2. JAM MULAI dan JAM SELESAI: Format HH:MM:SS (contoh: 07:00:00)');
         $instructionSheet->setCellValue('A5', '3. GURU_ID: ID guru dari database (lihat di menu Guru)');
         $instructionSheet->setCellValue('A6', '4. MATA_PELAJARAN_ID: ID mata pelajaran dari database (lihat di menu Mata Pelajaran)');

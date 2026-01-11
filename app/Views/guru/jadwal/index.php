@@ -73,7 +73,7 @@
                     </thead>
                     <tbody>
                         <?php 
-                        $hariList = ['Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
+                        $hariList = ['Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat'];
                         foreach ($hariList as $hari): 
                             if (!empty($jadwalByHari[$hari])):
                                 $rowspan = count($jadwalByHari[$hari]);

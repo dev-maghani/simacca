@@ -114,8 +114,6 @@ class DashboardController extends BaseController
             'Wednesday' => 'Rabu',
             'Thursday' => 'Kamis',
             'Friday' => 'Jumat',
-            'Saturday' => 'Sabtu',
-            'Sunday' => 'Minggu'
         ];
         return $days[$day] ?? $day;
     }

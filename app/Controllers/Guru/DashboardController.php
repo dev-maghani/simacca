@@ -129,7 +129,6 @@ class DashboardController extends BaseController
             'Wednesday' => 'Rabu',
             'Thursday' => 'Kamis',
             'Friday' => 'Jumat',
-            'Saturday' => 'Sabtu'
         ];
 
         $hariInggris = date('l');
@@ -153,7 +152,7 @@ class DashboardController extends BaseController
      */
     private function getJadwalMingguIni($guruId)
     {
-        $hariList = ['Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
+        $hariList = ['Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat'];
         $jadwalMingguIni = [];
 
         foreach ($hariList as $hari) {

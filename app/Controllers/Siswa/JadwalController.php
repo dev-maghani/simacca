@@ -44,7 +44,6 @@ class JadwalController extends BaseController
             'Rabu' => [],
             'Kamis' => [],
             'Jumat' => [],
-            'Sabtu' => []
         ];
 
         foreach ($jadwalAll as $jadwal) {
@@ -75,8 +74,6 @@ class JadwalController extends BaseController
             'Wednesday' => 'Rabu',
             'Thursday' => 'Kamis',
             'Friday' => 'Jumat',
-            'Saturday' => 'Sabtu',
-            'Sunday' => 'Minggu'
         ];
         return $days[$day] ?? $day;
     }

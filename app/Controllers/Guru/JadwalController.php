@@ -37,7 +37,6 @@ class JadwalController extends BaseController
             'Rabu' => [],
             'Kamis' => [],
             'Jumat' => [],
-            'Sabtu' => []
         ];
 
         foreach ($jadwal as $item) {

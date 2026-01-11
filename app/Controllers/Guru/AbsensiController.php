@@ -629,7 +629,6 @@ class AbsensiController extends BaseController
             'Wednesday' => 'Rabu',
             'Thursday' => 'Kamis',
             'Friday' => 'Jumat',
-            'Saturday' => 'Sabtu'
         ];
 
         $hariInggris = date('l');
@@ -720,7 +719,6 @@ class AbsensiController extends BaseController
             'Rabu' => 'Rabu',
             'Kamis' => 'Kamis',
             'Jumat' => 'Jumat',
-            'Sabtu' => 'Sabtu'
         ];
     }
 
