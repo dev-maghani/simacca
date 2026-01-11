@@ -295,8 +295,8 @@
                     <img src="<?= base_url('/assets/images/sekolah.png') ?>" alt="Logo Sekolah" height="64px"/>
                 </div>
                 <div class="header-text">
-                    <h1>PEMERINTAH PROPINSI SULAWESI SELATAN</h1>
-                    <h2>DINAS PENDIDIKAN</h2>
+                    <h3>PEMERINTAH PROPINSI SULAWESI SELATAN</h1>
+                    <h3>DINAS PENDIDIKAN</h2>
                     <h3>CABANG DINAS PENDIDIKAN WILAYAH III</h3>
                     <h2>UPT SMKN 8 BONE</h2>
                     <p><em>Alamat : Jln. Poros Bone – Sengkang Welado Kec. Ajangale Kode Pos 92755</em></p>
