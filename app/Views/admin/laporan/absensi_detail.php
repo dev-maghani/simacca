@@ -8,7 +8,7 @@
         <h2 class="text-xl font-bold mb-1">LAPORAN ABSENSI PEMBELAJARAN</h2>
         <h3 class="text-lg font-semibold mb-2">SISTEM INFORMASI AKADEMIK</h3>
         <div class="border-t-2 border-b-2 border-black py-1 inline-block px-8">
-            <p class="text-sm">Periode: <?= date('d/m/Y', strtotime($from)); ?> - <?= date('d/m/Y', strtotime($to)); ?></p>
+            <p class="text-sm">Tanggal: <?= date('d/m/Y', strtotime($tanggal)); ?></p>
             <?php if ($kelasId): ?>
                 <p class="text-sm">Kelas: <?= esc($kelasList[$kelasId] ?? '-'); ?></p>
             <?php else: ?>
@@ -25,14 +25,10 @@
 
 <!-- Filter -->
 <div class="bg-white rounded-xl shadow p-6 mb-6 no-print">
-    <form class="grid grid-cols-1 md:grid-cols-4 gap-4" method="get" action="<?= base_url('admin/laporan/absensi-detail'); ?>">
+    <form class="grid grid-cols-1 md:grid-cols-3 gap-4" method="get" action="<?= base_url('admin/laporan/absensi-detail'); ?>">
         <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">Dari Tanggal</label>
-            <input type="date" name="from" value="<?= esc($from); ?>" class="w-full border rounded-lg px-3 py-2">
-        </div>
-        <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">Sampai Tanggal</label>
-            <input type="date" name="to" value="<?= esc($to); ?>" class="w-full border rounded-lg px-3 py-2">
+            <label class="block text-sm font-medium text-gray-700 mb-1">Tanggal</label>
+            <input type="date" name="tanggal" value="<?= esc($tanggal); ?>" class="w-full border rounded-lg px-3 py-2" required>
         </div>
         <div>
             <label class="block text-sm font-medium text-gray-700 mb-1">Kelas</label>
@@ -49,7 +45,7 @@
             <button type="submit" class="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700">
                 <i class="fas fa-filter mr-2"></i>Terapkan
             </button>
-            <a href="<?= base_url('admin/laporan/absensi-detail/print') . '?from=' . $from . '&to=' . $to . ($kelasId ? '&kelas_id=' . $kelasId : ''); ?>" target="_blank" class="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700">
+            <a href="<?= base_url('admin/laporan/absensi-detail/print') . '?tanggal=' . $tanggal . ($kelasId ? '&kelas_id=' . $kelasId : ''); ?>" target="_blank" class="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700">
                 <i class="fas fa-print mr-2"></i>Cetak
             </a>
         </div>
@@ -61,10 +57,27 @@
     <div class="p-6 border-b border-gray-200 no-print">
         <div class="flex justify-between items-center">
             <h2 class="text-lg font-semibold text-gray-800">Detail Absensi Pembelajaran</h2>
-            <span class="text-sm text-gray-500">Periode: <?= date('d/m/Y', strtotime($from)); ?> - <?= date('d/m/Y', strtotime($to)); ?></span>
+            <span class="text-sm text-gray-500">Tanggal: <?= date('d/m/Y', strtotime($tanggal)); ?></span>
         </div>
-        <?php if (!empty($laporanData)): ?>
-            <p class="text-sm text-gray-600 mt-2">Total: <?= count($laporanData); ?> sesi pembelajaran</p>
+        <?php if (!empty($laporanPerHari)): ?>
+            <div class="mt-4 grid grid-cols-2 md:grid-cols-4 gap-4">
+                <div class="bg-green-50 border border-green-200 rounded-lg p-3">
+                    <p class="text-xs text-green-600 font-medium">Sudah Isi</p>
+                    <p class="text-2xl font-bold text-green-700"><?= $totalStats['jadwal_sudah_isi']; ?></p>
+                </div>
+                <div class="bg-red-50 border border-red-200 rounded-lg p-3">
+                    <p class="text-xs text-red-600 font-medium">Belum Isi</p>
+                    <p class="text-2xl font-bold text-red-700"><?= $totalStats['jadwal_belum_isi']; ?></p>
+                </div>
+                <div class="bg-blue-50 border border-blue-200 rounded-lg p-3">
+                    <p class="text-xs text-blue-600 font-medium">Total Jadwal</p>
+                    <p class="text-2xl font-bold text-blue-700"><?= $totalStats['total_jadwal']; ?></p>
+                </div>
+                <div class="bg-purple-50 border border-purple-200 rounded-lg p-3">
+                    <p class="text-xs text-purple-600 font-medium">% Pengisian</p>
+                    <p class="text-2xl font-bold text-purple-700"><?= $totalStats['percentage_isi']; ?>%</p>
+                </div>
+            </div>
         <?php endif; ?>
     </div>
 
@@ -73,104 +86,118 @@
             <thead class="bg-gray-50 print-thead">
                 <tr>
                     <th class="px-2 py-2 text-left text-xs font-medium text-gray-700 uppercase border border-gray-300">No</th>
-                    <th class="px-2 py-2 text-left text-xs font-medium text-gray-700 uppercase border border-gray-300">Tanggal</th>
                     <th class="px-2 py-2 text-left text-xs font-medium text-gray-700 uppercase border border-gray-300">Kelas</th>
                     <th class="px-2 py-2 text-left text-xs font-medium text-gray-700 uppercase border border-gray-300">Jam</th>
                     <th class="px-2 py-2 text-left text-xs font-medium text-gray-700 uppercase border border-gray-300">Guru Mapel</th>
                     <th class="px-2 py-2 text-left text-xs font-medium text-gray-700 uppercase border border-gray-300">Mata Pelajaran</th>
                     <th class="px-2 py-2 text-left text-xs font-medium text-gray-700 uppercase border border-gray-300">Wali Kelas</th>
-                    <th class="px-2 py-2 text-center text-xs font-medium text-gray-700 uppercase border border-gray-300">Hadir</th>
-                    <th class="px-2 py-2 text-center text-xs font-medium text-gray-700 uppercase border border-gray-300">Sakit</th>
-                    <th class="px-2 py-2 text-center text-xs font-medium text-gray-700 uppercase border border-gray-300">Izin</th>
-                    <th class="px-2 py-2 text-center text-xs font-medium text-gray-700 uppercase border border-gray-300">Alpa</th>
-                    <th class="px-2 py-2 text-left text-xs font-medium text-gray-700 uppercase border border-gray-300">Catatan Khusus</th>
+                    <th class="px-2 py-2 text-center text-xs font-medium text-gray-700 uppercase border border-gray-300">H</th>
+                    <th class="px-2 py-2 text-center text-xs font-medium text-gray-700 uppercase border border-gray-300">S</th>
+                    <th class="px-2 py-2 text-center text-xs font-medium text-gray-700 uppercase border border-gray-300">I</th>
+                    <th class="px-2 py-2 text-center text-xs font-medium text-gray-700 uppercase border border-gray-300">A</th>
+                    <th class="px-2 py-2 text-left text-xs font-medium text-gray-700 uppercase border border-gray-300">Catatan</th>
                     <th class="px-2 py-2 text-center text-xs font-medium text-gray-700 uppercase border border-gray-300">Foto</th>
-                    <th class="px-2 py-2 text-left text-xs font-medium text-gray-700 uppercase border border-gray-300">Guru Pengganti</th>
+                    <th class="px-2 py-2 text-left text-xs font-medium text-gray-700 uppercase border border-gray-300">Pengganti</th>
                 </tr>
             </thead>
             <tbody class="bg-white divide-y divide-gray-200">
-                <?php if (!empty($laporanData)): ?>
-                    <?php $no = 1; ?>
-                    <?php foreach ($laporanData as $row): ?>
-                        <tr class="hover:bg-gray-50 print-border">
-                            <td class="px-2 py-2 text-sm text-gray-900 border border-gray-300"><?= $no++; ?></td>
-                            <td class="px-2 py-2 text-sm text-gray-900 border border-gray-300 print-nowrap">
-                                <?= date('d/m/Y', strtotime($row['tanggal'])); ?>
-                            </td>
-                            <td class="px-2 py-2 text-sm text-gray-900 border border-gray-300">
-                                <?= esc($row['nama_kelas']); ?>
-                            </td>
-                            <td class="px-2 py-2 text-sm text-gray-900 border border-gray-300 print-nowrap">
-                                <?= date('H:i', strtotime($row['jam_mulai'])); ?>-<?= date('H:i', strtotime($row['jam_selesai'])); ?>
-                            </td>
-                            <td class="px-2 py-2 text-sm text-gray-900 border border-gray-300">
-                                <?= esc($row['nama_guru']); ?>
-                            </td>
-                            <td class="px-2 py-2 text-sm text-gray-900 border border-gray-300">
-                                <?= esc($row['nama_mapel']); ?>
-                            </td>
-                            <td class="px-2 py-2 text-sm text-gray-900 border border-gray-300">
-                                <?= $row['nama_wali_kelas'] ? esc($row['nama_wali_kelas']) : '-'; ?>
-                            </td>
-                            <td class="px-2 py-2 text-center text-sm border border-gray-300">
-                                <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800 print-badge">
-                                    <?= (int)$row['jumlah_hadir']; ?>
-                                </span>
-                            </td>
-                            <td class="px-2 py-2 text-center text-sm border border-gray-300">
-                                <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800 print-badge">
-                                    <?= (int)$row['jumlah_sakit']; ?>
-                                </span>
-                            </td>
-                            <td class="px-2 py-2 text-center text-sm border border-gray-300">
-                                <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800 print-badge">
-                                    <?= (int)$row['jumlah_izin']; ?>
-                                </span>
-                            </td>
-                            <td class="px-2 py-2 text-center text-sm border border-gray-300">
-                                <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800 print-badge">
-                                    <?= (int)$row['jumlah_alpa']; ?>
-                                </span>
-                            </td>
-                            <td class="px-2 py-2 text-sm text-gray-900 border border-gray-300">
-                                <?php if (!empty($row['catatan_khusus'])): ?>
-                                    <div class="max-w-xs print-max-w-full">
-                                        <p class="text-gray-700 print-text-xs <?= ($row['catatan_khusus'] !== '-') ? 'text-left' : 'text-center'; ?>" title="<?= esc($row['catatan_khusus']); ?>">
-                                            <?= esc(strlen($row['catatan_khusus']) > 50 ? substr($row['catatan_khusus'], 0, 50) . '...' : $row['catatan_khusus']); ?>
-                                        </p>
-                                    </div>
+                <?php if (!empty($laporanPerHari)): ?>
+                    <?php $globalNo = 1; ?>
+                    <?php foreach ($laporanPerHari as $hariData): ?>
+                        <?php foreach ($hariData['jadwal_list'] as $jadwal): ?>
+                            <?php 
+                            $belumIsi = empty($jadwal['absensi_id']);
+                            $rowClass = $belumIsi ? 'bg-red-50' : 'hover:bg-gray-50';
+                            ?>
+                            <tr class="<?= $rowClass; ?> print-border">
+                                <td class="px-2 py-2 text-sm <?= $belumIsi ? 'text-red-700 font-semibold' : 'text-gray-900'; ?> border border-gray-300"><?= $globalNo++; ?></td>
+                                <td class="px-2 py-2 text-sm <?= $belumIsi ? 'text-red-700 font-semibold' : 'text-gray-900'; ?> border border-gray-300">
+                                    <?= esc($jadwal['nama_kelas']); ?>
+                                </td>
+                                <td class="px-2 py-2 text-sm <?= $belumIsi ? 'text-red-700 font-semibold' : 'text-gray-900'; ?> border border-gray-300 print-nowrap">
+                                    <?= date('H:i', strtotime($jadwal['jam_mulai'])); ?>
+                                </td>
+                                <td class="px-2 py-2 text-sm <?= $belumIsi ? 'text-red-700 font-semibold' : 'text-gray-900'; ?> border border-gray-300">
+                                    <?= esc($jadwal['nama_guru']); ?>
+                                </td>
+                                <td class="px-2 py-2 text-sm <?= $belumIsi ? 'text-red-700 font-semibold' : 'text-gray-900'; ?> border border-gray-300">
+                                    <?= esc($jadwal['nama_mapel']); ?>
+                                </td>
+                                <td class="px-2 py-2 text-sm <?= $belumIsi ? 'text-red-700' : 'text-gray-900'; ?> border border-gray-300">
+                                    <?= $jadwal['nama_wali_kelas'] ? esc($jadwal['nama_wali_kelas']) : '-'; ?>
+                                </td>
+                                
+                                <?php if ($belumIsi): ?>
+                                    <td class="px-2 py-2 text-center border border-gray-300" colspan="4">
+                                        <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-bold bg-red-600 text-white">
+                                            BELUM ISI
+                                        </span>
+                                    </td>
+                                    <td class="px-2 py-2 text-center text-sm text-red-700 border border-gray-300">-</td>
+                                    <td class="px-2 py-2 text-center text-sm text-red-700 border border-gray-300">-</td>
+                                    <td class="px-2 py-2 text-center text-sm text-red-700 border border-gray-300">-</td>
                                 <?php else: ?>
-                                    -
+                                    <td class="px-2 py-2 text-center text-sm border border-gray-300">
+                                        <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                                            <?= (int)$jadwal['jumlah_hadir']; ?>
+                                        </span>
+                                    </td>
+                                    <td class="px-2 py-2 text-center text-sm border border-gray-300">
+                                        <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
+                                            <?= (int)$jadwal['jumlah_sakit']; ?>
+                                        </span>
+                                    </td>
+                                    <td class="px-2 py-2 text-center text-sm border border-gray-300">
+                                        <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                                            <?= (int)$jadwal['jumlah_izin']; ?>
+                                        </span>
+                                    </td>
+                                    <td class="px-2 py-2 text-center text-sm border border-gray-300">
+                                        <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800">
+                                            <?= (int)$jadwal['jumlah_alpa']; ?>
+                                        </span>
+                                    </td>
+                                    <td class="px-2 py-2 text-sm text-gray-900 border border-gray-300">
+                                        <?php if (!empty($jadwal['catatan_khusus'])): ?>
+                                            <div class="max-w-xs">
+                                                <p class="text-gray-700 text-xs" title="<?= esc($jadwal['catatan_khusus']); ?>">
+                                                    <?= esc(strlen($jadwal['catatan_khusus']) > 40 ? substr($jadwal['catatan_khusus'], 0, 40) . '...' : $jadwal['catatan_khusus']); ?>
+                                                </p>
+                                            </div>
+                                        <?php else: ?>
+                                            -
+                                        <?php endif; ?>
+                                    </td>
+                                    <td class="px-2 py-2 text-center text-sm border border-gray-300">
+                                        <?php if (!empty($jadwal['foto_dokumentasi'])): ?>
+                                            <img src="<?= base_url('writable/uploads/' . esc($jadwal['foto_dokumentasi'])) ?>"
+                                                alt="Foto"
+                                                class="w-12 h-12 object-cover rounded mx-auto cursor-pointer hover:scale-110 transition-transform"
+                                                onclick="showImageModal('<?= base_url('writable/uploads/' . esc($jadwal['foto_dokumentasi'])) ?>')">
+                                        <?php else: ?>
+                                            <span class="text-gray-400 text-xs">
+                                                <i class="fas fa-image"></i>
+                                            </span>
+                                        <?php endif; ?>
+                                    </td>
+                                    <td class="px-2 py-2 text-sm text-gray-900 border border-gray-300">
+                                        <?php if (!empty($jadwal['nama_guru_pengganti'])): ?>
+                                            <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-purple-100 text-purple-800">
+                                                <?= esc($jadwal['nama_guru_pengganti']); ?>
+                                            </span>
+                                        <?php else: ?>
+                                            -
+                                        <?php endif; ?>
+                                    </td>
                                 <?php endif; ?>
-                            </td>
-                            <td class="px-2 py-2 text-center text-sm border border-gray-300">
-                                <?php if (!empty($row['foto_dokumentasi'])): ?>
-                                    <img src="<?= base_url('files/jurnal/' . esc($row['foto_dokumentasi'])) ?>"
-                                        alt="Foto Dokumentasi"
-                                        class="w-16 h-16 object-cover rounded-lg mx-auto cursor-pointer hover:scale-110 transition-transform"
-                                        onclick="showImageModal('<?= base_url('files/jurnal/' . esc($row['foto_dokumentasi'])) ?>')">
-                                <?php else: ?>
-                                    <span class="text-gray-400 text-xs">
-                                        <i class="fas fa-image"></i><br>Tidak ada foto
-                                    </span>
-                                <?php endif; ?>
-                            </td>
-                            <td class="px-2 py-2 text-sm text-gray-900 border border-gray-300">
-                                <?php if (!empty($row['nama_guru_pengganti'])): ?>
-                                    <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-purple-100 text-purple-800 print-badge">
-                                        <?= esc($row['nama_guru_pengganti']); ?>
-                                    </span>
-                                <?php else: ?>
-                                    -
-                                <?php endif; ?>
-                            </td>
-                        </tr>
+                            </tr>
+                        <?php endforeach; ?>
                     <?php endforeach; ?>
                 <?php else: ?>
                     <tr>
-                        <td colspan="14" class="px-6 py-8 text-center text-gray-500 border border-gray-300">
+                        <td colspan="13" class="px-6 py-8 text-center text-gray-500 border border-gray-300">
                             <i class="fas fa-inbox text-4xl text-gray-300 mb-3"></i>
-                            <p>Belum ada data absensi untuk periode ini.</p>
+                            <p>Belum ada jadwal untuk tanggal ini.</p>
                         </td>
                     </tr>
                 <?php endif; ?>

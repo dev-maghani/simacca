@@ -322,7 +322,7 @@
         <h2>Sistem Informasi Akademik</h2>
         <p>Sekolah Menengah Kejuruan</p>
         <div class="period-box">
-            <strong>Periode:</strong> <?= date('d/m/Y', strtotime($from)); ?> - <?= date('d/m/Y', strtotime($to)); ?>
+            <strong>Tanggal:</strong> <?= date('d F Y', strtotime($tanggal)); ?>
             <?php if ($kelasId): ?>
                 <br><strong>Kelas:</strong> <?= esc($kelasList[$kelasId] ?? '-'); ?>
             <?php else: ?>

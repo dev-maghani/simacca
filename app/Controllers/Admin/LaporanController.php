@@ -69,26 +69,57 @@ class LaporanController extends BaseController
      */
     public function absensiDetail()
     {
-        $from = $this->request->getGet('from') ?: date('Y-m-01');
-        $to = $this->request->getGet('to') ?: date('Y-m-t');
+        $tanggal = $this->request->getGet('tanggal') ?: date('Y-m-d');
         $kelasId = $this->request->getGet('kelas_id');
 
         // Data filter & referensi
         $kelasList = $this->kelasModel->getListKelas();
 
-        // Ambil data laporan lengkap
-        $laporanData = $this->absensiModel->getLaporanAbsensiLengkap($from, $to, $kelasId ?? null);
+        // Ambil data laporan per hari (1 tanggal saja)
+        $laporanPerHari = $this->absensiModel->getLaporanAbsensiPerHari($tanggal, $tanggal, $kelasId ?? null);
+
+        // Hitung statistik
+        $totalStats = [
+            'hadir' => 0,
+            'sakit' => 0,
+            'izin' => 0,
+            'alpa' => 0,
+            'total' => 0,
+            'jadwal_sudah_isi' => 0,
+            'jadwal_belum_isi' => 0,
+            'total_jadwal' => 0
+        ];
+
+        foreach ($laporanPerHari as $hari) {
+            foreach ($hari['jadwal_list'] as $jadwal) {
+                $totalStats['total_jadwal']++;
+                
+                if ($jadwal['absensi_id']) {
+                    $totalStats['jadwal_sudah_isi']++;
+                    $totalStats['hadir'] += $jadwal['jumlah_hadir'];
+                    $totalStats['sakit'] += $jadwal['jumlah_sakit'];
+                    $totalStats['izin'] += $jadwal['jumlah_izin'];
+                    $totalStats['alpa'] += $jadwal['jumlah_alpa'];
+                } else {
+                    $totalStats['jadwal_belum_isi']++;
+                }
+            }
+        }
+
+        $totalStats['total'] = $totalStats['hadir'] + $totalStats['sakit'] + $totalStats['izin'] + $totalStats['alpa'];
+        $totalStats['percentage'] = $totalStats['total'] > 0 ? round(($totalStats['hadir'] / $totalStats['total']) * 100, 2) : 0;
+        $totalStats['percentage_isi'] = $totalStats['total_jadwal'] > 0 ? round(($totalStats['jadwal_sudah_isi'] / $totalStats['total_jadwal']) * 100, 2) : 0;
 
         $data = [
             'title' => 'Laporan Absensi Detail',
             'pageTitle' => 'Laporan Absensi Detail',
             'pageDescription' => 'Laporan absensi lengkap dengan detail kehadiran per sesi pembelajaran',
             'user' => $this->getUserData(),
-            'from' => $from,
-            'to' => $to,
+            'tanggal' => $tanggal,
             'kelasId' => $kelasId,
             'kelasList' => $kelasList,
-            'laporanData' => $laporanData,
+            'laporanPerHari' => $laporanPerHari,
+            'totalStats' => $totalStats,
         ];
 
         return view('admin/laporan/absensi_detail', $data);
@@ -99,15 +130,14 @@ class LaporanController extends BaseController
      */
     public function printAbsensiDetail()
     {
-        $from = $this->request->getGet('from') ?: date('Y-m-01');
-        $to = $this->request->getGet('to') ?: date('Y-m-t');
+        $tanggal = $this->request->getGet('tanggal') ?: date('Y-m-d');
         $kelasId = $this->request->getGet('kelas_id');
 
         // Data filter & referensi
         $kelasList = $this->kelasModel->getListKelas();
 
         // Ambil data laporan per hari dengan semua jadwal
-        $laporanPerHari = $this->absensiModel->getLaporanAbsensiPerHari($from, $to, $kelasId ?? null);
+        $laporanPerHari = $this->absensiModel->getLaporanAbsensiPerHari($tanggal, $tanggal, $kelasId ?? null);
 
         // Hitung total statistik
         $totalStats = [
@@ -143,8 +173,7 @@ class LaporanController extends BaseController
 
         $data = [
             'title' => 'Cetak Laporan Absensi Detail',
-            'from' => $from,
-            'to' => $to,
+            'tanggal' => $tanggal,
             'kelasId' => $kelasId,
             'kelasList' => $kelasList,
             'laporanPerHari' => $laporanPerHari,
