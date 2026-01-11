@@ -38,12 +38,12 @@
 - **Persetujuan Izin** - Approve/Reject izin siswa dengan catatan
 - **Laporan** - Laporan kehadiran lengkap (rekapitulasi & per siswa)
 
-### 5. 🎓 Siswa Module
-- **Dashboard** - Info personal & jadwal (in progress)
-- **Jadwal Pelajaran** - Lihat jadwal harian/mingguan
-- **Riwayat Absensi** - Track kehadiran pribadi
-- **Pengajuan Izin** - Submit izin tidak hadir
-- **Profil** - Update data personal
+### 5. 🎓 Siswa Module ✅ COMPLETE
+- **Dashboard** - Info personal, jadwal & statistik kehadiran
+- **Jadwal Pelajaran** - Timeline view jadwal harian/mingguan
+- **Riwayat Absensi** - Track kehadiran dengan filter periode
+- **Pengajuan Izin** - Submit & tracking izin dengan dokumen
+- **Profil** - Update data personal & change password
 
 ## 🗄️ Struktur Database
 - `users` - Data user multi-role dengan authentication
@@ -197,7 +197,7 @@ Setelah server berjalan (`php spark serve`), akses:
 | Admin Module | ✅ Complete | 100% |
 | Guru Mapel Module | ✅ Complete | 100% |
 | Wali Kelas Module | ✅ Complete | 100% |
-| Siswa Module | ⚠️ Partial | 50% (Controllers only) |
+| Siswa Module | ✅ Complete | 100% |
 | Profile Module | ⚠️ Partial | 30% |
 | Notification System | 📋 Planned | 0% |
 | Mobile API | 📋 Planned | 0% |

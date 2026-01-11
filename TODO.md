@@ -69,12 +69,12 @@
 - [x] `app/Views/walikelas/laporan/index.php` ✅ SELESAI
 
 #### 2. Views yang Hilang - Siswa
-- [ ] `app/Views/siswa/dashboard.php`
-- [ ] `app/Views/siswa/jadwal/index.php`
-- [ ] `app/Views/siswa/absensi/index.php`
-- [ ] `app/Views/siswa/izin/index.php`
-- [ ] `app/Views/siswa/izin/create.php`
-- [ ] `app/Views/siswa/profil/index.php`
+- [x] `app/Views/siswa/dashboard.php` ✅ SELESAI
+- [x] `app/Views/siswa/jadwal/index.php` ✅ SELESAI
+- [x] `app/Views/siswa/absensi/index.php` ✅ SELESAI
+- [x] `app/Views/siswa/izin/index.php` ✅ SELESAI
+- [x] `app/Views/siswa/izin/create.php` ✅ SELESAI
+- [x] `app/Views/siswa/profil/index.php` ✅ SELESAI
 
 #### 3. ProfileController Implementation
 - [ ] Implement ProfileController methods (index, update)
