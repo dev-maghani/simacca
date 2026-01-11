@@ -478,7 +478,7 @@
             <tr>
                 <th style="width: 25px;">No</th>
                 <th style="width: 55px;">Kelas</th>
-                <th style="width: 800px;">Jam<br>Mengajar</th>
+                <th style="width: 80px;">Jam<br>Mengajar</th>
                 <th style="width: 95px;">Nama Guru<br>Mapel</th>
                 <th style="width: 85px;">Mata<br>Pelajaran</th>
                 <!-- <th style="width: 85px;">Nama<br>Wali Kelas</th> -->
