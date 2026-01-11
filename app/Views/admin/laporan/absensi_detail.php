@@ -164,7 +164,7 @@
                                     <td class="px-2 py-2 text-sm text-gray-900 border border-gray-300">
                                         <?php if (!empty($jadwal['catatan_khusus'])): ?>
                                             <div class="max-w-xs">
-                                                <p class="text-gray-700 text-xs" title="<?= esc($jadwal['catatan_khusus']); ?>">
+                                                <p class="text-gray-700 text-xs <?= esc($jadwal['catatan_khusus']  !== '-') ? 'text-left' : 'text-center'; ?>" title="<?= esc($jadwal['catatan_khusus']); ?>">
                                                     <?= esc(strlen($jadwal['catatan_khusus']) > 40 ? substr($jadwal['catatan_khusus'], 0, 40) . '...' : $jadwal['catatan_khusus']); ?>
                                                 </p>
                                             </div>
