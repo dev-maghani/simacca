@@ -140,7 +140,7 @@
                                         </p>
                                     </div>
                                 <?php else: ?>
-                                    -
+                                    <!-- - -->
                                     <div class="max-w-xs print-max-w-full">
                                         <p class="text-gray-700 print-text-xs text-center">
                                             -
