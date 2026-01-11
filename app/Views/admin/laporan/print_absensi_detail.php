@@ -398,7 +398,6 @@
         </div>
     </div>
 
-    <?= print_r($tanggal); ?>
     <!-- Header -->
     <div style="text-align: center;">
         <h1>Laporan Absensi Pembelajaran</h1>
@@ -532,7 +531,7 @@
                                 <td class="catatan-cell <?= ($jadwal['catatan_khusus'] !== '-') ? 'left' : 'center'; ?>"><?= esc($jadwal['catatan_khusus'] ?: '-'); ?></td>
                                 <td class="foto-cell">
                                     <?php if (!empty($jadwal['foto_dokumentasi'])): ?>
-                                        <img src="<?= base_url('files/jurnal/' . $jadwal['foto_dokumentasi']); ?>" alt="Foto">
+                                        <img src="<?= base_url('files/jurnal/' . $jadwal['foto_dokumentasi']); ?>" alt="Foto" width="100px">
                                     <?php else: ?>
                                         -
                                     <?php endif; ?>
