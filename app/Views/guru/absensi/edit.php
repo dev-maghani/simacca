@@ -164,25 +164,27 @@
                     </button>
                 </div>
             </div>
-            <div class="card-body">
+            <div class="p-6">
                 <?php if (empty($siswaList)): ?>
-                <div class="alert alert-warning">
-                    <i class="fas fa-exclamation-triangle me-1"></i>
-                    Tidak ada siswa dalam kelas ini.
+                <div class="bg-yellow-50 border-l-4 border-yellow-500 p-4 rounded-lg shadow-sm">
+                    <div class="flex items-center">
+                        <i class="fas fa-exclamation-triangle text-yellow-500 text-xl mr-3"></i>
+                        <p class="text-yellow-800 font-medium">Tidak ada siswa dalam kelas ini.</p>
+                    </div>
                 </div>
                 <?php else: ?>
-                <div class="table-responsive">
-                    <table class="table table-bordered table-hover">
-                        <thead class="table-light">
+                <div class="overflow-x-auto">
+                    <table class="min-w-full divide-y divide-gray-200">
+                        <thead class="bg-gradient-to-r from-gray-100 to-gray-200">
                             <tr>
-                                <th width="50">No</th>
-                                <th width="100">NIS</th>
-                                <th>Nama Siswa</th>
-                                <th width="150">Status</th>
-                                <th>Keterangan</th>
+                                <th class="px-4 py-3 text-left text-xs font-bold text-gray-700 uppercase tracking-wider w-16">No</th>
+                                <th class="px-4 py-3 text-left text-xs font-bold text-gray-700 uppercase tracking-wider w-32">NIS</th>
+                                <th class="px-4 py-3 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">Nama Siswa</th>
+                                <th class="px-4 py-3 text-left text-xs font-bold text-gray-700 uppercase tracking-wider w-48">Status</th>
+                                <th class="px-4 py-3 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">Keterangan</th>
                             </tr>
                         </thead>
-                        <tbody>
+                        <tbody class="bg-white divide-y divide-gray-200">
                             <?php 
                             $no = 1;
                             // Create array of existing absensi details
@@ -205,31 +207,33 @@
                                     }
                                 }
                             ?>
-                            <tr>
-                                <td class="text-center"><?= $no++ ?></td>
-                                <td><?= $siswa['nis'] ?></td>
-                                <td>
-                                    <?= $siswa['nama_lengkap'] ?>
-                                    <?php if ($hasIzin): ?>
-                                    <span class="badge bg-info ms-2">
-                                        <i class="fas fa-envelope me-1"></i> Ada Izin
-                                    </span>
-                                    <?php endif; ?>
+                            <tr class="hover:bg-gray-50 transition-colors">
+                                <td class="px-4 py-4 text-center text-sm font-medium text-gray-900"><?= $no++ ?></td>
+                                <td class="px-4 py-4 text-sm text-gray-700 font-medium"><?= $siswa['nis'] ?></td>
+                                <td class="px-4 py-4 text-sm text-gray-900">
+                                    <div class="flex items-center">
+                                        <span class="font-medium"><?= $siswa['nama_lengkap'] ?></span>
+                                        <?php if ($hasIzin): ?>
+                                        <span class="ml-2 inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-cyan-100 text-cyan-800">
+                                            <i class="fas fa-envelope mr-1"></i> Ada Izin
+                                        </span>
+                                        <?php endif; ?>
+                                    </div>
                                 </td>
-                                <td>
-                                    <select class="form-select form-select-sm status-select" 
+                                <td class="px-4 py-4 text-sm">
+                                    <select class="w-full px-3 py-2 border-2 border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:border-transparent transition-all status-select" 
                                             name="siswa[<?= $siswa['id'] ?>][status]" 
                                             data-siswa-id="<?= $siswa['id'] ?>"
                                             required>
-                                        <option value="hadir" <?= $currentStatus == 'hadir' ? 'selected' : '' ?>>Hadir</option>
-                                        <option value="izin" <?= $currentStatus == 'izin' ? 'selected' : '' ?>>Izin</option>
-                                        <option value="sakit" <?= $currentStatus == 'sakit' ? 'selected' : '' ?>>Sakit</option>
-                                        <option value="alpa" <?= $currentStatus == 'alpa' ? 'selected' : '' ?>>Alpa</option>
+                                        <option value="hadir" <?= $currentStatus == 'hadir' ? 'selected' : '' ?>>✓ Hadir</option>
+                                        <option value="izin" <?= $currentStatus == 'izin' ? 'selected' : '' ?>>📋 Izin</option>
+                                        <option value="sakit" <?= $currentStatus == 'sakit' ? 'selected' : '' ?>>🏥 Sakit</option>
+                                        <option value="alpa" <?= $currentStatus == 'alpa' ? 'selected' : '' ?>>✗ Alpa</option>
                                     </select>
                                 </td>
-                                <td>
+                                <td class="px-4 py-4 text-sm">
                                     <input type="text" 
-                                           class="form-control form-control-sm keterangan-input" 
+                                           class="w-full px-3 py-2 border-2 border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:border-transparent transition-all keterangan-input" 
                                            name="siswa[<?= $siswa['id'] ?>][keterangan]" 
                                            id="keterangan_<?= $siswa['id'] ?>"
                                            value="<?= $currentKeterangan ?>"
