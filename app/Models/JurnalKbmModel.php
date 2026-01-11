@@ -107,6 +107,7 @@ class JurnalKbmModel extends Model
                                 jurnal_kbm.foto_dokumentasi,
                                 jurnal_kbm.created_at,
                                 absensi.tanggal,
+                                absensi.pertemuan_ke,
                                 mata_pelajaran.nama_mapel,
                                 kelas.nama_kelas')
             ->join('absensi', 'absensi.id = jurnal_kbm.absensi_id')
