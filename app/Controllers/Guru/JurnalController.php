@@ -239,7 +239,7 @@ class JurnalController extends BaseController
             'jurnal' => $jurnal
         ];
 
-        return view('guru/jurnal/show', $data);
+        return view('guru/jurnal/show_simple', $data);
     }
 
     public function update($jurnalId)
