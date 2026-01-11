@@ -397,16 +397,12 @@
     <!-- Header -->
     <div class="header">
         <h1>Laporan Absensi Pembelajaran</h1>
-        <h2>Sistem Informasi Akademik</h2>
-        <p>Sekolah Menengah Kejuruan</p>
-        <div class="period-box">
-            <strong>Tanggal:</strong> <?= date('d F Y', strtotime($tanggal)); ?>
-            <?php if ($kelasId): ?>
-                <br><strong>Kelas:</strong> <?= esc($kelasList[$kelasId] ?? '-'); ?>
-            <?php else: ?>
-                <br><strong>Semua Kelas</strong>
-            <?php endif; ?>
-        </div>
+        <strong>Tanggal:</strong> <?= date('d F Y', strtotime($tanggal)); ?>
+        <?php if ($kelasId): ?>
+            <br><strong>Kelas:</strong> <?= esc($kelasList[$kelasId] ?? '-'); ?>
+        <?php else: ?>
+            <br><strong>Semua Kelas</strong>
+        <?php endif; ?>
     </div>
 
     <!-- Summary Section -->
