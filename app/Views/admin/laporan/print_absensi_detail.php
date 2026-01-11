@@ -398,6 +398,7 @@
         </div>
     </div>
 
+    <?= print_r($tanggal); ?>
     <!-- Header -->
     <div style="text-align: center;">
         <h1>Laporan Absensi Pembelajaran</h1>
