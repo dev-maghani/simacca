@@ -73,8 +73,11 @@ class JurnalController extends BaseController
             return redirect()->to('/guru/jurnal')->with('error', 'Jurnal untuk absensi ini sudah dibuat');
         }
 
-        // Cek apakah absensi milik guru yang login
-        if ($absensi['nama_guru'] !== $guru['nama_lengkap']) {
+        // Cek apakah guru yang login adalah pembuat absensi (created_by)
+        // Ini mencakup both scenarios:
+        // 1. Guru mengajar jadwal sendiri (normal mode)
+        // 2. Guru pengganti yang input absensi (substitute mode)
+        if ($absensi['created_by'] != $userId) {
             return redirect()->to('/guru/jurnal')->with('error', 'Anda tidak memiliki akses ke absensi ini');
         }
 
@@ -222,8 +225,10 @@ class JurnalController extends BaseController
             return redirect()->to('/guru/jurnal')->with('error', 'Data jurnal tidak ditemukan');
         }
 
-        // Cek apakah jurnal milik guru yang login
-        if ($jurnal['nama_guru'] !== $guru['nama_lengkap']) {
+        // Cek apakah jurnal dibuat oleh guru yang login
+        // Check via absensi's created_by to support substitute teacher mode
+        $absensi = $this->absensiModel->find($jurnal['absensi_id']);
+        if ($absensi && $absensi['created_by'] != $userId) {
             return redirect()->to('/guru/jurnal')->with('error', 'Anda tidak memiliki akses ke jurnal ini');
         }
 
@@ -253,8 +258,10 @@ class JurnalController extends BaseController
             return redirect()->to('/guru/jurnal')->with('error', 'Data jurnal tidak ditemukan');
         }
 
-        // Cek apakah jurnal milik guru yang login
-        if ($jurnal['nama_guru'] !== $guru['nama_lengkap']) {
+        // Cek apakah jurnal dibuat oleh guru yang login
+        // Check via absensi's created_by to support substitute teacher mode
+        $absensi = $this->absensiModel->find($jurnal['absensi_id']);
+        if ($absensi && $absensi['created_by'] != $userId) {
             return redirect()->to('/guru/jurnal')->with('error', 'Anda tidak memiliki akses ke jurnal ini');
         }
 
@@ -463,8 +470,10 @@ class JurnalController extends BaseController
             return redirect()->to('/guru/jurnal')->with('error', 'Data jurnal tidak ditemukan');
         }
 
-        // Cek apakah jurnal milik guru yang login
-        if ($jurnal['nama_guru'] !== $guru['nama_lengkap']) {
+        // Cek apakah jurnal dibuat oleh guru yang login
+        // Check via absensi's created_by to support substitute teacher mode
+        $absensi = $this->absensiModel->find($jurnal['absensi_id']);
+        if ($absensi && $absensi['created_by'] != $userId) {
             return redirect()->to('/guru/jurnal')->with('error', 'Anda tidak memiliki akses ke jurnal ini');
         }
 
