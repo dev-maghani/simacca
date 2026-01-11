@@ -9,6 +9,7 @@ use App\Models\SiswaModel;
 use App\Models\AbsensiModel;
 use App\Models\AbsensiDetailModel;
 use App\Models\IzinSiswaModel;
+use App\Models\JadwalMengajarModel;
 
 class DashboardController extends BaseController
 {
@@ -17,7 +18,8 @@ class DashboardController extends BaseController
     protected $siswaModel;
     protected $absensiModel;
     protected $absensiDetailModel;
-    protected $izinSiswaModel;
+    protected $izinModel;
+    protected $jadwalModel;
 
     public function __construct()
     {
@@ -26,7 +28,8 @@ class DashboardController extends BaseController
         $this->siswaModel = new SiswaModel();
         $this->absensiModel = new AbsensiModel();
         $this->absensiDetailModel = new AbsensiDetailModel();
-        $this->izinSiswaModel = new IzinSiswaModel();
+        $this->izinModel = new IzinSiswaModel();
+        $this->jadwalModel = new JadwalMengajarModel();
     }
 
     public function index()
@@ -38,6 +41,8 @@ class DashboardController extends BaseController
         if (!$guru || !$guru['is_wali_kelas']) {
             return redirect()->to('/access-denied')->with('error', 'Anda bukan wali kelas');
         }
+
+        $guruId = $guru['id'];
 
         // Get kelas data
         $kelas = $this->kelasModel->getByWaliKelas($guru['id']);
@@ -64,7 +69,7 @@ class DashboardController extends BaseController
                 ->where('users.is_active', 1)
                 ->countAllResults(),
             'total_absensi_bulan_ini' => count($absensiKelas),
-            'izin_pending' => $this->izinSiswaModel->getPendingApproval($kelas['id'])
+            'izin_pending' => $this->izinModel->getPendingApproval($kelas['id'])
         ];
 
         // Get statistik kehadiran detail
@@ -110,9 +115,37 @@ class DashboardController extends BaseController
             'kehadiranStats' => $kehadiranStats,
             'siswaAlpa' => $siswaAlpa,
             'recentAbsensi' => $recentAbsensi,
-            'izinPending' => $stats['izin_pending']
+            'izinPending' => $stats['izin_pending'],
+            'pendingIzin' => $this->getPendingIzinForGuru($guruId)
         ];
 
         return view('walikelas/dashboard', $data);
+    }
+
+    /**
+     * Get pending izin for guru's classes
+     */
+    private function getPendingIzinForGuru($guruId)
+    {
+        // Get kelas yang diajar oleh guru ini
+        $kelasIds = $this->jadwalModel->distinct()->select('kelas_id')
+            ->where('guru_id', $guruId)
+            ->findAll();
+
+        if (empty($kelasIds)) {
+            return [];
+        }
+
+        $kelasIdArray = array_column($kelasIds, 'kelas_id');
+
+        // Get pending izin for these classes
+        return $this->izinModel->select('izin_siswa.*, siswa.nama_lengkap, siswa.nis, kelas.nama_kelas')
+            ->join('siswa', 'siswa.id = izin_siswa.siswa_id')
+            ->join('kelas', 'kelas.id = siswa.kelas_id')
+            ->whereIn('siswa.kelas_id', $kelasIdArray)
+            ->where('izin_siswa.status', 'pending')
+            ->orderBy('izin_siswa.tanggal', 'DESC')
+            ->limit(5)
+            ->findAll();
     }
 }
