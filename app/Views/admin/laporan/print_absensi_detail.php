@@ -37,11 +37,29 @@
         }
 
         /* Header */
-        .header {
+        /* .header {
             text-align: center;
             margin-bottom: 15px;
             border-bottom: 3px double #000;
             padding-bottom: 10px;
+        } */
+
+        /* Header dengan Logo */
+        .header {
+            text-align: center;
+            margin-bottom: 10px;
+            border-bottom: 4px double #000;
+            padding-bottom: 5px;
+            position: relative;
+        }
+
+        .header-content {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 10px;
+            margin-bottom: 3px;
+            padding: 0 15px;
         }
 
         .header h1 {
@@ -67,6 +85,46 @@
             padding: 5px 15px;
             margin-top: 8px;
             font-size: 9pt;
+        }
+
+        .logo {
+            width: 60px;
+            height: 60px;
+            flex-shrink: 0;
+        }
+
+        .header-text {
+            text-align: center;
+            flex: 1;
+            padding: 0 5px;
+        }
+
+        .header-text h1 {
+            font-size: 13pt;
+            font-weight: bold;
+            margin-bottom: 1px;
+            text-transform: uppercase;
+            line-height: 1.1;
+        }
+
+        .header-text h2 {
+            font-size: 12pt;
+            font-weight: bold;
+            margin-bottom: 1px;
+            line-height: 1.1;
+        }
+
+        .header-text h3 {
+            font-size: 11pt;
+            font-weight: bold;
+            margin-bottom: 2px;
+            line-height: 1.1;
+        }
+
+        .header-text p {
+            font-size: 8.5pt;
+            margin: 0.5px 0;
+            line-height: 1.2;
         }
 
         /* Info Section */
@@ -315,6 +373,26 @@
     <button onclick="window.print()" class="print-button no-print">
         <i class="fas fa-print"></i> Cetak Laporan
     </button>
+
+    <!-- Header dengan Logo -->
+        <div class="header">
+            <div class="header-content">
+                <div class="logo">
+                    <img src="<?= base_url('/assets/images/sekolah.png') ?>" alt="Logo Sekolah" height="64px"/>
+                </div>
+                <div class="header-text">
+                    <h3>PEMERINTAH PROPINSI SULAWESI SELATAN</h1>
+                    <h3>DINAS PENDIDIKAN</h2>
+                    <h3>CABANG DINAS PENDIDIKAN WILAYAH III</h3>
+                    <h2>UPT SMKN 8 BONE</h2>
+                    <p><em>Alamat : Jln. Poros Bone – Sengkang Welado Kec. Ajangale Kode Pos 92755</em></p>
+                    <p><em>Email : smkn8bone@gmail.com</em></p>
+                </div>
+                <div class="logo">
+                    <img src="<?= base_url('/assets/images/provinsi.png') ?>" alt="Logo Provinsi" height="64px">
+                </div>
+            </div>
+        </div>
 
     <!-- Header -->
     <div class="header">
