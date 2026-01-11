@@ -236,11 +236,20 @@
                                     </div>
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap text-center">
-                                    <a href="<?= base_url('guru/jurnal/edit/' . $j['id']) ?>" 
-                                       class="inline-flex items-center px-4 py-2 bg-gradient-to-r from-amber-500 to-orange-500 text-white rounded-lg hover:from-amber-600 hover:to-orange-600 transition-all font-semibold shadow-md hover:shadow-lg transform hover:-translate-y-0.5">
-                                        <i class="fas fa-edit mr-2"></i>
-                                        Edit
-                                    </a>
+                                    <div class="flex items-center justify-center gap-2">
+                                        <a href="<?= base_url('guru/jurnal/show/' . $j['id']) ?>" 
+                                           class="inline-flex items-center px-4 py-2 bg-gradient-to-r from-blue-500 to-cyan-500 text-white rounded-lg hover:from-blue-600 hover:to-cyan-600 transition-all font-semibold shadow-md hover:shadow-lg transform hover:-translate-y-0.5"
+                                           title="Preview Jurnal">
+                                            <i class="fas fa-eye mr-2"></i>
+                                            Preview
+                                        </a>
+                                        <a href="<?= base_url('guru/jurnal/edit/' . $j['id']) ?>" 
+                                           class="inline-flex items-center px-4 py-2 bg-gradient-to-r from-amber-500 to-orange-500 text-white rounded-lg hover:from-amber-600 hover:to-orange-600 transition-all font-semibold shadow-md hover:shadow-lg transform hover:-translate-y-0.5"
+                                           title="Edit Jurnal">
+                                            <i class="fas fa-edit mr-2"></i>
+                                            Edit
+                                        </a>
+                                    </div>
                                 </td>
                             </tr>
                             <?php endforeach; ?>
@@ -254,11 +263,18 @@
                     <div class="bg-gradient-to-br from-white to-gray-50 rounded-xl shadow-md border-2 border-gray-200 p-5 hover:shadow-lg transition-all">
                         <div class="flex items-start justify-between mb-4">
                             <span class="bg-indigo-100 text-indigo-800 text-xs font-bold px-3 py-1 rounded-full">#{<?= $no++ ?>}</span>
-                            <a href="<?= base_url('guru/jurnal/edit/' . $j['id']) ?>" 
-                               class="px-4 py-2 bg-gradient-to-r from-amber-500 to-orange-500 text-white rounded-lg text-sm font-semibold shadow-md">
-                                <i class="fas fa-edit mr-1"></i>
-                                Edit
-                            </a>
+                            <div class="flex gap-2">
+                                <a href="<?= base_url('guru/jurnal/show/' . $j['id']) ?>" 
+                                   class="px-3 py-2 bg-gradient-to-r from-blue-500 to-cyan-500 text-white rounded-lg text-sm font-semibold shadow-md"
+                                   title="Preview">
+                                    <i class="fas fa-eye"></i>
+                                </a>
+                                <a href="<?= base_url('guru/jurnal/edit/' . $j['id']) ?>" 
+                                   class="px-3 py-2 bg-gradient-to-r from-amber-500 to-orange-500 text-white rounded-lg text-sm font-semibold shadow-md"
+                                   title="Edit">
+                                    <i class="fas fa-edit"></i>
+                                </a>
+                            </div>
                         </div>
                         
                         <div class="space-y-3">
