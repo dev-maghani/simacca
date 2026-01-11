@@ -145,14 +145,14 @@
                             </td>
                             <td class="px-2 py-2 text-center text-sm border border-gray-300">
                                 <?php if (!empty($row['foto_dokumentasi'])): ?>
-                                    <button onclick="showImageModal('<?= base_url('files/jurnal/' . esc($row['foto_dokumentasi'])); ?>')" 
-                                            class="text-indigo-600 hover:text-indigo-900 no-print">
-                                        <i class="fas fa-image text-lg"></i>
-                                    </button>
-                                    <img src="<?= base_url('files/jurnal/' . esc($row['foto_dokumentasi'])); ?>" 
-                                         alt="Foto" class="print-only-inline hidden w-12 h-12 object-cover mx-auto">
+                                    <img src="<?= base_url('files/jurnal/' . esc($row['foto_dokumentasi'])) ?>"
+                                        alt="Foto Dokumentasi"
+                                        class="w-16 h-16 object-cover rounded-lg mx-auto cursor-pointer hover:scale-110 transition-transform"
+                                        onclick="showImageModal('<?= base_url('files/jurnal/' . esc($row['foto_dokumentasi'])) ?>')">
                                 <?php else: ?>
-                                    -
+                                    <span class="text-gray-400 text-xs">
+                                        <i class="fas fa-image"></i><br>Tidak ada foto
+                                    </span>
                                 <?php endif; ?>
                             </td>
                             <td class="px-2 py-2 text-sm text-gray-900 border border-gray-300">
@@ -219,27 +219,28 @@
 <style>
     /* Print styles */
     @media print {
+
         /* Hide non-print elements */
         .no-print {
             display: none !important;
         }
-        
+
         /* Show print-only elements */
         .print-header,
         .print-footer {
             display: block !important;
         }
-        
+
         .print-only-inline {
             display: inline-block !important;
         }
-        
+
         /* Page setup for landscape */
         @page {
             size: A4 landscape;
             margin: 1cm 0.5cm;
         }
-        
+
         /* Body and general styles */
         body {
             font-size: 8pt;
@@ -247,13 +248,13 @@
             color: #000;
             background: white;
         }
-        
+
         /* Remove shadows and rounded corners */
         .print-no-shadow {
             box-shadow: none !important;
             border-radius: 0 !important;
         }
-        
+
         /* Table styles */
         .print-table {
             width: 100%;
@@ -261,50 +262,50 @@
             font-size: 7pt;
             page-break-inside: auto;
         }
-        
+
         .print-table th,
         .print-table td {
             padding: 3px 2px !important;
             border: 1px solid #000 !important;
             vertical-align: top;
         }
-        
+
         .print-thead {
             background-color: #e5e7eb !important;
             -webkit-print-color-adjust: exact;
             print-color-adjust: exact;
             font-weight: bold;
         }
-        
+
         .print-thead th {
             font-size: 7pt !important;
             font-weight: bold;
             text-align: center;
         }
-        
+
         /* Table rows */
         .print-border td {
             border: 1px solid #000 !important;
         }
-        
+
         tr {
             page-break-inside: avoid;
         }
-        
+
         /* Text wrapping */
         .print-nowrap {
             white-space: nowrap;
         }
-        
+
         .print-max-w-full {
             max-width: 100% !important;
         }
-        
+
         .print-text-xs {
             font-size: 6pt !important;
             line-height: 1.2;
         }
-        
+
         /* Badge styles for print */
         .print-badge {
             background-color: transparent !important;
@@ -315,74 +316,136 @@
             -webkit-print-color-adjust: exact;
             print-color-adjust: exact;
         }
-        
+
         /* Overflow handling */
         .print-overflow-visible {
             overflow: visible !important;
         }
-        
+
         /* Specific column widths for better layout */
         .print-table th:nth-child(1),
-        .print-table td:nth-child(1) { width: 3%; } /* No */
+        .print-table td:nth-child(1) {
+            width: 3%;
+        }
+
+        /* No */
         .print-table th:nth-child(2),
-        .print-table td:nth-child(2) { width: 7%; } /* Tanggal */
+        .print-table td:nth-child(2) {
+            width: 7%;
+        }
+
+        /* Tanggal */
         .print-table th:nth-child(3),
-        .print-table td:nth-child(3) { width: 6%; } /* Kelas */
+        .print-table td:nth-child(3) {
+            width: 6%;
+        }
+
+        /* Kelas */
         .print-table th:nth-child(4),
-        .print-table td:nth-child(4) { width: 8%; } /* Jam */
+        .print-table td:nth-child(4) {
+            width: 8%;
+        }
+
+        /* Jam */
         .print-table th:nth-child(5),
-        .print-table td:nth-child(5) { width: 10%; } /* Guru Mapel */
+        .print-table td:nth-child(5) {
+            width: 10%;
+        }
+
+        /* Guru Mapel */
         .print-table th:nth-child(6),
-        .print-table td:nth-child(6) { width: 10%; } /* Mata Pelajaran */
+        .print-table td:nth-child(6) {
+            width: 10%;
+        }
+
+        /* Mata Pelajaran */
         .print-table th:nth-child(7),
-        .print-table td:nth-child(7) { width: 10%; } /* Wali Kelas */
+        .print-table td:nth-child(7) {
+            width: 10%;
+        }
+
+        /* Wali Kelas */
         .print-table th:nth-child(8),
-        .print-table td:nth-child(8) { width: 3%; text-align: center; } /* H */
+        .print-table td:nth-child(8) {
+            width: 3%;
+            text-align: center;
+        }
+
+        /* H */
         .print-table th:nth-child(9),
-        .print-table td:nth-child(9) { width: 3%; text-align: center; } /* S */
+        .print-table td:nth-child(9) {
+            width: 3%;
+            text-align: center;
+        }
+
+        /* S */
         .print-table th:nth-child(10),
-        .print-table td:nth-child(10) { width: 3%; text-align: center; } /* I */
+        .print-table td:nth-child(10) {
+            width: 3%;
+            text-align: center;
+        }
+
+        /* I */
         .print-table th:nth-child(11),
-        .print-table td:nth-child(11) { width: 3%; text-align: center; } /* A */
+        .print-table td:nth-child(11) {
+            width: 3%;
+            text-align: center;
+        }
+
+        /* A */
         .print-table th:nth-child(12),
-        .print-table td:nth-child(12) { width: 15%; } /* Catatan Khusus */
+        .print-table td:nth-child(12) {
+            width: 15%;
+        }
+
+        /* Catatan Khusus */
         .print-table th:nth-child(13),
-        .print-table td:nth-child(13) { width: 8%; text-align: center; } /* Foto */
+        .print-table td:nth-child(13) {
+            width: 8%;
+            text-align: center;
+        }
+
+        /* Foto */
         .print-table th:nth-child(14),
-        .print-table td:nth-child(14) { width: 11%; } /* Guru Pengganti */
-        
+        .print-table td:nth-child(14) {
+            width: 11%;
+        }
+
+        /* Guru Pengganti */
+
         /* Image in print */
         .print-table img {
             max-width: 40px !important;
             max-height: 40px !important;
             object-fit: cover;
         }
-        
+
         /* Remove hover effects */
         .hover\:bg-gray-50:hover {
             background-color: transparent !important;
         }
     }
-    
+
     /* Screen styles for line-clamp */
     @media screen {
         .line-clamp-2 {
             display: -webkit-box;
-            -webkit-line-clamp: 2;
             -webkit-box-orient: vertical;
+            -webkit-line-clamp: 2;
+            line-clamp: 2;
             overflow: hidden;
         }
     }
 </style>
 
 <script>
-function showImageModal(imageUrl) {
-    document.getElementById('modalImage').src = imageUrl;
-    document.getElementById('imageModal').classList.remove('hidden');
-}
+    function showImageModal(imageUrl) {
+        document.getElementById('modalImage').src = imageUrl;
+        document.getElementById('imageModal').classList.remove('hidden');
+    }
 
-function closeImageModal() {
-    document.getElementById('imageModal').classList.add('hidden');
-}
+    function closeImageModal() {
+        document.getElementById('imageModal').classList.add('hidden');
+    }
 </script>
 <?= $this->endSection() ?>
