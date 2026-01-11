@@ -4,6 +4,20 @@ namespace App\Database\Migrations;
 
 use CodeIgniter\Database\Migration;
 
+/**
+ * Migration: Add Foto to Jurnal KBM
+ * 
+ * Adds foto_dokumentasi field to jurnal_kbm table.
+ * Allows teachers to upload photo documentation of teaching activities.
+ * 
+ * Dependencies: jurnal_kbm
+ * Added Field: foto_dokumentasi (VARCHAR 255, NULLABLE)
+ * 
+ * @package App\Database\Migrations
+ * @author SIMACCA Team
+ * @version 1.0.0
+ * @date 2026-01-11
+ */
 class AddFotoToJurnalKbm extends Migration
 {
     public function up()

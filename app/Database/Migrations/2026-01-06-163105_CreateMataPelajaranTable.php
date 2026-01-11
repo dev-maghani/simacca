@@ -4,6 +4,17 @@ namespace App\Database\Migrations;
 
 use CodeIgniter\Database\Migration;
 
+/**
+ * Migration: Create Mata Pelajaran Table
+ * 
+ * Creates table for subjects/courses with KKM (Kriteria Ketuntasan Minimal).
+ * 
+ * Dependencies: None
+ * 
+ * @package App\Database\Migrations
+ * @author SIMACCA Team
+ * @version 1.0.0
+ */
 class CreateMataPelajaranTable extends Migration
 {
     public function up()

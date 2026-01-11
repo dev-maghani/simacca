@@ -15,28 +15,39 @@
 #--------------------------------------------------------------------
 
 # CI_ENVIRONMENT = production
+CI_ENVIRONMENT = development
 
 #--------------------------------------------------------------------
 # APP
 #--------------------------------------------------------------------
 
-# app.baseURL = ''
+#--------------------------------------------------------------------
+# APP Configuration
+#--------------------------------------------------------------------
+app.baseURL = 'http://localhost:8080/'
 # If you have trouble with `.`, you could also use `_`.
 # app_baseURL = ''
 # app.forceGlobalSecureRequests = false
-# app.CSPEnabled = false
+app.CSPEnabled = false
 
 #--------------------------------------------------------------------
 # DATABASE
 #--------------------------------------------------------------------
 
-# database.default.hostname = localhost
-# database.default.database = ci4
-# database.default.username = root
-# database.default.password = root
-# database.default.DBDriver = MySQLi
-# database.default.DBPrefix =
-# database.default.port = 3306
+#--------------------------------------------------------------------
+# DATABASE - SIMACCA Configuration
+#--------------------------------------------------------------------
+# Pastikan database sudah dibuat:
+# CREATE DATABASE simacca_db CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+#--------------------------------------------------------------------
+
+database.default.hostname = localhost
+database.default.database = simacca_db
+database.default.username = root
+database.default.password = 
+database.default.DBDriver = MySQLi
+database.default.DBPrefix =
+database.default.port = 3306
 
 # If you use MySQLi as tests, first update the values of Config\Database::$tests.
 # database.tests.hostname = localhost

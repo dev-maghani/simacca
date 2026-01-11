@@ -4,6 +4,24 @@ namespace App\Database\Migrations;
 
 use CodeIgniter\Database\Migration;
 
+/**
+ * Migration: Create Izin Siswa Table
+ * 
+ * Creates student permission/leave request table with approval workflow.
+ * Includes start/end date, reason, and document attachment.
+ * 
+ * Dependencies: siswa, kelas
+ * Foreign Keys:
+ *   - siswa_id -> siswa(id) ON DELETE CASCADE
+ *   - kelas_id -> kelas(id)
+ * 
+ * Status Enum: pending, approved, rejected
+ * Note: Timestamps added via AddTimestampsToIzinSiswa migration
+ * 
+ * @package App\Database\Migrations
+ * @author SIMACCA Team
+ * @version 1.0.0
+ */
 class CreateIzinSiswaTable extends Migration
 {
     public function up()

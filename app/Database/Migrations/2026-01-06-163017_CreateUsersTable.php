@@ -4,6 +4,18 @@ namespace App\Database\Migrations;
 
 use CodeIgniter\Database\Migration;
 
+/**
+ * Migration: Create Users Table
+ * 
+ * Creates the main users table for multi-role authentication system.
+ * Roles: admin, guru_mapel, wali_kelas, siswa
+ * 
+ * Dependencies: None (First table)
+ * 
+ * @package App\Database\Migrations
+ * @author SIMACCA Team
+ * @version 1.0.0
+ */
 class CreateUsersTable extends Migration
 {
     public function up()

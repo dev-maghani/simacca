@@ -70,7 +70,7 @@
 
 📝 **Lihat detail lengkap di:** [FEATURES.md](FEATURES.md)
 
-## Instalasi
+### Langkah 1: Instalasi
 1. Clone Repository:
 ```bash
 git clone https://github.com/gh4ni404/simacca.git
@@ -79,25 +79,48 @@ git clone https://github.com/gh4ni404/simacca.git
 ```bash
 composer install
 ```
-3. Copy .env file
+
+### Langkah 2: Konfigurasi Database
 ```bash
+# Copy file env ke .env
 cp env .env
-```
-4. Konfiguraswi database di .env
-5. jalankan migrations:
-```bash
-php spark migrate
-```
-6. Jalankan seeder:
-```bash
-php spark db:seed DummyDataSeeder
-php spark db:seed AdminSeeder
+
+# Edit .env - bagian database saja
+# database.default.database = simacca_db
+# database.default.username = root
+# database.default.password = 
 ```
 
-## Development Server
+**PENTING:** Buat database dulu di MySQL:
+```sql
+CREATE DATABASE simacca_db;
+```
+
+### Langkah 3: Setup Otomatis ⭐
+```bash
+# Setup lengkap (migrations + admin user)
+php spark setup
+
+# Atau dengan data dummy untuk testing
+php spark setup --with-dummy
+```
+
+### Langkah 4: Jalankan Server
 ```bash
 php spark serve
 ```
+
+Buka browser: **http://localhost:8080**
+
+### Default Login
+- **Username:** `admin`
+- **Password:** `admin123`
+
+⚠️ **Ganti password setelah login pertama!**
+
+---
+
+**📖 Panduan lengkap:** [INSTALL.md](INSTALL.md)
 
 # CodeIgniter 4 Application Starter
 
@@ -181,28 +204,25 @@ Untuk informasi lebih detail tentang fitur dan development:
 ### Technical Notes
 All detailed technical documentation has been archived. Key information about recent updates and fixes can be found in the **Recent Updates & Fixes** section of FEATURES.md.
 
-## 🚀 Quick Start
+## 🎯 Quick Commands Reference
 
-### Default Login Credentials
+| Command | Description |
+|---------|-------------|
+| `php spark setup` | Setup lengkap (migrations + seeding) |
+| `php spark setup --with-dummy` | Setup dengan data dummy |
+| `php spark setup --force` | Reset dan setup ulang |
+| `php spark serve` | Jalankan development server |
+| `php spark migrate:status` | Cek status migrations |
 
-Setelah menjalankan seeder, gunakan kredensial berikut:
+### 🔗 Access URLs
 
-**Admin:**
-- Username: `admin`
-- Password: `password` (atau cek di AdminSeeder)
+Setelah server berjalan (`php spark serve`):
 
-**Guru/Siswa:**
-- Lihat data dummy di DummyDataSeeder
-
-### Access URLs
-
-Setelah server berjalan (`php spark serve`), akses:
-
-- **Login Page:** `http://localhost:8080/login`
-- **Admin Dashboard:** `http://localhost:8080/admin/dashboard`
-- **Guru Dashboard:** `http://localhost:8080/guru/dashboard`
-- **Wali Kelas Dashboard:** `http://localhost:8080/walikelas/dashboard`
-- **Siswa Dashboard:** `http://localhost:8080/siswa/dashboard`
+- **Login:** http://localhost:8080/login
+- **Admin Dashboard:** http://localhost:8080/admin/dashboard
+- **Guru Dashboard:** http://localhost:8080/guru/dashboard
+- **Wali Kelas Dashboard:** http://localhost:8080/walikelas/dashboard
+- **Siswa Dashboard:** http://localhost:8080/siswa/dashboard
 
 ## 📊 Status Pengembangan
 
@@ -247,36 +267,30 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ## 🆘 Troubleshooting
 
-### Common Issues
+### Error: "Database connection failed"
+1. Pastikan MySQL service berjalan
+2. Cek kredensial di `.env`
+3. Pastikan database sudah dibuat: `CREATE DATABASE simacca_db;`
 
-**Database Connection Error:**
+### Error: "Table already exists"
+Reset database:
 ```bash
-# Check .env configuration
-database.default.hostname = localhost
-database.default.database = simacca_db
-database.default.username = your_username
-database.default.password = your_password
+php spark setup --force
 ```
 
-**Migration Error:**
-```bash
-# Reset migrations
-php spark migrate:rollback
-php spark migrate
-```
+### Error: "composer not found"
+Install Composer dari https://getcomposer.org/
 
-**Permission Error (writable folder):**
+### Writable Folder Permission Error
 ```bash
 # Linux/Mac
 chmod -R 777 writable/
-# Windows - Check folder permissions manually
+
+# Windows
+Right-click writable folder → Properties → Security → Edit permissions
 ```
 
-**Composer Dependencies:**
-```bash
-composer update
-composer dump-autoload
-```
+**📖 Troubleshooting lengkap:** [INSTALL.md](INSTALL.md#troubleshooting)
 
 ## 📞 Support
 

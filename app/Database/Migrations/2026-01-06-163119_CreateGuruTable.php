@@ -4,6 +4,19 @@ namespace App\Database\Migrations;
 
 use CodeIgniter\Database\Migration;
 
+/**
+ * Migration: Create Guru Table
+ * 
+ * Creates table for teachers with full profile information.
+ * Links to users table for authentication.
+ * 
+ * Dependencies: users
+ * Foreign Keys: user_id -> users(id)
+ * 
+ * @package App\Database\Migrations
+ * @author SIMACCA Team
+ * @version 1.0.0
+ */
 class CreateGuruTable extends Migration
 {
     public function up()

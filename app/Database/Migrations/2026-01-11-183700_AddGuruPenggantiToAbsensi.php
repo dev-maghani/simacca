@@ -4,6 +4,26 @@ namespace App\Database\Migrations;
 
 use CodeIgniter\Database\Migration;
 
+/**
+ * Migration: Add Guru Pengganti to Absensi
+ * 
+ * Adds guru_pengganti_id field to absensi table for substitute teacher feature.
+ * Records which teacher is substituting when the regular teacher is absent.
+ * 
+ * Dependencies: absensi, guru
+ * Added Field: guru_pengganti_id (INT, NULLABLE)
+ * Foreign Keys: guru_pengganti_id -> guru(id) ON DELETE SET NULL
+ * 
+ * Features:
+ * - Allows recording substitute teachers for any class session
+ * - Dual ownership access control (creator OR schedule owner)
+ * - Integrated with attendance and teaching journal
+ * 
+ * @package App\Database\Migrations
+ * @author SIMACCA Team
+ * @version 1.1.0
+ * @date 2026-01-11
+ */
 class AddGuruPenggantiToAbsensi extends Migration
 {
     public function up()

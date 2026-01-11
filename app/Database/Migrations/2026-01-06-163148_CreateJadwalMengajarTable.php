@@ -4,6 +4,22 @@ namespace App\Database\Migrations;
 
 use CodeIgniter\Database\Migration;
 
+/**
+ * Migration: Create Jadwal Mengajar Table
+ * 
+ * Creates teaching schedule table with conflict detection.
+ * Links teacher, subject, and class with time schedule.
+ * 
+ * Dependencies: guru, mata_pelajaran, kelas
+ * Foreign Keys:
+ *   - guru_id -> guru(id)
+ *   - mata_pelajaran_id -> mata_pelajaran(id)
+ *   - kelas_id -> kelas(id)
+ * 
+ * @package App\Database\Migrations
+ * @author SIMACCA Team
+ * @version 1.0.0
+ */
 class CreateJadwalMengajarTable extends Migration
 {
     public function up()

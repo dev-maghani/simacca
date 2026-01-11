@@ -4,6 +4,22 @@ namespace App\Database\Migrations;
 
 use CodeIgniter\Database\Migration;
 
+/**
+ * Migration: Create Jurnal KBM Table
+ * 
+ * Creates teaching journal table for documenting learning activities.
+ * One journal per absensi session with notes and photo documentation.
+ * 
+ * Dependencies: absensi
+ * Foreign Keys:
+ *   - absensi_id -> absensi(id) ON DELETE CASCADE
+ * 
+ * Note: foto_dokumentasi field added via AddFotoToJurnalKbm migration
+ * 
+ * @package App\Database\Migrations
+ * @author SIMACCA Team
+ * @version 1.0.0
+ */
 class CreateJurnalKbmTable extends Migration
 {
     public function up()

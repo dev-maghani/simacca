@@ -4,6 +4,18 @@ namespace App\Database\Migrations;
 
 use CodeIgniter\Database\Migration;
 
+/**
+ * Migration: Create Kelas Table
+ * 
+ * Creates table for class management with wali kelas assignment.
+ * 
+ * Dependencies: None
+ * Note: wali_kelas_id will be added via UpdateKelasForeignKey migration
+ * 
+ * @package App\Database\Migrations
+ * @author SIMACCA Team
+ * @version 1.0.0
+ */
 class CreateKelasTable extends Migration
 {
     public function up()

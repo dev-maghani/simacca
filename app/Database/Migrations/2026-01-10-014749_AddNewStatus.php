@@ -4,6 +4,19 @@ namespace App\Database\Migrations;
 
 use CodeIgniter\Database\Migration;
 
+/**
+ * Migration: Add New Status
+ * 
+ * Updates absensi_detail status enum to add new attendance statuses.
+ * Expands the attendance tracking capabilities.
+ * 
+ * Dependencies: absensi_detail
+ * Modified: status ENUM field
+ * 
+ * @package App\Database\Migrations
+ * @author SIMACCA Team
+ * @version 1.0.0
+ */
 class AddNewStatus extends Migration
 {
     public function up()

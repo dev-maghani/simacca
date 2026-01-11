@@ -4,6 +4,23 @@ namespace App\Database\Migrations;
 
 use CodeIgniter\Database\Migration;
 
+/**
+ * Migration: Create Absensi Detail Table
+ * 
+ * Creates attendance detail table (per student per session).
+ * Records individual student attendance status.
+ * 
+ * Dependencies: absensi, siswa
+ * Foreign Keys:
+ *   - absensi_id -> absensi(id) ON DELETE CASCADE
+ *   - siswa_id -> siswa(id) ON DELETE CASCADE
+ * 
+ * Status Enum: hadir, sakit, izin, alpa
+ * 
+ * @package App\Database\Migrations
+ * @author SIMACCA Team
+ * @version 1.0.0
+ */
 class CreateAbsensiDetailTable extends Migration
 {
     public function up()

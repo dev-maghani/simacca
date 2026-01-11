@@ -4,6 +4,21 @@ namespace App\Database\Migrations;
 
 use CodeIgniter\Database\Migration;
 
+/**
+ * Migration: Create Siswa Table
+ * 
+ * Creates table for students with profile and class assignment.
+ * Links to users table for authentication and kelas for class membership.
+ * 
+ * Dependencies: users, kelas
+ * Foreign Keys: 
+ *   - user_id -> users(id)
+ *   - kelas_id -> kelas(id)
+ * 
+ * @package App\Database\Migrations
+ * @author SIMACCA Team
+ * @version 1.0.0
+ */
 class CreateSiswaTable extends Migration
 {
     public function up()

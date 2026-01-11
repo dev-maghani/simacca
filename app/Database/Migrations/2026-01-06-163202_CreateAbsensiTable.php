@@ -4,6 +4,23 @@ namespace App\Database\Migrations;
 
 use CodeIgniter\Database\Migration;
 
+/**
+ * Migration: Create Absensi Table
+ * 
+ * Creates attendance header table (per session/meeting).
+ * Contains meeting number, date, and learning materials.
+ * 
+ * Dependencies: jadwal_mengajar, users
+ * Foreign Keys:
+ *   - jadwal_mengajar_id -> jadwal_mengajar(id)
+ *   - created_by -> users(id)
+ * 
+ * Note: guru_pengganti_id added via AddGuruPenggantiToAbsensi migration
+ * 
+ * @package App\Database\Migrations
+ * @author SIMACCA Team
+ * @version 1.0.0
+ */
 class CreateAbsensiTable extends Migration
 {
     public function up()
