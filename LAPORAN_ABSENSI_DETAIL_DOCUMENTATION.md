@@ -148,3 +148,70 @@ Untuk rollback (jika diperlukan):
 ```bash
 php spark migrate:rollback
 ```
+
+## Update Log - Perbaikan Print & Foto (2026-01-11)
+
+### Perbaikan yang Dilakukan:
+
+#### 1. Foto Dokumentasi
+- ✅ Menambahkan `esc()` pada URL foto untuk keamanan
+- ✅ Button foto hanya tampil di screen (class `no-print`)
+- ✅ Foto tampil sebagai thumbnail kecil (40x40px) saat print
+- ✅ Menggunakan `print-only-inline` untuk menampilkan foto saat print
+
+#### 2. Tampilan Print Formal
+- ✅ **Header Print**: Judul formal "LAPORAN ABSENSI PEMBELAJARAN"
+  - Menampilkan periode laporan
+  - Menampilkan kelas yang dipilih
+- ✅ **Footer Print**: Tanda tangan
+  - Kepala Sekolah (kiri)
+  - Petugas Admin (kanan)
+  - Tanggal cetak otomatis
+
+#### 3. Format Print Landscape
+- ✅ Page setup: A4 Landscape
+- ✅ Margin: 1cm (atas/bawah), 0.5cm (kiri/kanan)
+- ✅ Font size: 7-8pt untuk print
+- ✅ Border tabel hitam solid untuk print
+- ✅ Background header tabel abu-abu
+
+#### 4. Layout Tabel Print
+- ✅ 14 kolom tampil sempurna dengan lebar proporsional:
+  - No (3%), Tanggal (7%), Kelas (6%), Jam (8%)
+  - Guru Mapel (10%), Mata Pelajaran (10%), Wali Kelas (10%)
+  - H/S/I/A (masing-masing 3%)
+  - Catatan Khusus (15%), Foto (8%), Guru Pengganti (11%)
+- ✅ Header singkat untuk kolom kehadiran (H, S, I, A)
+- ✅ Padding kompak (3px 2px) untuk efisiensi ruang
+- ✅ Border collapse untuk tampilan rapi
+
+#### 5. Style Print
+- ✅ Badge kehadiran dengan border hitam untuk print
+- ✅ No page break di tengah row tabel
+- ✅ Overflow visible untuk print
+- ✅ Text wrapping optimal
+- ✅ Print-color-adjust untuk mempertahankan warna
+
+#### 6. Keamanan & Kualitas
+- ✅ Semua output menggunakan `esc()` untuk XSS prevention
+- ✅ URL foto aman dan tervalidasi
+- ✅ File Controller sudah ada untuk serve foto
+- ✅ Modal image viewer untuk preview foto di screen
+
+### File yang Dimodifikasi:
+1. `app/Views/admin/laporan/absensi_detail.php` - Update lengkap view dengan print styles
+
+### Cara Menggunakan Print:
+1. Buka laporan di browser
+2. Atur filter sesuai kebutuhan
+3. Klik tombol "Cetak" atau Ctrl+P
+4. Pastikan orientation: **Landscape**
+5. Paper size: **A4**
+6. Margins: Default atau Custom (1cm/0.5cm)
+7. Print atau Save as PDF
+
+### Preview Print:
+- **Screen View**: Form filter, tombol, badge warna, icon foto
+- **Print View**: Header formal, tabel border hitam, foto thumbnail, footer tanda tangan
+- **Hidden saat Print**: Navigation, filter form, button actions
+- **Visible saat Print**: Print header, tabel data, foto thumbnail, print footer
