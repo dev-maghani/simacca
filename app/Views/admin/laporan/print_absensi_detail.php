@@ -402,7 +402,7 @@
     <!-- Header -->
     <div style="text-align: center;">
         <h1>Laporan Absensi Pembelajaran</h1>
-        <strong>Tanggal:</strong> <?= date('d F Y', strtotime($tanggal)); ?>
+        <strong>Tanggal:</strong> <?= date('l, d F Y', strtotime($tanggal)); ?>
         <?php if ($kelasId): ?>
             <br><strong>Kelas:</strong> <?= esc($kelasList[$kelasId] ?? '-'); ?>
         <?php else: ?>
