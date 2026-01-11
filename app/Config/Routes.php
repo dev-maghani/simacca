@@ -140,6 +140,7 @@ $routes->group('admin', ['filter' => 'auth'], function ($routes) {
 
     // Laporan
     $routes->get('laporan/absensi', 'Admin\LaporanController::absensi', ['filter' => 'role:admin']);
+    $routes->get('laporan/absensi-detail', 'Admin\LaporanController::absensiDetail', ['filter' => 'role:admin']);
     $routes->get('laporan/statistik', 'Admin\LaporanController::statistik', ['filter' => 'role:admin']);
 });
 

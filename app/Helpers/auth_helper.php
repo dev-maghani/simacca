@@ -177,6 +177,10 @@ if (!function_exists('get_sidebar_menu')) {
                             'url' => '/admin/laporan/absensi'
                         ],
                         [
+                            'title' => 'Laporan Absensi Detail',
+                            'url' => '/admin/laporan/absensi-detail'
+                        ],
+                        [
                             'title' => 'Statistik',
                             'url' => '/admin/laporan/statistik'
                         ]

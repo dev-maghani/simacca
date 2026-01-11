@@ -65,6 +65,36 @@ class LaporanController extends BaseController
     }
 
     /**
+     * Laporan Absensi Detail (Lengkap)
+     */
+    public function absensiDetail()
+    {
+        $from = $this->request->getGet('from') ?: date('Y-m-01');
+        $to = $this->request->getGet('to') ?: date('Y-m-t');
+        $kelasId = $this->request->getGet('kelas_id');
+
+        // Data filter & referensi
+        $kelasList = $this->kelasModel->getListKelas();
+
+        // Ambil data laporan lengkap
+        $laporanData = $this->absensiModel->getLaporanAbsensiLengkap($from, $to, $kelasId ?? null);
+
+        $data = [
+            'title' => 'Laporan Absensi Detail',
+            'pageTitle' => 'Laporan Absensi Detail',
+            'pageDescription' => 'Laporan absensi lengkap dengan detail kehadiran per sesi pembelajaran',
+            'user' => $this->getUserData(),
+            'from' => $from,
+            'to' => $to,
+            'kelasId' => $kelasId,
+            'kelasList' => $kelasList,
+            'laporanData' => $laporanData,
+        ];
+
+        return view('admin/laporan/absensi_detail', $data);
+    }
+
+    /**
      * Laporan Statistik umum
      */
     public function statistik()

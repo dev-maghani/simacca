@@ -18,6 +18,7 @@ class AbsensiModel extends Model
         'pertemuan_ke',
         'materi_pembelajaran',
         'created_by',
+        'guru_pengganti_id',
         'created_at'
     ];
 
@@ -183,5 +184,48 @@ class AbsensiModel extends Model
             ->orderBy('absensi.created_at', 'DESC')
             ->limit($limit)
             ->findAll();
+    }
+
+    /**
+     * Get laporan absensi lengkap untuk admin
+     */
+    public function getLaporanAbsensiLengkap($from, $to, $kelasId = null)
+    {
+        $builder = $this->db->table('absensi a')
+            ->select('a.id,
+                a.tanggal,
+                k.nama_kelas,
+                jm.jam_mulai,
+                jm.jam_selesai,
+                g.nama_lengkap as nama_guru,
+                mp.nama_mapel,
+                wk.nama_lengkap as nama_wali_kelas,
+                gp.nama_lengkap as nama_guru_pengganti,
+                jk.catatan_khusus,
+                jk.foto_dokumentasi,
+                SUM(CASE WHEN ad.status = "hadir" THEN 1 ELSE 0 END) as jumlah_hadir,
+                SUM(CASE WHEN ad.status = "sakit" THEN 1 ELSE 0 END) as jumlah_sakit,
+                SUM(CASE WHEN ad.status = "izin" THEN 1 ELSE 0 END) as jumlah_izin,
+                SUM(CASE WHEN ad.status = "alpa" THEN 1 ELSE 0 END) as jumlah_alpa')
+            ->join('jadwal_mengajar jm', 'jm.id = a.jadwal_mengajar_id')
+            ->join('kelas k', 'k.id = jm.kelas_id')
+            ->join('guru g', 'g.id = jm.guru_id')
+            ->join('mata_pelajaran mp', 'mp.id = jm.mata_pelajaran_id')
+            ->join('guru wk', 'wk.id = k.wali_kelas_id', 'left')
+            ->join('guru gp', 'gp.id = a.guru_pengganti_id', 'left')
+            ->join('jurnal_kbm jk', 'jk.absensi_id = a.id', 'left')
+            ->join('absensi_detail ad', 'ad.absensi_id = a.id', 'left')
+            ->where('a.tanggal >=', $from)
+            ->where('a.tanggal <=', $to);
+
+        if ($kelasId) {
+            $builder->where('k.id', $kelasId);
+        }
+
+        $builder->groupBy('a.id')
+            ->orderBy('a.tanggal', 'DESC')
+            ->orderBy('jm.jam_mulai', 'ASC');
+
+        return $builder->get()->getResultArray();
     }
 }
