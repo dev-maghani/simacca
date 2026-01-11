@@ -170,10 +170,10 @@
                                     </td>
                                     <td class="px-2 py-2 text-center text-sm border border-gray-300">
                                         <?php if (!empty($jadwal['foto_dokumentasi'])): ?>
-                                            <img src="<?= base_url('writable/uploads/' . esc($jadwal['foto_dokumentasi'])) ?>"
+                                            <img src="<?= base_url('files/jurnal/' . esc($jadwal['foto_dokumentasi'])) ?>"
                                                 alt="Foto"
                                                 class="w-12 h-12 object-cover rounded mx-auto cursor-pointer hover:scale-110 transition-transform"
-                                                onclick="showImageModal('<?= base_url('writable/uploads/' . esc($jadwal['foto_dokumentasi'])) ?>')">
+                                                onclick="showImageModal('<?= base_url('files/jurnal/' . esc($jadwal['foto_dokumentasi'])) ?>')">
                                         <?php else: ?>
                                             <span class="text-gray-400 text-xs">
                                                 <i class="fas fa-image"></i>
