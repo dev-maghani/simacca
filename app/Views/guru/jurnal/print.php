@@ -18,8 +18,8 @@
 
         body {
             font-family: 'Times New Roman', Times, serif;
-            font-size: 12pt;
-            line-height: 1.5;
+            font-size: 11pt;
+            line-height: 1.4;
             color: #000;
             background: white;
         }
@@ -27,15 +27,15 @@
         .container {
             max-width: 210mm;
             margin: 0 auto;
-            padding: 20px;
+            padding: 10px;
         }
 
         /* Header dengan Logo */
         .header {
             text-align: center;
-            margin-bottom: 15px;
+            margin-bottom: 10px;
             border-bottom: 4px double #000;
-            padding-bottom: 8px;
+            padding-bottom: 5px;
             position: relative;
         }
 
@@ -43,82 +43,82 @@
             display: flex;
             align-items: center;
             justify-content: space-between;
-            gap: 15px;
-            margin-bottom: 5px;
-            padding: 0 20px;
+            gap: 10px;
+            margin-bottom: 3px;
+            padding: 0 15px;
         }
 
         .logo {
-            width: 70px;
-            height: 70px;
+            width: 60px;
+            height: 60px;
             flex-shrink: 0;
         }
 
         .header-text {
             text-align: center;
             flex: 1;
-            padding: 0 10px;
+            padding: 0 5px;
         }
 
         .header-text h1 {
-            font-size: 14pt;
-            font-weight: bold;
-            margin-bottom: 1px;
-            text-transform: uppercase;
-            line-height: 1.2;
-        }
-
-        .header-text h2 {
             font-size: 13pt;
             font-weight: bold;
             margin-bottom: 1px;
-            line-height: 1.2;
+            text-transform: uppercase;
+            line-height: 1.1;
+        }
+
+        .header-text h2 {
+            font-size: 12pt;
+            font-weight: bold;
+            margin-bottom: 1px;
+            line-height: 1.1;
         }
 
         .header-text h3 {
-            font-size: 12pt;
+            font-size: 11pt;
             font-weight: bold;
-            margin-bottom: 3px;
-            line-height: 1.2;
+            margin-bottom: 2px;
+            line-height: 1.1;
         }
 
         .header-text p {
-            font-size: 9pt;
-            margin: 1px 0;
-            line-height: 1.3;
+            font-size: 8.5pt;
+            margin: 0.5px 0;
+            line-height: 1.2;
         }
 
         /* Title */
         .document-title {
             text-align: center;
-            margin: 30px 0 20px 0;
+            margin: 15px 0 10px 0;
         }
 
         .document-title h2 {
-            font-size: 14pt;
+            font-size: 13pt;
             font-weight: bold;
             text-decoration: underline;
-            margin-bottom: 5px;
+            margin-bottom: 3px;
         }
 
         .document-title h3 {
-            font-size: 13pt;
+            font-size: 12pt;
             font-weight: bold;
         }
 
         /* Student Info */
         .student-info {
-            margin: 5px 0;
-            padding-left: 50px;
+            margin: 10px 0;
+            padding-left: 40px;
         }
 
         .student-info table {
             border: none;
-            margin-bottom: 5px;
+            margin-bottom: 0;
         }
 
         .student-info td {
-            padding: 5px 10px;
+            padding: 2px 8px;
             border: none;
         }
 
@@ -128,7 +128,7 @@
         }
 
         .student-info .colon {
-            width: 20px;
+            width: 15px;
         }
 
         .student-info .value {
@@ -139,13 +139,13 @@
         .jurnal-table {
             width: 100%;
             border-collapse: collapse;
-            margin: 20px 0;
+            margin: 15px 0;
         }
 
         .jurnal-table th,
         .jurnal-table td {
             border: 1px solid #000;
-            padding: 8px;
+            padding: 6px 8px;
             text-align: left;
             vertical-align: top;
         }
@@ -195,10 +195,10 @@
 
         /* Signature Section */
         .signature-section {
-            margin-top: 40px;
+            margin-top: 25px;
             display: flex;
             justify-content: space-between;
-            padding: 0 50px;
+            padding: 0 40px;
         }
 
         .signature-box {
@@ -207,29 +207,30 @@
         }
 
         .signature-box p {
-            margin-bottom: 80px;
+            margin-bottom: 60px;
+            line-height: 1.3;
         }
 
         .signature-box .name {
             font-weight: bold;
             border-bottom: 1px solid #000;
             display: inline-block;
-            min-width: 200px;
+            min-width: 180px;
             padding-bottom: 2px;
         }
 
         .signature-box .nip {
-            margin-top: 5px;
+            margin-top: 3px;
         }
 
         /* Footer */
         .footer {
             text-align: center;
-            margin-top: 30px;
-            font-size: 10pt;
+            margin-top: 20px;
+            font-size: 9pt;
             color: #666;
             border-top: 1px solid #ddd;
-            padding-top: 10px;
+            padding-top: 8px;
         }
 
         /* Print Button */
@@ -277,7 +278,7 @@
 
         .location-date {
             text-align: right;
-            margin: 20px 50px 40px 0;
+            margin: 15px 40px 20px 0;
         }
     </style>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
