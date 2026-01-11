@@ -141,6 +141,11 @@
                                     </div>
                                 <?php else: ?>
                                     -
+                                    <div class="max-w-xs print-max-w-full">
+                                        <p class="text-gray-700 print-text-xs text-center">
+                                            -
+                                        </p>
+                                    </div>
                                 <?php endif; ?>
                             </td>
                             <td class="px-2 py-2 text-center text-sm border border-gray-300">
