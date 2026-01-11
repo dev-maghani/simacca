@@ -108,13 +108,13 @@
 
         /* Student Info */
         .student-info {
-            margin: 10px 0;
+            margin: 5px 0;
             padding-left: 50px;
         }
 
         .student-info table {
             border: none;
-            margin-bottom: 20px;
+            margin-bottom: 5px;
         }
 
         .student-info td {
