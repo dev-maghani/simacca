@@ -228,4 +228,98 @@ class AbsensiModel extends Model
 
         return $builder->get()->getResultArray();
     }
+
+    /**
+     * Get laporan absensi per hari dengan list semua jadwal (sudah & belum mengisi)
+     * Untuk monitoring pengisian absensi dan jurnal oleh guru
+     */
+    public function getLaporanAbsensiPerHari($from, $to, $kelasId = null)
+    {
+        // Generate tanggal range
+        $dates = [];
+        $currentDate = strtotime($from);
+        $endDate = strtotime($to);
+        
+        while ($currentDate <= $endDate) {
+            $dates[] = date('Y-m-d', $currentDate);
+            $currentDate = strtotime('+1 day', $currentDate);
+        }
+
+        $result = [];
+        
+        foreach ($dates as $tanggal) {
+            $dayName = $this->getHariIndonesia(date('N', strtotime($tanggal)));
+            
+            // Get all jadwal for this day
+            $builderJadwal = $this->db->table('jadwal_mengajar jm')
+                ->select('jm.id as jadwal_id,
+                    jm.hari,
+                    jm.jam_mulai,
+                    jm.jam_selesai,
+                    k.id as kelas_id,
+                    k.nama_kelas,
+                    k.tingkat,
+                    g.id as guru_id,
+                    g.nama_lengkap as nama_guru,
+                    mp.nama_mapel,
+                    wk.nama_lengkap as nama_wali_kelas,
+                    a.id as absensi_id,
+                    gp.nama_lengkap as nama_guru_pengganti,
+                    jk.id as jurnal_id,
+                    jk.catatan_khusus,
+                    jk.foto_dokumentasi,
+                    SUM(CASE WHEN ad.status = "hadir" THEN 1 ELSE 0 END) as jumlah_hadir,
+                    SUM(CASE WHEN ad.status = "sakit" THEN 1 ELSE 0 END) as jumlah_sakit,
+                    SUM(CASE WHEN ad.status = "izin" THEN 1 ELSE 0 END) as jumlah_izin,
+                    SUM(CASE WHEN ad.status = "alpa" THEN 1 ELSE 0 END) as jumlah_alpa')
+                ->join('kelas k', 'k.id = jm.kelas_id')
+                ->join('guru g', 'g.id = jm.guru_id')
+                ->join('mata_pelajaran mp', 'mp.id = jm.mata_pelajaran_id')
+                ->join('guru wk', 'wk.id = k.wali_kelas_id', 'left')
+                ->join("absensi a", "a.jadwal_mengajar_id = jm.id AND a.tanggal = '$tanggal'", 'left')
+                ->join('guru gp', 'gp.id = a.guru_pengganti_id', 'left')
+                ->join('jurnal_kbm jk', 'jk.absensi_id = a.id', 'left')
+                ->join('absensi_detail ad', 'ad.absensi_id = a.id', 'left')
+                ->where('jm.hari', $dayName);
+
+            if ($kelasId) {
+                $builderJadwal->where('k.id', $kelasId);
+            }
+
+            $builderJadwal->groupBy('jm.id')
+                ->orderBy('k.tingkat', 'ASC')
+                ->orderBy('k.nama_kelas', 'ASC')
+                ->orderBy('jm.jam_mulai', 'ASC');
+
+            $jadwalList = $builderJadwal->get()->getResultArray();
+
+            if (!empty($jadwalList)) {
+                $result[] = [
+                    'tanggal' => $tanggal,
+                    'hari' => $dayName,
+                    'jadwal_list' => $jadwalList
+                ];
+            }
+        }
+
+        return $result;
+    }
+
+    /**
+     * Helper untuk convert nomor hari ke nama hari Indonesia
+     */
+    private function getHariIndonesia($dayNumber)
+    {
+        $days = [
+            1 => 'Senin',
+            2 => 'Selasa',
+            3 => 'Rabu',
+            4 => 'Kamis',
+            5 => 'Jumat',
+            6 => 'Sabtu',
+            7 => 'Minggu'
+        ];
+        
+        return $days[$dayNumber] ?? '';
+    }
 }

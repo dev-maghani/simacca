@@ -106,8 +106,8 @@ class LaporanController extends BaseController
         // Data filter & referensi
         $kelasList = $this->kelasModel->getListKelas();
 
-        // Ambil data laporan lengkap
-        $laporanData = $this->absensiModel->getLaporanAbsensiLengkap($from, $to, $kelasId ?? null);
+        // Ambil data laporan per hari dengan semua jadwal
+        $laporanPerHari = $this->absensiModel->getLaporanAbsensiPerHari($from, $to, $kelasId ?? null);
 
         // Hitung total statistik
         $totalStats = [
@@ -115,18 +115,31 @@ class LaporanController extends BaseController
             'sakit' => 0,
             'izin' => 0,
             'alpa' => 0,
-            'total' => 0
+            'total' => 0,
+            'jadwal_sudah_isi' => 0,
+            'jadwal_belum_isi' => 0,
+            'total_jadwal' => 0
         ];
 
-        foreach ($laporanData as $row) {
-            $totalStats['hadir'] += $row['jumlah_hadir'];
-            $totalStats['sakit'] += $row['jumlah_sakit'];
-            $totalStats['izin'] += $row['jumlah_izin'];
-            $totalStats['alpa'] += $row['jumlah_alpa'];
+        foreach ($laporanPerHari as $hari) {
+            foreach ($hari['jadwal_list'] as $jadwal) {
+                $totalStats['total_jadwal']++;
+                
+                if ($jadwal['absensi_id']) {
+                    $totalStats['jadwal_sudah_isi']++;
+                    $totalStats['hadir'] += $jadwal['jumlah_hadir'];
+                    $totalStats['sakit'] += $jadwal['jumlah_sakit'];
+                    $totalStats['izin'] += $jadwal['jumlah_izin'];
+                    $totalStats['alpa'] += $jadwal['jumlah_alpa'];
+                } else {
+                    $totalStats['jadwal_belum_isi']++;
+                }
+            }
         }
 
         $totalStats['total'] = $totalStats['hadir'] + $totalStats['sakit'] + $totalStats['izin'] + $totalStats['alpa'];
         $totalStats['percentage'] = $totalStats['total'] > 0 ? round(($totalStats['hadir'] / $totalStats['total']) * 100, 2) : 0;
+        $totalStats['percentage_isi'] = $totalStats['total_jadwal'] > 0 ? round(($totalStats['jadwal_sudah_isi'] / $totalStats['total_jadwal']) * 100, 2) : 0;
 
         $data = [
             'title' => 'Cetak Laporan Absensi Detail',
@@ -134,7 +147,7 @@ class LaporanController extends BaseController
             'to' => $to,
             'kelasId' => $kelasId,
             'kelasList' => $kelasList,
-            'laporanData' => $laporanData,
+            'laporanPerHari' => $laporanPerHari,
             'totalStats' => $totalStats,
         ];
 

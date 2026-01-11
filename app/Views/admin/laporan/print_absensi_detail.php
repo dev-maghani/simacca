@@ -124,6 +124,24 @@
             background-color: #f9f9f9;
         }
 
+        /* Highlight row merah untuk yang belum mengisi */
+        .data-table .belum-isi {
+            background-color: #ffebee !important;
+        }
+
+        .data-table .belum-isi td {
+            color: #c62828;
+        }
+
+        .data-table .badge-belum {
+            background-color: #ef5350;
+            color: white;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-size: 7pt;
+            font-weight: bold;
+        }
+
         .data-table .foto-cell {
             text-align: center;
             padding: 2px;
@@ -133,12 +151,23 @@
             max-width: 40px;
             max-height: 40px;
             object-fit: cover;
+            border: 1px solid #ccc;
         }
 
         .data-table .catatan-cell {
             font-size: 7pt;
             max-width: 80px;
             word-wrap: break-word;
+        }
+
+        /* Date group header */
+        .date-group-header {
+            background-color: #1a237e;
+            color: white;
+            font-weight: bold;
+            text-align: center;
+            padding: 6px;
+            font-size: 9pt;
         }
 
         /* Status Badge */
@@ -190,7 +219,7 @@
 
         .summary-grid {
             display: grid;
-            grid-template-columns: repeat(5, 1fr);
+            grid-template-columns: repeat(7, 1fr);
             gap: 5px;
             text-align: center;
         }
@@ -301,7 +330,7 @@
     <!-- Summary Section -->
     <div class="summary-section">
         <div class="summary-box">
-            <h3>Ringkasan Kehadiran</h3>
+            <h3>Ringkasan Kehadiran & Pengisian</h3>
             <div class="summary-grid">
                 <div class="summary-item">
                     <div class="label">Hadir</div>
@@ -320,12 +349,20 @@
                     <div class="value" style="color: #ef4444;"><?= $totalStats['alpa']; ?></div>
                 </div>
                 <div class="summary-item">
-                    <div class="label">Total</div>
+                    <div class="label">Total Absensi</div>
                     <div class="value"><?= $totalStats['total']; ?></div>
+                </div>
+                <div class="summary-item">
+                    <div class="label">Sudah Isi</div>
+                    <div class="value" style="color: #10b981;"><?= $totalStats['jadwal_sudah_isi']; ?></div>
+                </div>
+                <div class="summary-item">
+                    <div class="label">Belum Isi</div>
+                    <div class="value" style="color: #ef4444;"><?= $totalStats['jadwal_belum_isi']; ?></div>
                 </div>
             </div>
             <p class="mt-20 text-small" style="text-align: center;">
-                <strong>Persentase Kehadiran: <?= $totalStats['percentage']; ?>%</strong>
+                <strong>Kehadiran: <?= $totalStats['percentage']; ?>% | Pengisian: <?= $totalStats['percentage_isi']; ?>% (<?= $totalStats['jadwal_sudah_isi']; ?>/<?= $totalStats['total_jadwal']; ?> jadwal)</strong>
             </p>
         </div>
     </div>
@@ -334,7 +371,7 @@
     <div class="info-section" style="font-size: 8pt; margin-bottom: 10px;">
         <table style="width: 100%;">
             <tr>
-                <td style="width: 50%;"><strong>Total Sesi Pembelajaran:</strong> <?= count($laporanData); ?> Sesi</td>
+                <td style="width: 50%;"><strong>Total Jadwal:</strong> <?= $totalStats['total_jadwal']; ?> | <strong>Hari Efektif:</strong> <?= count($laporanPerHari); ?></td>
                 <td style="width: 50%; text-align: right;"><strong>Tanggal Cetak:</strong> <?= date('d/m/Y H:i'); ?> WIB</td>
             </tr>
         </table>
@@ -360,30 +397,53 @@
             </tr>
         </thead>
         <tbody>
-            <?php if (!empty($laporanData)): ?>
-                <?php $no = 1; ?>
-                <?php foreach ($laporanData as $row): ?>
+            <?php if (!empty($laporanPerHari)): ?>
+                <?php $globalNo = 1; ?>
+                <?php foreach ($laporanPerHari as $hariData): ?>
+                    <!-- Date Group Header -->
                     <tr>
-                        <td class="center"><?= $no++; ?></td>
-                        <td class="center"><?= esc($row['nama_kelas']); ?></td>
-                        <td class="center"><?= substr($row['jam_mulai'], 0, 5); ?></td>
-                        <td><?= esc($row['nama_guru']); ?></td>
-                        <td><?= esc($row['nama_mapel']); ?></td>
-                        <td><?= esc($row['nama_wali_kelas'] ?? '-'); ?></td>
-                        <td class="center"><?= $row['jumlah_hadir']; ?></td>
-                        <td class="center"><?= $row['jumlah_sakit']; ?></td>
-                        <td class="center"><?= $row['jumlah_izin']; ?></td>
-                        <td class="center"><?= $row['jumlah_alpa']; ?></td>
-                        <td class="catatan-cell"><?= esc($row['catatan_khusus'] ?? '-'); ?></td>
-                        <td class="foto-cell">
-                            <?php if (!empty($row['foto_dokumentasi'])): ?>
-                                <img src="<?= base_url('writable/uploads/' . $row['foto_dokumentasi']); ?>" alt="Foto">
-                            <?php else: ?>
-                                -
-                            <?php endif; ?>
+                        <td colspan="13" class="date-group-header">
+                            <?= $hariData['hari']; ?>, <?= date('d F Y', strtotime($hariData['tanggal'])); ?>
                         </td>
-                        <td><?= esc($row['nama_guru_pengganti'] ?? '-'); ?></td>
                     </tr>
+                    
+                    <?php foreach ($hariData['jadwal_list'] as $jadwal): ?>
+                        <?php 
+                        $belumIsi = empty($jadwal['absensi_id']);
+                        $rowClass = $belumIsi ? 'belum-isi' : '';
+                        ?>
+                        <tr class="<?= $rowClass; ?>">
+                            <td class="center"><?= $globalNo++; ?></td>
+                            <td class="center"><?= esc($jadwal['nama_kelas']); ?></td>
+                            <td class="center"><?= substr($jadwal['jam_mulai'], 0, 5); ?></td>
+                            <td><?= esc($jadwal['nama_guru']); ?></td>
+                            <td><?= esc($jadwal['nama_mapel']); ?></td>
+                            <td><?= esc($jadwal['nama_wali_kelas'] ?? '-'); ?></td>
+                            
+                            <?php if ($belumIsi): ?>
+                                <td class="center" colspan="4">
+                                    <span class="badge-belum">BELUM ISI</span>
+                                </td>
+                                <td class="catatan-cell center">-</td>
+                                <td class="foto-cell center">-</td>
+                                <td class="center">-</td>
+                            <?php else: ?>
+                                <td class="center"><?= $jadwal['jumlah_hadir']; ?></td>
+                                <td class="center"><?= $jadwal['jumlah_sakit']; ?></td>
+                                <td class="center"><?= $jadwal['jumlah_izin']; ?></td>
+                                <td class="center"><?= $jadwal['jumlah_alpa']; ?></td>
+                                <td class="catatan-cell"><?= esc($jadwal['catatan_khusus'] ?: '-'); ?></td>
+                                <td class="foto-cell">
+                                    <?php if (!empty($jadwal['foto_dokumentasi'])): ?>
+                                        <img src="<?= base_url('writable/uploads/' . $jadwal['foto_dokumentasi']); ?>" alt="Foto">
+                                    <?php else: ?>
+                                        -
+                                    <?php endif; ?>
+                                </td>
+                                <td><?= esc($jadwal['nama_guru_pengganti'] ?: '-'); ?></td>
+                            <?php endif; ?>
+                        </tr>
+                    <?php endforeach; ?>
                 <?php endforeach; ?>
                 
                 <!-- Total Row -->
@@ -393,12 +453,12 @@
                     <td class="center"><?= $totalStats['sakit']; ?></td>
                     <td class="center"><?= $totalStats['izin']; ?></td>
                     <td class="center"><?= $totalStats['alpa']; ?></td>
-                    <td colspan="3"></td>
+                    <td colspan="3" class="center"><?= $totalStats['jadwal_sudah_isi']; ?>/<?= $totalStats['total_jadwal']; ?> terisi</td>
                 </tr>
             <?php else: ?>
                 <tr>
                     <td colspan="13" class="center" style="padding: 20px; color: #999;">
-                        Tidak ada data absensi dalam periode ini
+                        Tidak ada jadwal dalam periode ini
                     </td>
                 </tr>
             <?php endif; ?>
