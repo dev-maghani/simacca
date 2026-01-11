@@ -79,10 +79,10 @@
                     <th class="px-2 py-2 text-left text-xs font-medium text-gray-700 uppercase border border-gray-300">Guru Mapel</th>
                     <th class="px-2 py-2 text-left text-xs font-medium text-gray-700 uppercase border border-gray-300">Mata Pelajaran</th>
                     <th class="px-2 py-2 text-left text-xs font-medium text-gray-700 uppercase border border-gray-300">Wali Kelas</th>
-                    <th class="px-2 py-2 text-center text-xs font-medium text-gray-700 uppercase border border-gray-300">H</th>
-                    <th class="px-2 py-2 text-center text-xs font-medium text-gray-700 uppercase border border-gray-300">S</th>
-                    <th class="px-2 py-2 text-center text-xs font-medium text-gray-700 uppercase border border-gray-300">I</th>
-                    <th class="px-2 py-2 text-center text-xs font-medium text-gray-700 uppercase border border-gray-300">A</th>
+                    <th class="px-2 py-2 text-center text-xs font-medium text-gray-700 uppercase border border-gray-300">Hadir</th>
+                    <th class="px-2 py-2 text-center text-xs font-medium text-gray-700 uppercase border border-gray-300">Sakit</th>
+                    <th class="px-2 py-2 text-center text-xs font-medium text-gray-700 uppercase border border-gray-300">Izin</th>
+                    <th class="px-2 py-2 text-center text-xs font-medium text-gray-700 uppercase border border-gray-300">Alpa</th>
                     <th class="px-2 py-2 text-left text-xs font-medium text-gray-700 uppercase border border-gray-300">Catatan Khusus</th>
                     <th class="px-2 py-2 text-center text-xs font-medium text-gray-700 uppercase border border-gray-300">Foto</th>
                     <th class="px-2 py-2 text-left text-xs font-medium text-gray-700 uppercase border border-gray-300">Guru Pengganti</th>
