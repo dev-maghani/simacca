@@ -402,7 +402,7 @@
     <!-- Header -->
     <div style="text-align: center;">
         <h1>Laporan Absensi Pembelajaran</h1>
-        <strong>Tanggal:</strong> <?= date('l, d F Y', strtotime($tanggal)); ?>
+        <strong>Tanggal:</strong> <?= new IntlDateFormatter('id-ID', date('l, d F Y', strtotime($tanggal))); ?>
         <?php if ($kelasId): ?>
             <br><strong>Kelas:</strong> <?= esc($kelasList[$kelasId] ?? '-'); ?>
         <?php else: ?>
@@ -469,7 +469,7 @@
                 <th style="width: 50px;">Jam<br>Mulai</th>
                 <th style="width: 95px;">Nama Guru<br>Mapel</th>
                 <th style="width: 85px;">Mata<br>Pelajaran</th>
-                <th style="width: 85px;">Nama<br>Wali Kelas</th>
+                <!-- <th style="width: 85px;">Nama<br>Wali Kelas</th> -->
                 <th style="width: 28px;">Hadir</th>
                 <th style="width: 28px;">Sakit</th>
                 <th style="width: 28px;">Izin</th>
@@ -501,7 +501,8 @@
                             <td class="center"><?= substr($jadwal['jam_mulai'], 0, 5); ?> - <?= substr($jadwal['jam_selesai'], 0, 5); ?></td>
                             <td><?= esc($jadwal['nama_guru']); ?></td>
                             <td><?= esc($jadwal['nama_mapel']); ?></td>
-                            <td><?= esc($jadwal['nama_wali_kelas'] ?? '-'); ?></td>
+                            <!-- hapus tag php nya jika ingin diaktifkan kembali -->
+                            <?php /**<td><?= esc($jadwal['nama_wali_kelas'] ?? '-'); ?></td> */ ?>
 
                             <?php if ($belumIsi): ?>
                                 <td class="center" colspan="4">

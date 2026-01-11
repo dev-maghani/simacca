@@ -90,7 +90,7 @@
                     <th class="px-2 py-2 text-left text-xs font-medium text-gray-700 uppercase border border-gray-300">Jam</th>
                     <th class="px-2 py-2 text-left text-xs font-medium text-gray-700 uppercase border border-gray-300">Guru Mapel</th>
                     <th class="px-2 py-2 text-left text-xs font-medium text-gray-700 uppercase border border-gray-300">Mata Pelajaran</th>
-                    <th class="px-2 py-2 text-left text-xs font-medium text-gray-700 uppercase border border-gray-300">Wali Kelas</th>
+                    <!-- <th class="px-2 py-2 text-left text-xs font-medium text-gray-700 uppercase border border-gray-300">Wali Kelas</th> -->
                     <th class="px-2 py-2 text-center text-xs font-medium text-gray-700 uppercase border border-gray-300">H</th>
                     <th class="px-2 py-2 text-center text-xs font-medium text-gray-700 uppercase border border-gray-300">S</th>
                     <th class="px-2 py-2 text-center text-xs font-medium text-gray-700 uppercase border border-gray-300">I</th>
@@ -123,9 +123,13 @@
                                 <td class="px-2 py-2 text-sm <?= $belumIsi ? 'text-red-700 font-semibold' : 'text-gray-900'; ?> border border-gray-300">
                                     <?= esc($jadwal['nama_mapel']); ?>
                                 </td>
-                                <td class="px-2 py-2 text-sm <?= $belumIsi ? 'text-red-700' : 'text-gray-900'; ?> border border-gray-300">
-                                    <?= $jadwal['nama_wali_kelas'] ? esc($jadwal['nama_wali_kelas']) : '-'; ?>
-                                </td>
+
+                                <!-- hilangkan tag phpnya jika dibutuhkan -->
+                               <?php /**
+                                *  <td class="px-2 py-2 text-sm <?= $belumIsi ? 'text-red-700' : 'text-gray-900'; ?> border border-gray-300">
+                                *    <?= $jadwal['nama_wali_kelas'] ? esc($jadwal['nama_wali_kelas']) : '-'; ?>
+                                *  </td>
+                                */ ?>
                                 
                                 <?php if ($belumIsi): ?>
                                     <td class="px-2 py-2 text-center border border-gray-300" colspan="4">
