@@ -353,7 +353,6 @@
                 <tr>
                     <th class="col-no">No</th>
                     <th class="col-tanggal">Tanggal</th>
-                    <th class="col-materi">Materi Pembelajaran</th>
                     <th class="col-kegiatan">Kegiatan Pembelajaran</th>
                     <th class="col-foto">Foto</th>
                     <th class="col-catatan">Catatan Khusus</th>
@@ -365,7 +364,6 @@
                     <td><?= date('d/m/Y', strtotime($jurnal['tanggal'])) ?><br>
                         <small style="color: #666;">Jam: <?= !empty($jurnal['jam_mulai']) ? date('H:i', strtotime($jurnal['jam_mulai'])) : '-' ?> - <?= !empty($jurnal['jam_selesai']) ? date('H:i', strtotime($jurnal['jam_selesai'])) : '-' ?></small>
                     </td>
-                    <td><?= nl2br(esc($jurnal['materi_pembelajaran'])) ?></td>
                     <td><?= nl2br(esc($jurnal['kegiatan_pembelajaran'])) ?></td>
                     <td class="center">
                         <?php if (!empty($jurnal['foto_dokumentasi'])): ?>
