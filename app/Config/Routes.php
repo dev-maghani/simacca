@@ -201,7 +201,9 @@ $routes->group('siswa', ['filter' => 'auth'], function ($routes) {
     // $routes->post('jurnal/simpan', 'Siswa\JurnalController::store', ['filter'=> 'role:siswa']);
     // $routes->get('jurnal/edit/(:num)', 'Siswa\JurnalController::edit/$1', ['filter'=> 'role:siswa']);
     // $routes->post('jurnal/update/(:num)', 'Siswa\JurnalController::update/$1', ['filter'=> 'role:siswa']);
-    $routes->get('profil', 'Siswa\ProfilController::index', ['filter' => 'role:siswa']);
+    $routes->get('profil', 'Siswa\\ProfilController::index', ['filter' => 'role:siswa']);
+    $routes->post('profil/update', 'Siswa\\ProfilController::update', ['filter' => 'role:siswa']);
+    $routes->post('profil/change-password', 'Siswa\\ProfilController::changePassword', ['filter' => 'role:siswa']);
 });
 
 // Profile Routes (for all roles)

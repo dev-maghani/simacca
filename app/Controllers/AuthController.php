@@ -79,7 +79,8 @@ class AuthController extends BaseController
         if ($user) {
             // Set session data
             $sessionData = [
-                'userId'        => $user['id'],
+                'user_id'       => $user['id'],
+                'userId'        => $user['id'], // Keep for backward compatibility
                 'username'      => $user['username'],
                 'role'          => $user['role'],
                 'email'         => $user['email'],

@@ -75,9 +75,10 @@ class SiswaModel extends Model
      */
     public function getByUserId($userId)
     {
-        return $this->where('user_id', $userId)
+        return $this->select('siswa.*, kelas.nama_kelas, users.username, users.is_active')
             ->join('kelas', 'kelas.id = siswa.kelas_id', 'left')
-            ->select('siswa.*, kelas.nama_kelas')
+            ->join('users', 'users.id = siswa.user_id', 'left')
+            ->where('siswa.user_id', $userId)
             ->first();
     }
 

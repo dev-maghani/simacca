@@ -224,7 +224,6 @@ class SiswaController extends BaseController
 
             // Update password jika diisi
             if ($this->request->getPost('password')) {
-                // $userUpdateData['password'] = password_hash($this->request->getPost('password'), PASSWORD_DEFAULT);
                 $userUpdateData['password'] = $this->request->getPost('password');
             }
 
