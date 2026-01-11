@@ -95,6 +95,53 @@ class LaporanController extends BaseController
     }
 
     /**
+     * Print Laporan Absensi Detail
+     */
+    public function printAbsensiDetail()
+    {
+        $from = $this->request->getGet('from') ?: date('Y-m-01');
+        $to = $this->request->getGet('to') ?: date('Y-m-t');
+        $kelasId = $this->request->getGet('kelas_id');
+
+        // Data filter & referensi
+        $kelasList = $this->kelasModel->getListKelas();
+
+        // Ambil data laporan lengkap
+        $laporanData = $this->absensiModel->getLaporanAbsensiLengkap($from, $to, $kelasId ?? null);
+
+        // Hitung total statistik
+        $totalStats = [
+            'hadir' => 0,
+            'sakit' => 0,
+            'izin' => 0,
+            'alpa' => 0,
+            'total' => 0
+        ];
+
+        foreach ($laporanData as $row) {
+            $totalStats['hadir'] += $row['jumlah_hadir'];
+            $totalStats['sakit'] += $row['jumlah_sakit'];
+            $totalStats['izin'] += $row['jumlah_izin'];
+            $totalStats['alpa'] += $row['jumlah_alpa'];
+        }
+
+        $totalStats['total'] = $totalStats['hadir'] + $totalStats['sakit'] + $totalStats['izin'] + $totalStats['alpa'];
+        $totalStats['percentage'] = $totalStats['total'] > 0 ? round(($totalStats['hadir'] / $totalStats['total']) * 100, 2) : 0;
+
+        $data = [
+            'title' => 'Cetak Laporan Absensi Detail',
+            'from' => $from,
+            'to' => $to,
+            'kelasId' => $kelasId,
+            'kelasList' => $kelasList,
+            'laporanData' => $laporanData,
+            'totalStats' => $totalStats,
+        ];
+
+        return view('admin/laporan/print_absensi_detail', $data);
+    }
+
+    /**
      * Laporan Statistik umum
      */
     public function statistik()
