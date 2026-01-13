@@ -478,14 +478,29 @@ class AbsensiController extends BaseController
         ];
 
         if (!$this->validate($rules)) {
+            // Log validation errors for debugging
+            log_message('error', 'Validation failed in AbsensiController::update: ' . json_encode($this->validator->getErrors()));
+            $this->session->setFlashdata('error', 'Validasi gagal: ' . implode(', ', $this->validator->getErrors()));
             return redirect()->back()->withInput()->with('errors', $this->validator->getErrors());
         }
+
+        // Get siswa data and validate
+        $siswaData = $this->request->getPost('siswa');
+        if (empty($siswaData) || !is_array($siswaData)) {
+            log_message('error', 'No siswa data received in AbsensiController::update');
+            $this->session->setFlashdata('error', 'Data siswa tidak ditemukan. Mohon refresh halaman dan coba lagi.');
+            return redirect()->back()->withInput();
+        }
+
+        // Log for debugging
+        log_message('info', 'Updating absensi ID: ' . $id . ' with ' . count($siswaData) . ' students');
 
         // Update absensi data
         $absensiData = [
             'id' => $id,
             'tanggal' => $this->request->getPost('tanggal'),
-            'pertemuan_ke' => $this->request->getPost('pertemuan_ke')
+            'pertemuan_ke' => $this->request->getPost('pertemuan_ke'),
+            'updated_at' => date('Y-m-d H:i:s')
         ];
 
         // Start database transaction
@@ -494,12 +509,40 @@ class AbsensiController extends BaseController
 
         try {
             // Update absensi
-            $this->absensiModel->save($absensiData);
+            if (!$this->absensiModel->save($absensiData)) {
+                throw new \Exception('Gagal mengupdate data absensi utama.');
+            }
 
             // Update absensi details
-            $siswaData = $this->request->getPost('siswa');
+            $updateCount = 0;
+            $insertCount = 0;
 
             foreach ($siswaData as $siswaId => $data) {
+                // Validate siswa_id
+                if (!is_numeric($siswaId)) {
+                    log_message('warning', 'Invalid siswa_id: ' . $siswaId);
+                    continue;
+                }
+
+                // Validate status
+                if (!isset($data['status']) || empty($data['status'])) {
+                    log_message('warning', 'Empty status for siswa_id: ' . $siswaId);
+                    continue;
+                }
+                
+                // Normalize status to lowercase and handle Alpha -> alpa conversion
+                $status = strtolower(trim($data['status']));
+                if ($status === 'alpha') {
+                    $status = 'alpa';
+                }
+                
+                // Validate status value
+                $validStatuses = ['hadir', 'izin', 'sakit', 'alpa'];
+                if (!in_array($status, $validStatuses)) {
+                    log_message('warning', 'Invalid status "' . $data['status'] . '" for siswa_id: ' . $siswaId);
+                    continue;
+                }
+
                 $existing = $this->absensiDetailModel
                     ->where('absensi_id', $id)
                     ->where('siswa_id', $siswaId)
@@ -507,19 +550,29 @@ class AbsensiController extends BaseController
 
                 if ($existing) {
                     // Update existing record
-                    $this->absensiDetailModel->update($existing['id'], [
-                        'status' => $data['status'],
+                    $updateResult = $this->absensiDetailModel->update($existing['id'], [
+                        'status' => $status,
                         'keterangan' => $data['keterangan'] ?? null
                     ]);
+                    
+                    if ($updateResult) {
+                        $updateCount++;
+                        log_message('debug', 'Updated siswa_id: ' . $siswaId . ' with status: ' . $status);
+                    }
                 } else {
                     // Insert new record
-                    $this->absensiDetailModel->insert([
+                    $insertResult = $this->absensiDetailModel->insert([
                         'absensi_id' => $id,
                         'siswa_id' => $siswaId,
-                        'status' => $data['status'],
+                        'status' => $status,
                         'keterangan' => $data['keterangan'] ?? null,
                         'waktu_absen' => date('Y-m-d H:i:s')
                     ]);
+                    
+                    if ($insertResult) {
+                        $insertCount++;
+                        log_message('debug', 'Inserted siswa_id: ' . $siswaId . ' with status: ' . $status);
+                    }
                 }
             }
 
@@ -529,7 +582,10 @@ class AbsensiController extends BaseController
                 throw new \Exception('Gagal memperbarui data absensi.');
             }
 
-            $this->session->setFlashdata('success', 'Nice! Absen sudah diupdate ??');
+            // Log success
+            log_message('info', 'Absensi updated successfully. Updated: ' . $updateCount . ', Inserted: ' . $insertCount);
+
+            $this->session->setFlashdata('success', 'Nice! Absen sudah diupdate ?? (Diubah: ' . $updateCount . ', Ditambah: ' . $insertCount . ')');
             
             // Check next action from form
             $nextAction = $this->request->getPost('next_action');
@@ -543,7 +599,8 @@ class AbsensiController extends BaseController
             return redirect()->to('/guru/absensi');
         } catch (\Exception $e) {
             $db->transRollback();
-            $this->session->setFlashdata('error', $e->getMessage());
+            log_message('error', 'Error updating absensi: ' . $e->getMessage());
+            $this->session->setFlashdata('error', 'Gagal menyimpan: ' . $e->getMessage());
             return redirect()->back()->withInput();
         }
     }

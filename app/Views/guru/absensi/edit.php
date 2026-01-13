@@ -137,22 +137,22 @@
                     </div>
                     <div class="hidden md:flex gap-2 flex-wrap">
                         <button type="button"
-                            onclick="setAllStatus('Hadir')"
+                            onclick="setAllStatus('hadir')"
                             class="inline-flex items-center px-3 py-2 bg-green-500 hover:bg-green-600 text-white font-semibold rounded-lg shadow-md transition-all transform hover:scale-105">
                             <i class="fas fa-check-circle mr-1"></i> Semua Hadir
                         </button>
                         <button type="button"
-                            onclick="setAllStatus('Izin')"
+                            onclick="setAllStatus('izin')"
                             class="inline-flex items-center px-3 py-2 bg-blue-500 hover:bg-blue-600 text-white font-semibold rounded-lg shadow-md transition-all transform hover:scale-105">
                             <i class="fas fa-file-alt mr-1"></i> Semua Izin
                         </button>
                         <button type="button"
-                            onclick="setAllStatus('Sakit')"
+                            onclick="setAllStatus('sakit')"
                             class="inline-flex items-center px-3 py-2 bg-yellow-500 hover:bg-yellow-600 text-white font-semibold rounded-lg shadow-md transition-all transform hover:scale-105">
                             <i class="fas fa-medkit mr-1"></i> Semua Sakit
                         </button>
                         <button type="button"
-                            onclick="setAllStatus('Alpha')"
+                            onclick="setAllStatus('alpa')"
                             class="inline-flex items-center px-3 py-2 bg-red-500 hover:bg-red-600 text-white font-semibold rounded-lg shadow-md transition-all transform hover:scale-105">
                             <i class="fas fa-times-circle mr-1"></i> Semua Alpha
                         </button>
@@ -174,25 +174,25 @@
                 <!-- Mobile Quick Actions -->
                 <div class="grid grid-cols-4 gap-2">
                     <button type="button" 
-                            onclick="setAllStatus('Hadir')"
+                            onclick="setAllStatus('hadir')"
                             class="flex flex-col items-center justify-center p-2 bg-green-500 hover:bg-green-600 text-white font-semibold rounded-lg shadow-sm transition-all text-xs">
                         <i class="fas fa-check-circle mb-1"></i>
                         <span>Hadir</span>
                     </button>
                     <button type="button" 
-                            onclick="setAllStatus('Izin')"
+                            onclick="setAllStatus('izin')"
                             class="flex flex-col items-center justify-center p-2 bg-blue-500 hover:bg-blue-600 text-white font-semibold rounded-lg shadow-sm transition-all text-xs">
                         <i class="fas fa-file-alt mb-1"></i>
                         <span>Izin</span>
                     </button>
                     <button type="button" 
-                            onclick="setAllStatus('Sakit')"
+                            onclick="setAllStatus('sakit')"
                             class="flex flex-col items-center justify-center p-2 bg-yellow-500 hover:bg-yellow-600 text-white font-semibold rounded-lg shadow-sm transition-all text-xs">
                         <i class="fas fa-medkit mb-1"></i>
                         <span>Sakit</span>
                     </button>
                     <button type="button" 
-                            onclick="setAllStatus('Alpha')"
+                            onclick="setAllStatus('alpa')"
                             class="flex flex-col items-center justify-center p-2 bg-red-500 hover:bg-red-600 text-white font-semibold rounded-lg shadow-sm transition-all text-xs">
                         <i class="fas fa-times-circle mb-1"></i>
                         <span>Alpha</span>
@@ -244,24 +244,30 @@
                                         <td class="px-4 py-4 text-sm text-gray-900 font-medium"><?= $siswa['nama_lengkap'] ?></td>
                                         <td class="px-4 py-4">
                                             <!-- Hidden input to store the selected status -->
-                                            <input type="hidden" name="siswa[<?= $siswa['id'] ?>][status]" value="<?= $currentStatus ?>" class="status-input" data-siswa-id="<?= $siswa['id'] ?>">
+                                            <input type="hidden" name="siswa[<?= $siswa['id'] ?>][status]" value="<?= strtolower($currentStatus) ?>" class="status-input" data-siswa-id="<?= $siswa['id'] ?>">
                                             
                                             <!-- Status Button Group -->
                                             <div class="grid grid-cols-4 gap-2" data-siswa-id="<?= $siswa['id'] ?>">
-                                                <?php foreach (['Hadir', 'Izin', 'Sakit', 'Alpha'] as $statusValue): 
-                                                    $isSelected = ($currentStatus == $statusValue);
+                                                <?php foreach (['hadir', 'izin', 'sakit', 'alpa'] as $statusValue): 
+                                                    $isSelected = (strtolower($currentStatus) == $statusValue);
                                                     
                                                     // Set button style based on status - matching reference image
-                                                    if ($statusValue == 'Hadir') {
+                                                    // Display labels (capitalized for UI)
+                                                    $displayLabel = ucfirst($statusValue);
+                                                    if ($statusValue == 'alpa') {
+                                                        $displayLabel = 'Alpha';
+                                                    }
+                                                    
+                                                    if ($statusValue == 'hadir') {
                                                         $btnClass = $isSelected ? 'bg-green-500 text-white border-green-500' : 'bg-white text-green-600 border-green-400 hover:bg-green-50';
                                                         $icon = 'fa-check-circle';
-                                                    } elseif ($statusValue == 'Izin') {
+                                                    } elseif ($statusValue == 'izin') {
                                                         $btnClass = $isSelected ? 'bg-blue-500 text-white border-blue-500' : 'bg-white text-blue-600 border-blue-400 hover:bg-blue-50';
                                                         $icon = 'fa-clipboard-list';
-                                                    } elseif ($statusValue == 'Sakit') {
+                                                    } elseif ($statusValue == 'sakit') {
                                                         $btnClass = $isSelected ? 'bg-orange-500 text-white border-orange-500' : 'bg-white text-orange-600 border-orange-400 hover:bg-orange-50';
                                                         $icon = 'fa-briefcase-medical';
-                                                    } else { // Alpha
+                                                    } else { // alpa
                                                         $btnClass = $isSelected ? 'bg-red-500 text-white border-red-500' : 'bg-white text-red-600 border-red-400 hover:bg-red-50';
                                                         $icon = 'fa-times-circle';
                                                     }
@@ -272,7 +278,7 @@
                                                         data-status="<?= $statusValue ?>"
                                                         onclick="selectStatus(<?= $siswa['id'] ?>, '<?= $statusValue ?>')">
                                                     <i class="fas <?= $icon ?> text-base"></i>
-                                                    <span><?= $statusValue ?></span>
+                                                    <span><?= $displayLabel ?></span>
                                                 </button>
                                                 <?php endforeach; ?>
                                             </div>
@@ -344,20 +350,20 @@
                             </div>
 
                             <!-- Hidden Input -->
-                            <input type="hidden" name="siswa[<?= $siswa['id'] ?>][status]" value="<?= $currentStatus ?>" class="status-input" data-siswa-id="<?= $siswa['id'] ?>">
+                            <input type="hidden" name="siswa[<?= $siswa['id'] ?>][status]" value="<?= strtolower($currentStatus) ?>" class="status-input" data-siswa-id="<?= $siswa['id'] ?>">
 
                             <!-- Status Buttons -->
                             <div class="grid grid-cols-4 gap-2 mb-3">
                                 <?php 
                                 $mobileStatusOptions = [
-                                    'Hadir' => ['label' => 'Hadir', 'icon' => 'fa-check-circle', 'activeColor' => 'bg-green-500 text-white border-green-500', 'inactiveColor' => 'bg-white text-gray-700 border-gray-300'],
-                                    'Izin' => ['label' => 'Izin', 'icon' => 'fa-clipboard-list', 'activeColor' => 'bg-blue-500 text-white border-blue-500', 'inactiveColor' => 'bg-white text-gray-700 border-gray-300'],
-                                    'Sakit' => ['label' => 'Sakit', 'icon' => 'fa-briefcase-medical', 'activeColor' => 'bg-orange-500 text-white border-orange-500', 'inactiveColor' => 'bg-white text-gray-700 border-gray-300'],
-                                    'Alpha' => ['label' => 'Alpha', 'icon' => 'fa-times-circle', 'activeColor' => 'bg-red-500 text-white border-red-500', 'inactiveColor' => 'bg-white text-gray-700 border-gray-300']
+                                    'hadir' => ['label' => 'Hadir', 'icon' => 'fa-check-circle', 'activeColor' => 'bg-green-500 text-white border-green-500', 'inactiveColor' => 'bg-white text-gray-700 border-gray-300'],
+                                    'izin' => ['label' => 'Izin', 'icon' => 'fa-clipboard-list', 'activeColor' => 'bg-blue-500 text-white border-blue-500', 'inactiveColor' => 'bg-white text-gray-700 border-gray-300'],
+                                    'sakit' => ['label' => 'Sakit', 'icon' => 'fa-briefcase-medical', 'activeColor' => 'bg-orange-500 text-white border-orange-500', 'inactiveColor' => 'bg-white text-gray-700 border-gray-300'],
+                                    'alpa' => ['label' => 'Alpha', 'icon' => 'fa-times-circle', 'activeColor' => 'bg-red-500 text-white border-red-500', 'inactiveColor' => 'bg-white text-gray-700 border-gray-300']
                                 ];
                                 
                                 foreach ($mobileStatusOptions as $value => $option):
-                                    $isSelected = ($currentStatus == $value);
+                                    $isSelected = (strtolower($currentStatus) == $value);
                                     $buttonClass = $isSelected ? $option['activeColor'] : $option['inactiveColor'];
                                 ?>
                                 <button type="button" 
@@ -434,21 +440,21 @@
             return;
         }
 
-        // Define button styles for each status (desktop)
+        // Define button styles for each status (desktop) - use lowercase keys to match database
         const desktopButtonStyles = {
-            'Hadir': {
+            'hadir': {
                 active: ['bg-green-500', 'text-white', 'border-green-500'],
                 inactive: ['bg-white', 'text-green-600', 'border-green-400', 'hover:bg-green-50']
             },
-            'Izin': {
+            'izin': {
                 active: ['bg-blue-500', 'text-white', 'border-blue-500'],
                 inactive: ['bg-white', 'text-blue-600', 'border-blue-400', 'hover:bg-blue-50']
             },
-            'Sakit': {
+            'sakit': {
                 active: ['bg-orange-500', 'text-white', 'border-orange-500'],
                 inactive: ['bg-white', 'text-orange-600', 'border-orange-400', 'hover:bg-orange-50']
             },
-            'Alpha': {
+            'alpa': {
                 active: ['bg-red-500', 'text-white', 'border-red-500'],
                 inactive: ['bg-white', 'text-red-600', 'border-red-400', 'hover:bg-red-50']
             }
@@ -456,19 +462,19 @@
 
         // Define button styles for mobile
         const mobileButtonStyles = {
-            'Hadir': {
+            'hadir': {
                 active: ['bg-green-500', 'text-white', 'border-green-500'],
                 inactive: ['bg-white', 'text-gray-700', 'border-gray-300']
             },
-            'Izin': {
+            'izin': {
                 active: ['bg-blue-500', 'text-white', 'border-blue-500'],
                 inactive: ['bg-white', 'text-gray-700', 'border-gray-300']
             },
-            'Sakit': {
+            'sakit': {
                 active: ['bg-orange-500', 'text-white', 'border-orange-500'],
                 inactive: ['bg-white', 'text-gray-700', 'border-gray-300']
             },
-            'Alpha': {
+            'alpa': {
                 active: ['bg-red-500', 'text-white', 'border-red-500'],
                 inactive: ['bg-white', 'text-gray-700', 'border-gray-300']
             }
@@ -591,13 +597,21 @@
     function setAllStatus(status) {
         const hiddenInputs = document.querySelectorAll('.status-input');
         
+        // Convert to lowercase for consistency with database
+        const statusLower = status.toLowerCase();
+        const statusToSend = (statusLower === 'alpha') ? 'alpa' : statusLower;
+        
         hiddenInputs.forEach(input => {
             const siswaId = input.getAttribute('data-siswa-id');
-            selectStatus(siswaId, status);
+            selectStatus(siswaId, statusToSend);
         });
 
         // Show feedback
         const statusLabels = {
+            'hadir': 'Hadir',
+            'izin': 'Izin',
+            'sakit': 'Sakit',
+            'alpa': 'Alpha',
             'Hadir': 'Hadir',
             'Izin': 'Izin',
             'Sakit': 'Sakit',
@@ -623,11 +637,48 @@
         }, 2000);
     }
 
-    // Form validation
+    // Form validation and submission handler
     document.getElementById('formEditAbsensi').addEventListener('submit', function(e) {
-        const btnSubmit = document.getElementById('btnSubmit');
-        btnSubmit.disabled = true;
-        btnSubmit.innerHTML = '<i class="fas fa-spinner fa-spin mr-1"></i> Menyimpan...';
+        // Validate that we have data to submit
+        const hiddenInputs = document.querySelectorAll('.status-input');
+        let hasData = false;
+        
+        hiddenInputs.forEach(input => {
+            if (input.value && input.value !== '') {
+                hasData = true;
+            }
+        });
+        
+        if (!hasData) {
+            e.preventDefault();
+            alert('Mohon isi setidaknya satu status kehadiran siswa!');
+            return false;
+        }
+        
+        // Debug: Log data yang akan dikirim
+        console.log('Form submitting with data:');
+        const formData = new FormData(this);
+        for (let pair of formData.entries()) {
+            console.log(pair[0] + ': ' + pair[1]);
+        }
+        
+        // Get the button that was clicked
+        const clickedButton = e.submitter || document.activeElement;
+        
+        // Disable the clicked button only after a short delay to ensure form submits
+        setTimeout(function() {
+            if (clickedButton && clickedButton.tagName === 'BUTTON') {
+                clickedButton.disabled = true;
+                const originalHTML = clickedButton.innerHTML;
+                clickedButton.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i> Menyimpan...';
+                
+                // Re-enable after 5 seconds in case of error
+                setTimeout(function() {
+                    clickedButton.disabled = false;
+                    clickedButton.innerHTML = originalHTML;
+                }, 5000);
+            }
+        }, 100);
     });
 
     // Initialize on page load
