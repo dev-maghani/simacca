@@ -16,6 +16,9 @@ class App extends BaseConfig
      *
      * E.g., http://example.com/
      */
+    // Base URL - will be overridden by .env in production
+    // Development: http://localhost:8080/
+    // Production: https://simacca.smkn8bone.sch.id/
     public string $baseURL = 'http://localhost:8080/';
 
     /**

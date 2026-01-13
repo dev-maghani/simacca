@@ -41,7 +41,8 @@ class Filters extends BaseFilters
         'performance'   => PerformanceMetrics::class,
         'auth'          => \App\Filters\AuthFilter::class,
         'role'          => \App\Filters\RoleFilter::class,
-        'guest'          => \App\Filters\GuestFilter::class,
+        'guest'         => \App\Filters\GuestFilter::class,
+        'keepalive'     => \App\Filters\KeepAliveFilter::class,  // ✅ Prevent ERR_CONNECTION_RESET
     ];
 
     /**
@@ -85,6 +86,7 @@ class Filters extends BaseFilters
      */
     public array $globals = [
         'before' => [
+            'keepalive',  // ✅ CRITICAL: Prevent ERR_CONNECTION_RESET
             // 'honeypot',
             'csrf' => [
                 'except' => [
@@ -98,6 +100,7 @@ class Filters extends BaseFilters
             // 'invalidchars',
         ],
         'after' => [
+            'keepalive',      // ✅ CRITICAL: Ensure keep-alive response headers
             // 'honeypot',
             'secureheaders',  // Enable security headers for protection
             'toolbar',

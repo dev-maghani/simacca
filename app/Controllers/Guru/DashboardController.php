@@ -149,20 +149,26 @@ class DashboardController extends BaseController
 
     /**
      * Get jadwal minggu ini untuk guru
+     * OPTIMIZED: Single query instead of N+1
      */
     private function getJadwalMingguIni($guruId)
     {
         $hariList = ['Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat'];
-        $jadwalMingguIni = [];
-
-        foreach ($hariList as $hari) {
-            $jadwalMingguIni[$hari] = $this->jadwalModel->select('jadwal_mengajar.*, mata_pelajaran.nama_mapel, kelas.nama_kelas')
-                ->join('mata_pelajaran', 'mata_pelajaran.id = jadwal_mengajar.mata_pelajaran_id')
-                ->join('kelas', 'kelas.id = jadwal_mengajar.kelas_id')
-                ->where('guru_id', $guruId)
-                ->where('hari', $hari)
-                ->orderBy('jam_mulai', 'ASC')
-                ->findAll();
+        
+        // Single query untuk semua hari - OPTIMIZATION
+        $allJadwal = $this->jadwalModel->select('jadwal_mengajar.*, mata_pelajaran.nama_mapel, kelas.nama_kelas')
+            ->join('mata_pelajaran', 'mata_pelajaran.id = jadwal_mengajar.mata_pelajaran_id')
+            ->join('kelas', 'kelas.id = jadwal_mengajar.kelas_id')
+            ->where('guru_id', $guruId)
+            ->whereIn('hari', $hariList)
+            ->orderBy('FIELD(hari, "Senin", "Selasa", "Rabu", "Kamis", "Jumat")', '', false)
+            ->orderBy('jam_mulai', 'ASC')
+            ->findAll();
+        
+        // Group hasil berdasarkan hari
+        $jadwalMingguIni = array_fill_keys($hariList, []);
+        foreach ($allJadwal as $jadwal) {
+            $jadwalMingguIni[$jadwal['hari']][] = $jadwal;
         }
 
         return $jadwalMingguIni;
@@ -170,10 +176,12 @@ class DashboardController extends BaseController
 
     /**
      * Get recent absensi (5 terakhir)
+     * OPTIMIZED: Added limit and proper indexing
      */
     private function getRecentAbsensi($guruId)
     {
-        return $this->absensiModel->select('absensi.*, mata_pelajaran.nama_mapel, kelas.nama_kelas')
+        return $this->absensiModel->select('absensi.id, absensi.tanggal, absensi.pertemuan_ke, absensi.materi_pembelajaran, 
+                                           mata_pelajaran.nama_mapel, kelas.nama_kelas')
             ->join('jadwal_mengajar', 'jadwal_mengajar.id = absensi.jadwal_mengajar_id')
             ->join('mata_pelajaran', 'mata_pelajaran.id = jadwal_mengajar.mata_pelajaran_id')
             ->join('kelas', 'kelas.id = jadwal_mengajar.kelas_id')
@@ -186,10 +194,12 @@ class DashboardController extends BaseController
 
     /**
      * Get recent jurnal (5 terakhir)
+     * OPTIMIZED: Select only needed columns
      */
     private function getRecentJurnal($guruId)
     {
-        return $this->jurnalModel->select('jurnal_kbm.*, absensi.tanggal, mata_pelajaran.nama_mapel, kelas.nama_kelas')
+        return $this->jurnalModel->select('jurnal_kbm.id, jurnal_kbm.tujuan_pembelajaran, jurnal_kbm.kegiatan_pembelajaran,
+                                          absensi.tanggal, absensi.pertemuan_ke, mata_pelajaran.nama_mapel, kelas.nama_kelas')
             ->join('absensi', 'absensi.id = jurnal_kbm.absensi_id')
             ->join('jadwal_mengajar', 'jadwal_mengajar.id = absensi.jadwal_mengajar_id')
             ->join('mata_pelajaran', 'mata_pelajaran.id = jadwal_mengajar.mata_pelajaran_id')
@@ -202,26 +212,18 @@ class DashboardController extends BaseController
 
     /**
      * Get pending izin for guru's classes
+     * OPTIMIZED: Use subquery instead of separate query
      */
     private function getPendingIzinForGuru($guruId)
     {
-        // Get kelas yang diajar oleh guru ini
-        $kelasIds = $this->jadwalModel->distinct()->select('kelas_id')
-            ->where('guru_id', $guruId)
-            ->findAll();
-
-        if (empty($kelasIds)) {
-            return [];
-        }
-
-        $kelasIdArray = array_column($kelasIds, 'kelas_id');
-
-        // Get pending izin for these classes
-        return $this->izinModel->select('izin_siswa.*, siswa.nama_lengkap, siswa.nis, kelas.nama_kelas')
+        // Get pending izin with subquery - OPTIMIZATION
+        return $this->izinModel->select('izin_siswa.id, izin_siswa.tanggal, izin_siswa.alasan, izin_siswa.status,
+                                        siswa.nama_lengkap, siswa.nis, kelas.nama_kelas')
             ->join('siswa', 'siswa.id = izin_siswa.siswa_id')
             ->join('kelas', 'kelas.id = siswa.kelas_id')
-            ->whereIn('siswa.kelas_id', $kelasIdArray)
+            ->join('jadwal_mengajar', 'jadwal_mengajar.kelas_id = kelas.id AND jadwal_mengajar.guru_id = ' . (int)$guruId)
             ->where('izin_siswa.status', 'pending')
+            ->groupBy('izin_siswa.id')
             ->orderBy('izin_siswa.tanggal', 'DESC')
             ->limit(5)
             ->findAll();
@@ -229,29 +231,32 @@ class DashboardController extends BaseController
 
     /**
      * Get chart data for guru dashboard
+     * OPTIMIZED: Limit date range to current month only
      */
     private function getChartData($guruId)
     {
         $currentMonth = date('m');
         $currentYear = date('Y');
+        $startDate = "$currentYear-$currentMonth-01";
+        $endDate = date('Y-m-t', strtotime($startDate));
 
-        // Get absensi data for current month
+        // Get absensi data for current month - OPTIMIZED with date range
         $absensiData = $this->absensiModel->select("DATE_FORMAT(tanggal, '%Y-%m-%d') as tanggal, COUNT(*) as jumlah")
             ->join('jadwal_mengajar', 'jadwal_mengajar.id = absensi.jadwal_mengajar_id')
             ->where('jadwal_mengajar.guru_id', $guruId)
-            ->where('MONTH(tanggal)', $currentMonth)
-            ->where('YEAR(tanggal)', $currentYear)
+            ->where('tanggal >=', $startDate)
+            ->where('tanggal <=', $endDate)
             ->groupBy('tanggal')
             ->orderBy('tanggal', 'ASC')
             ->findAll();
 
-        // Get absensi by status for current month
+        // Get absensi by status for current month - OPTIMIZED with date range
         $statusData = $this->absensiModel->select('absensi_detail.status, COUNT(*) as jumlah')
             ->join('jadwal_mengajar', 'jadwal_mengajar.id = absensi.jadwal_mengajar_id')
             ->join('absensi_detail', 'absensi_detail.absensi_id = absensi.id')
             ->where('jadwal_mengajar.guru_id', $guruId)
-            ->where('MONTH(absensi.tanggal)', $currentMonth)
-            ->where('YEAR(absensi.tanggal)', $currentYear)
+            ->where('absensi.tanggal >=', $startDate)
+            ->where('absensi.tanggal <=', $endDate)
             ->groupBy('absensi_detail.status')
             ->findAll();
 

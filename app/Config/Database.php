@@ -27,13 +27,13 @@ class Database extends Config
     public array $default = [
         'DSN'          => '',
         'hostname'     => 'localhost',
-        'username'     => '',
-        'password'     => '',
-        'database'     => '',
+        'username'     => 'root',        // Default for local development
+        'password'     => '',            // Override in .env for production
+        'database'     => 'simacca_db',  // Default database name
         'DBDriver'     => 'MySQLi',
         'DBPrefix'     => '',
-        'pConnect'     => false,
-        'DBDebug'      => true,
+        'pConnect'     => true,          // OPTIMIZED: Enable persistent connection
+        'DBDebug'      => (ENVIRONMENT !== 'production'), // Auto-disable in production
         'charset'      => 'utf8mb4',
         'DBCollat'     => 'utf8mb4_general_ci',
         'swapPre'      => '',
@@ -42,6 +42,20 @@ class Database extends Config
         'strictOn'     => false,
         'failover'     => [],
         'port'         => 3306,
+        
+        // ✅ CRITICAL: Prevent ERR_CONNECTION_RESET
+        'connectTimeout' => 10,          // Connection timeout (seconds)
+        'strictOn'     => false,         // Disable strict mode for compatibility
+        'compress'     => false,         // Disable compression (can cause reset)
+        
+        // ✅ MySQLi specific options for stability
+        'mysqli'       => [
+            'MYSQLI_OPT_CONNECT_TIMEOUT' => 10,  // Connect timeout
+            'MYSQLI_OPT_READ_TIMEOUT'    => 30,  // Read timeout
+            'MYSQLI_OPT_WRITE_TIMEOUT'   => 30,  // Write timeout
+            'MYSQLI_INIT_COMMAND'        => 'SET sql_mode=(SELECT REPLACE(@@sql_mode,"ONLY_FULL_GROUP_BY",""))', // Prevent SQL errors
+        ],
+        
         'numberNative' => false,
         'foundRows'    => false,
         'dateFormat'   => [
