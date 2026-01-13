@@ -142,7 +142,72 @@ Buka browser: **http://localhost:8080**
 
 ---
 
-**📖 Panduan lengkap:** [INSTALL.md](INSTALL.md)
+## 🚀 Production Deployment
+
+### Directory Structure
+SIMACCA uses a split directory structure for enhanced security:
+
+```
+/home/user/
+├── simacca_public/          # Web-accessible directory (Document Root)
+│   ├── index.php
+│   ├── .htaccess
+│   └── assets/
+│
+└── simaccaProject/          # Application files (NOT web-accessible)
+    ├── app/
+    ├── vendor/
+    ├── writable/
+    └── .env
+```
+
+### Deployment Steps
+
+1. **Upload Files**
+   - Upload `public/` contents to your web root (e.g., `public_html/`)
+   - Upload application files to a directory outside web root
+
+2. **Configure Paths**
+   - Edit `public/index.php` line 50:
+     ```php
+     require FCPATH . '../simaccaProject/app/Config/Paths.php';
+     ```
+
+3. **Configure Environment**
+   - Copy `.env.production` to `.env`
+   - Update database credentials
+   - Set `CI_ENVIRONMENT = production`
+   - **Important:** DO NOT use PHP constants in .env file
+   - **Important:** Comment out `session.savePath` and `logger.path` to use defaults
+
+4. **Set Permissions**
+   ```bash
+   chmod 600 .env
+   chmod -R 775 writable/
+   ```
+
+5. **Generate Encryption Key**
+   ```bash
+   php spark key:generate
+   ```
+
+### Important .env Configuration Notes
+
+❌ **DON'T** use PHP constants or concatenation in .env:
+```ini
+# WRONG - These will cause errors
+session.savePath = null
+logger.path = WRITEPATH . 'logs/'
+```
+
+✅ **DO** comment them out to use defaults:
+```ini
+# CORRECT - Let CodeIgniter use defaults
+# session.savePath = null
+# logger.path = WRITEPATH . 'logs/'
+```
+
+---
 
 # CodeIgniter 4 Application Starter
 

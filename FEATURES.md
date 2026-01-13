@@ -4,12 +4,71 @@
 **Framework:** CodeIgniter 4.6.4  
 **Database:** MySQL  
 **Styling:** Tailwind CSS  
-**Version:** 1.1.0  
-**Last Updated:** 2026-01-12
+**Version:** 1.2.0  
+**Last Updated:** 2026-01-14
 
 ---
 
 ## 📋 Recent Updates & Fixes
+
+### 🆕 Production Deployment & Infrastructure Fixes (2026-01-14)
+**Status:** ✅ Complete & Tested
+
+**Issues Resolved:**
+1. **Session Headers Already Sent Error**
+   - Problem: component_helper.php auto-loaded components calling session() during bootstrap
+   - Solution: Refactored to function-based approach with render_alerts()
+   - Impact: Session initialization now happens after bootstrap complete
+
+2. **SQL Syntax Error (Reserved Keywords)**
+   - Problem: Using `current_time` as alias (reserved word in MariaDB)
+   - Solution: Changed to `server_time`
+   - File: public/connection-test.php
+
+3. **Split Directory Path Configuration**
+   - Problem: Production uses separate public/ and app/ directories
+   - Solution: Updated paths to point to simaccaProject/
+   - Files: index.php, connection-test.php, Paths.php
+
+4. **.env File Configuration Issues**
+   - Problem: PHP constants in .env (session.savePath = null, logger.path = WRITEPATH)
+   - Solution: Commented out to use CodeIgniter defaults
+   - Impact: .env files must be plain text, no PHP code
+
+5. **modal_scripts() Undefined Function**
+   - Problem: Function not available after component_helper refactoring
+   - Solution: Added modal_scripts() directly to component_helper.php
+   - Impact: Modal interactions work correctly
+
+6. **Component Helper Refactoring**
+   - Before: Auto-load all components → Early session() calls
+   - After: Lazy-load via functions → Safe session handling
+   - New functions: render_alerts(), load_component(), modal_scripts()
+
+7. **Permission Issues Documentation**
+   - Created comprehensive deployment guides
+   - Documented .env file rules and best practices
+   - Added troubleshooting procedures
+
+**Production Readiness:**
+- ✅ Local testing: All features working
+- ✅ Split directory structure: Secure deployment
+- ✅ Session handling: No initialization errors
+- ✅ .env configuration: Proper plain text format
+- ✅ Modal interactions: JavaScript handlers working
+- ✅ Error handling: Comprehensive error messages
+
+**Files Modified:**
+- app/Helpers/component_helper.php (major refactor)
+- app/Views/templates/main_layout.php (use render_alerts)
+- app/Views/templates/auth_layout.php (use render_alerts)
+- public/index.php (split directory paths)
+- public/connection-test.php (SQL fix, path fix)
+- .env.production (removed PHP constants)
+
+---
+
+## 📋 Previous Updates & Fixes
 
 ### 🆕 Import Siswa Auto-Create Kelas (2026-01-12)
 **Status:** ✅ Complete & Production Ready

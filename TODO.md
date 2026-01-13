@@ -164,7 +164,18 @@
 
 ## 🐛 Bug dan Perbaikan
 
-### Recently Fixed ✅ (2026-01-12)
+### Recently Fixed ✅ (2026-01-14)
+
+#### Production Deployment Fixes
+- [x] **Session Headers Already Sent Error** - Refactored component_helper.php to use function-based approach
+- [x] **SQL Syntax Error** - Fixed reserved keyword issue (current_time → server_time)
+- [x] **Split Directory Path Configuration** - Updated paths for production deployment
+- [x] **.env File Configuration** - Fixed PHP constants usage (session.savePath, logger.path)
+- [x] **modal_scripts() Function** - Added modal JavaScript handler to component_helper
+- [x] **Permission Issues** - Documented comprehensive fix procedures
+- [x] **Component Helper Refactoring** - Created render_alerts() function for safe session handling
+
+### Previously Fixed ✅ (2026-01-12)
 - [x] **Import Siswa Auto-Create Kelas** - FIXED
   - Issue: Saat import siswa dengan kelas baru, kelas tidak otomatis dibuat
   - Root cause: Fungsi getKelasIdByName() hanya mencari, tidak membuat kelas baru
