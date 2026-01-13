@@ -2,3 +2,42 @@
 Stack trace:
 #0 {main}
   thrown in /home2/smknbone/simaccaProject/tmp_rovodev_check_walikelas_setup.php on line 10
+[13-Jan-2026 15:55:10 UTC] PHP Warning:  chdir(): No such file or directory (errno 2) in /home2/smknbone/simaccaProject/spark on line 66
+[13-Jan-2026 15:55:10 UTC] PHP Fatal error:  Uncaught Error: Class "CodeIgniter\Exceptions\InvalidArgumentException" not found in /home2/smknbone/simaccaProject/vendor/codeigniter4/framework/system/Config/DotEnv.php:179
+Stack trace:
+#0 /home2/smknbone/simaccaProject/vendor/codeigniter4/framework/system/Config/DotEnv.php(129): CodeIgniter\Config\DotEnv->sanitizeValue('WRITEPATH . 'lo...')
+#1 /home2/smknbone/simaccaProject/vendor/codeigniter4/framework/system/Config/DotEnv.php(79): CodeIgniter\Config\DotEnv->normaliseVariable('logger.path')
+#2 /home2/smknbone/simaccaProject/vendor/codeigniter4/framework/system/Config/DotEnv.php(47): CodeIgniter\Config\DotEnv->parse()
+#3 /home2/smknbone/simaccaProject/vendor/codeigniter4/framework/system/Boot.php(173): CodeIgniter\Config\DotEnv->load()
+#4 /home2/smknbone/simaccaProject/vendor/codeigniter4/framework/system/Boot.php(120): CodeIgniter\Boot::loadDotEnv(Object(Config\Paths))
+#5 /home2/smknbone/simaccaProject/spark(87): CodeIgniter\Boot::bootSpark(Object(Config\Paths))
+#6 {main}
+  thrown in /home2/smknbone/simaccaProject/vendor/codeigniter4/framework/system/Config/DotEnv.php on line 179
+[13-Jan-2026 15:58:16 UTC] PHP Warning:  chdir(): No such file or directory (errno 2) in /home2/smknbone/simaccaProject/spark on line 66
+[13-Jan-2026 15:58:16 UTC] PHP Fatal error:  Uncaught Error: Class "CodeIgniter\Exceptions\InvalidArgumentException" not found in /home2/smknbone/simaccaProject/vendor/codeigniter4/framework/system/Config/DotEnv.php:179
+Stack trace:
+#0 /home2/smknbone/simaccaProject/vendor/codeigniter4/framework/system/Config/DotEnv.php(129): CodeIgniter\Config\DotEnv->sanitizeValue('WRITEPATH . 'lo...')
+#1 /home2/smknbone/simaccaProject/vendor/codeigniter4/framework/system/Config/DotEnv.php(79): CodeIgniter\Config\DotEnv->normaliseVariable('logger.path')
+#2 /home2/smknbone/simaccaProject/vendor/codeigniter4/framework/system/Config/DotEnv.php(47): CodeIgniter\Config\DotEnv->parse()
+#3 /home2/smknbone/simaccaProject/vendor/codeigniter4/framework/system/Boot.php(173): CodeIgniter\Config\DotEnv->load()
+#4 /home2/smknbone/simaccaProject/vendor/codeigniter4/framework/system/Boot.php(120): CodeIgniter\Boot::loadDotEnv(Object(Config\Paths))
+#5 /home2/smknbone/simaccaProject/spark(87): CodeIgniter\Boot::bootSpark(Object(Config\Paths))
+#6 {main}
+  thrown in /home2/smknbone/simaccaProject/vendor/codeigniter4/framework/system/Config/DotEnv.php on line 179
+[13-Jan-2026 15:58:32 UTC] PHP Warning:  chdir(): No such file or directory (errno 2) in /home2/smknbone/simaccaProject/spark on line 66
+[13-Jan-2026 15:58:32 UTC] PHP Fatal error:  Uncaught Error: Class "CodeIgniter\Exceptions\InvalidArgumentException" not found in /home2/smknbone/simaccaProject/vendor/codeigniter4/framework/system/Config/DotEnv.php:179
+Stack trace:
+#0 /home2/smknbone/simaccaProject/vendor/codeigniter4/framework/system/Config/DotEnv.php(129): CodeIgniter\Config\DotEnv->sanitizeValue('WRITEPATH . 'lo...')
+#1 /home2/smknbone/simaccaProject/vendor/codeigniter4/framework/system/Config/DotEnv.php(79): CodeIgniter\Config\DotEnv->normaliseVariable('logger.path')
+#2 /home2/smknbone/simaccaProject/vendor/codeigniter4/framework/system/Config/DotEnv.php(47): CodeIgniter\Config\DotEnv->parse()
+#3 /home2/smknbone/simaccaProject/vendor/codeigniter4/framework/system/Boot.php(173): CodeIgniter\Config\DotEnv->load()
+#4 /home2/smknbone/simaccaProject/vendor/codeigniter4/framework/system/Boot.php(120): CodeIgniter\Boot::loadDotEnv(Object(Config\Paths))
+#5 /home2/smknbone/simaccaProject/spark(87): CodeIgniter\Boot::bootSpark(Object(Config\Paths))
+#6 {main}
+  thrown in /home2/smknbone/simaccaProject/vendor/codeigniter4/framework/system/Config/DotEnv.php on line 179
+[13-Jan-2026 16:31:05 UTC] PHP Warning:  chdir(): No such file or directory (errno 2) in /home2/smknbone/simaccaProject/spark on line 66
+[13-Jan-2026 16:46:24 UTC] PHP Fatal error:  Uncaught Error: Class "CodeIgniter\Database\Config" not found in /home2/smknbone/simaccaProject/app/Config/Database.php:10
+Stack trace:
+#0 /home2/smknbone/simaccaProject/deploy.php(148): require_once()
+#1 {main}
+  thrown in /home2/smknbone/simaccaProject/app/Config/Database.php on line 10
