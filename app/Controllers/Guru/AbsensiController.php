@@ -46,7 +46,7 @@ class AbsensiController extends BaseController
         $guru = $this->guruModel->getByUserId($userId);
 
         if (!$guru) {
-            $this->session->setFlashdata('error', 'Data guru tidak ditemukan.');
+            $this->session->setFlashdata('error', 'Hmm, data guru nggak ketemu ??');
             return redirect()->to('/login');
         }
 
@@ -90,7 +90,7 @@ class AbsensiController extends BaseController
         $guru = $this->guruModel->getByUserId($userId);
 
         if (!$guru) {
-            $this->session->setFlashdata('error', 'Data guru tidak ditemukan.');
+            $this->session->setFlashdata('error', 'Hmm, data guru nggak ketemu ??');
             return redirect()->to('/login');
         }
 
@@ -105,7 +105,7 @@ class AbsensiController extends BaseController
         if ($jadwalId) {
             $jadwal = $this->jadwalModel->getJadwalWithDetail($jadwalId);
             if (!$jadwal) {
-                $this->session->setFlashdata('error', 'Jadwal tidak ditemukan.');
+                $this->session->setFlashdata('error', 'Jadwal nggak ada nih ??');
                 return redirect()->to('/guru/absensi/tambah');
             }
             // Allow access if:
@@ -137,7 +137,7 @@ class AbsensiController extends BaseController
             }
             
             // For original teacher, allow editing
-            $this->session->setFlashdata('info', 'Absensi untuk jadwal ini pada tanggal ' . $tanggal . ' sudah ada.');
+            $this->session->setFlashdata('info', 'Absen di tanggal ' . $tanggal . ' udah diisi sebelumnya 📝');
             return redirect()->to('/guru/absensi/edit/' . $existingAbsensi['id']);
         }
 
@@ -190,7 +190,7 @@ class AbsensiController extends BaseController
         $guru = $this->guruModel->getByUserId($userId);
 
         if (!$guru) {
-            $this->session->setFlashdata('error', 'Data guru tidak ditemukan.');
+            $this->session->setFlashdata('error', 'Hmm, data guru nggak ketemu ??');
             return redirect()->to('/login');
         }
 
@@ -213,7 +213,7 @@ class AbsensiController extends BaseController
         // Verify jadwal exists
         $jadwal = $this->jadwalModel->find($jadwalId);
         if (!$jadwal) {
-            $this->session->setFlashdata('error', 'Jadwal tidak valid.');
+            $this->session->setFlashdata('error', 'Jadwal ini nggak valid ??');
             return redirect()->back()->withInput();
         }
 
@@ -232,7 +232,7 @@ class AbsensiController extends BaseController
 
         // Check if absensi already exists
         if ($this->absensiModel->isAlreadyAbsen($jadwalId, $tanggal)) {
-            $this->session->setFlashdata('error', 'Absensi untuk jadwal ini pada tanggal tersebut sudah ada.');
+            $this->session->setFlashdata('error', 'Absen di tanggal ini udah diisi sebelumnya ??');
             return redirect()->back()->withInput();
         }
 
@@ -283,7 +283,7 @@ class AbsensiController extends BaseController
                 throw new \Exception('Gagal menyimpan data detail absensi.');
             }
 
-            $this->session->setFlashdata('success', 'Absensi berhasil disimpan!');
+            $this->session->setFlashdata('success', 'Mantap! Absen tersimpan.');
 
             // Check next action from form
             $nextAction = $this->request->getPost('next_action');
@@ -313,7 +313,7 @@ class AbsensiController extends BaseController
         $guru = $this->guruModel->getByUserId($userId);
 
         if (!$guru) {
-            $this->session->setFlashdata('error', 'Data guru tidak ditemukan.');
+            $this->session->setFlashdata('error', 'Hmm, data guru nggak ketemu ??');
             return redirect()->to('/login');
         }
 
@@ -334,7 +334,7 @@ class AbsensiController extends BaseController
                     || ($absensi['guru_pengganti_id'] == $guru['id']);
         
         if (!$hasAccess) {
-            $this->session->setFlashdata('error', 'Akses ditolak. Anda bukan pengajar di jadwal ini.');
+            $this->session->setFlashdata('error', 'Sorry, ini bukan jadwal kamu.');
             return redirect()->to('/guru/absensi');
         }
 
@@ -369,7 +369,7 @@ class AbsensiController extends BaseController
         $guru = $this->guruModel->getByUserId($userId);
 
         if (!$guru) {
-            $this->session->setFlashdata('error', 'Data guru tidak ditemukan.');
+            $this->session->setFlashdata('error', 'Hmm, data guru nggak ketemu ??');
             return redirect()->to('/login');
         }
 
@@ -390,13 +390,13 @@ class AbsensiController extends BaseController
                     || ($absensi['guru_pengganti_id'] == $guru['id']);
         
         if (!$hasAccess) {
-            $this->session->setFlashdata('error', 'Akses ditolak. Anda bukan pengajar di jadwal ini.');
+            $this->session->setFlashdata('error', 'Sorry, ini bukan jadwal kamu.');
             return redirect()->to('/guru/absensi');
         }
 
         // Check if absensi is editable (within 24 hours)
         if (!$this->isAbsensiEditable($absensi)) {
-            $this->session->setFlashdata('error', 'Absensi ini sudah tidak dapat diedit (lebih dari 24 jam).');
+            $this->session->setFlashdata('error', 'Absen ini udah lewat 24 jam, nggak bisa diedit lagi ya ?');
             return redirect()->to('/guru/absensi/show/' . $id);
         }
 
@@ -440,7 +440,7 @@ class AbsensiController extends BaseController
         $guru = $this->guruModel->getByUserId($userId);
 
         if (!$guru) {
-            $this->session->setFlashdata('error', 'Data guru tidak ditemukan.');
+            $this->session->setFlashdata('error', 'Hmm, data guru nggak ketemu ??');
             return redirect()->to('/login');
         }
 
@@ -460,13 +460,13 @@ class AbsensiController extends BaseController
                     || ($absensi['guru_pengganti_id'] == $guru['id']);
         
         if (!$hasAccess) {
-            $this->session->setFlashdata('error', 'Akses ditolak. Anda bukan pengajar di jadwal ini.');
+            $this->session->setFlashdata('error', 'Sorry, ini bukan jadwal kamu.');
             return redirect()->to('/guru/absensi');
         }
 
         // Check if absensi is editable
         if (!$this->isAbsensiEditable($absensi)) {
-            $this->session->setFlashdata('error', 'Absensi ini sudah tidak dapat diedit (lebih dari 24 jam).');
+            $this->session->setFlashdata('error', 'Absen ini udah lewat 24 jam, nggak bisa diedit lagi ya ?');
             return redirect()->to('/guru/absensi/show/' . $id);
         }
 
@@ -529,7 +529,7 @@ class AbsensiController extends BaseController
                 throw new \Exception('Gagal memperbarui data absensi.');
             }
 
-            $this->session->setFlashdata('success', 'Absensi berhasil diperbarui!');
+            $this->session->setFlashdata('success', 'Nice! Absen sudah diupdate ??');
             
             // Check next action from form
             $nextAction = $this->request->getPost('next_action');
@@ -559,7 +559,7 @@ class AbsensiController extends BaseController
         $guru = $this->guruModel->getByUserId($userId);
 
         if (!$guru) {
-            $this->session->setFlashdata('error', 'Data guru tidak ditemukan.');
+            $this->session->setFlashdata('error', 'Hmm, data guru nggak ketemu ??');
             return redirect()->to('/login');
         }
 
@@ -579,21 +579,21 @@ class AbsensiController extends BaseController
                     || ($absensi['guru_pengganti_id'] == $guru['id']);
         
         if (!$hasAccess) {
-            $this->session->setFlashdata('error', 'Akses ditolak. Anda bukan pengajar di jadwal ini.');
+            $this->session->setFlashdata('error', 'Sorry, ini bukan jadwal kamu.');
             return redirect()->to('/guru/absensi');
         }
 
         // Check if absensi is editable
         if (!$this->isAbsensiEditable($absensi)) {
-            $this->session->setFlashdata('error', 'Absensi ini sudah tidak dapat dihapus (lebih dari 24 jam).');
+            $this->session->setFlashdata('error', 'Absen udah lewat 24 jam, nggak bisa dihapus ??');
             return redirect()->to('/guru/absensi/show/' . $id);
         }
 
         // Delete absensi (cascade will delete absensi_detail)
         if ($this->absensiModel->delete($id)) {
-            $this->session->setFlashdata('success', 'Absensi berhasil dihapus!');
+            $this->session->setFlashdata('success', 'Absen sudah dihapus ?');
         } else {
-            $this->session->setFlashdata('error', 'Gagal menghapus absensi.');
+            $this->session->setFlashdata('error', 'Hmm, gagal hapus absen ??');
         }
 
         return redirect()->to('/guru/absensi');
@@ -722,7 +722,7 @@ class AbsensiController extends BaseController
         $guru = $this->guruModel->getByUserId($userId);
 
         if (!$guru) {
-            $this->session->setFlashdata('error', 'Data guru tidak ditemukan.');
+            $this->session->setFlashdata('error', 'Hmm, data guru nggak ketemu ??');
             return redirect()->to('/login');
         }
 
@@ -743,7 +743,7 @@ class AbsensiController extends BaseController
                     || ($absensi['guru_pengganti_id'] == $guru['id']);
         
         if (!$hasAccess) {
-            $this->session->setFlashdata('error', 'Akses ditolak. Anda bukan pengajar di jadwal ini.');
+            $this->session->setFlashdata('error', 'Sorry, ini bukan jadwal kamu.exiexit');
             return redirect()->to('/guru/absensi');
         }
 
