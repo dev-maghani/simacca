@@ -4,7 +4,7 @@
 
 <h2 style="color: #333; margin-top: 0;">Selamat Datang di SIMACCA! 🎉</h2>
 
-<p>Halo, <strong><?= esc($username) ?></strong>!</p>
+<p>Halo, <strong><?= esc($fullName ?? $username) ?></strong>!</p>
 
 <p>Akun SIMACCA Anda telah berhasil dibuat. Berikut adalah detail akun Anda:</p>
 

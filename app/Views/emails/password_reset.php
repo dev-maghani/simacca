@@ -4,7 +4,7 @@
 
 <h2 style="color: #333; margin-top: 0;">Reset Password Anda</h2>
 
-<p>Halo, <strong><?= esc($username) ?></strong>!</p>
+<p>Halo, <strong><?= esc($fullName ?? $username) ?></strong>!</p>
 
 <p>Kami menerima permintaan untuk mereset password akun SIMACCA Anda. Jika Anda tidak melakukan permintaan ini, abaikan email ini.</p>
 
