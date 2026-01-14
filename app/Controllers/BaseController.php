@@ -136,6 +136,15 @@ abstract class BaseController extends Controller
             return false;
         }
 
+        // If admin unlocked, check against unlocked_at timestamp instead
+        if (!empty($absensi['unlocked_at'])) {
+            $unlockedAt = strtotime($absensi['unlocked_at']);
+            $now = time();
+            $diffHours = ($now - $unlockedAt) / 3600;
+            return $diffHours <= 24; // Editable within 24 hours from unlock
+        }
+
+        // Otherwise, check against created_at (original behavior)
         $createdAt = strtotime($absensi['created_at']);
         $now = time();
         $diffHours = ($now - $createdAt) / 3600;

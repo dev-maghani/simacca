@@ -1,0 +1,270 @@
+<?= $this->extend('templates/main_layout') ?>
+
+<?= $this->section('content') ?>
+<div class="container-fluid px-4">
+    <!-- Header -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h1 class="h3 mb-1 text-gray-800"><?= esc($pageTitle) ?></h1>
+            <p class="text-muted mb-0"><?= esc($pageDescription) ?></p>
+        </div>
+    </div>
+
+    <!-- Alert Messages -->
+    <?php if (session()->getFlashdata('success')): ?>
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            <i class="fas fa-check-circle mr-2"></i>
+            <?= session()->getFlashdata('success') ?>
+            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+            </button>
+        </div>
+    <?php endif; ?>
+
+    <?php if (session()->getFlashdata('error')): ?>
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            <i class="fas fa-exclamation-circle mr-2"></i>
+            <?= session()->getFlashdata('error') ?>
+            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+            </button>
+        </div>
+    <?php endif; ?>
+
+    <!-- Filter Card -->
+    <div class="card shadow mb-4">
+        <div class="card-header py-3">
+            <h6 class="m-0 font-weight-bold text-primary">
+                <i class="fas fa-filter mr-2"></i>Filter Absensi
+            </h6>
+        </div>
+        <div class="card-body">
+            <form method="get" action="<?= base_url('admin/absensi') ?>" id="filterForm">
+                <div class="row">
+                    <div class="col-md-3 mb-3">
+                        <label for="tanggal_dari" class="form-label">Tanggal Dari</label>
+                        <input type="date" class="form-control" id="tanggal_dari" name="tanggal_dari" 
+                               value="<?= esc($filters['tanggal_dari']) ?>">
+                    </div>
+                    <div class="col-md-3 mb-3">
+                        <label for="tanggal_sampai" class="form-label">Tanggal Sampai</label>
+                        <input type="date" class="form-control" id="tanggal_sampai" name="tanggal_sampai" 
+                               value="<?= esc($filters['tanggal_sampai']) ?>">
+                    </div>
+                    <div class="col-md-3 mb-3">
+                        <label for="kelas_id" class="form-label">Kelas</label>
+                        <select class="form-control" id="kelas_id" name="kelas_id">
+                            <option value="">Semua Kelas</option>
+                            <?php foreach ($kelasList as $kelas): ?>
+                                <option value="<?= $kelas['id'] ?>" 
+                                    <?= $filters['kelas_id'] == $kelas['id'] ? 'selected' : '' ?>>
+                                    <?= esc($kelas['nama_kelas']) ?>
+                                </option>
+                            <?php endforeach; ?>
+                        </select>
+                    </div>
+                    <div class="col-md-3 mb-3">
+                        <label for="guru_id" class="form-label">Guru</label>
+                        <select class="form-control" id="guru_id" name="guru_id">
+                            <option value="">Semua Guru</option>
+                            <?php foreach ($guruList as $guru): ?>
+                                <option value="<?= $guru['id'] ?>" 
+                                    <?= $filters['guru_id'] == $guru['id'] ? 'selected' : '' ?>>
+                                    <?= esc($guru['nama_lengkap']) ?>
+                                </option>
+                            <?php endforeach; ?>
+                        </select>
+                    </div>
+                    <div class="col-md-3 mb-3">
+                        <label for="mapel_id" class="form-label">Mata Pelajaran</label>
+                        <select class="form-control" id="mapel_id" name="mapel_id">
+                            <option value="">Semua Mapel</option>
+                            <?php foreach ($mapelList as $mapel): ?>
+                                <option value="<?= $mapel['id'] ?>" 
+                                    <?= $filters['mapel_id'] == $mapel['id'] ? 'selected' : '' ?>>
+                                    <?= esc($mapel['nama_mapel']) ?>
+                                </option>
+                            <?php endforeach; ?>
+                        </select>
+                    </div>
+                    <div class="col-md-3 mb-3">
+                        <label for="status_lock" class="form-label">Status</label>
+                        <select class="form-control" id="status_lock" name="status_lock">
+                            <option value="">Semua Status</option>
+                            <option value="editable" <?= $filters['status_lock'] == 'editable' ? 'selected' : '' ?>>
+                                Dapat Diedit
+                            </option>
+                            <option value="locked" <?= $filters['status_lock'] == 'locked' ? 'selected' : '' ?>>
+                                Terkunci
+                            </option>
+                        </select>
+                    </div>
+                    <div class="col-md-6 mb-3 d-flex align-items-end">
+                        <button type="submit" class="btn btn-primary mr-2">
+                            <i class="fas fa-search mr-1"></i> Filter
+                        </button>
+                        <a href="<?= base_url('admin/absensi') ?>" class="btn btn-secondary">
+                            <i class="fas fa-redo mr-1"></i> Reset
+                        </a>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Data Table Card -->
+    <div class="card shadow mb-4">
+        <div class="card-header py-3 d-flex justify-content-between align-items-center">
+            <h6 class="m-0 font-weight-bold text-primary">
+                <i class="fas fa-list mr-2"></i>Data Absensi (<?= count($absensiList) ?> record)
+            </h6>
+            <div>
+                <button type="button" class="btn btn-warning btn-sm" id="bulkUnlockBtn" disabled>
+                    <i class="fas fa-unlock mr-1"></i> Unlock Terpilih (<span id="selectedCount">0</span>)
+                </button>
+            </div>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-bordered table-hover" id="dataTable" width="100%" cellspacing="0">
+                    <thead class="bg-primary text-white">
+                        <tr>
+                            <th width="40px">
+                                <input type="checkbox" id="checkAll">
+                            </th>
+                            <th>Tanggal</th>
+                            <th>Hari/Jam</th>
+                            <th>Kelas</th>
+                            <th>Guru</th>
+                            <th>Mata Pelajaran</th>
+                            <th>Status</th>
+                            <th width="140px">Aksi</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <?php if (empty($absensiList)): ?>
+                            <tr>
+                                <td colspan="8" class="text-center py-4 text-muted">
+                                    <i class="fas fa-inbox fa-3x mb-3 d-block"></i>
+                                    Tidak ada data absensi ditemukan
+                                </td>
+                            </tr>
+                        <?php else: ?>
+                            <?php foreach ($absensiList as $absensi): ?>
+                                <tr>
+                                    <td class="text-center">
+                                        <?php if ($absensi['is_locked']): ?>
+                                            <input type="checkbox" class="absensi-checkbox" value="<?= $absensi['id'] ?>">
+                                        <?php endif; ?>
+                                    </td>
+                                    <td><?= date('d M Y', strtotime($absensi['tanggal'])) ?></td>
+                                    <td>
+                                        <small class="text-muted"><?= esc($absensi['hari']) ?></small><br>
+                                        <?= esc($absensi['jam_mulai']) ?> - <?= esc($absensi['jam_selesai']) ?>
+                                    </td>
+                                    <td><?= esc($absensi['nama_kelas']) ?></td>
+                                    <td>
+                                        <?= esc($absensi['nama_guru']) ?>
+                                        <?php if ($absensi['nama_guru_pengganti']): ?>
+                                            <br><small class="text-info">
+                                                <i class="fas fa-user-circle"></i> Pengganti: <?= esc($absensi['nama_guru_pengganti']) ?>
+                                            </small>
+                                        <?php endif; ?>
+                                    </td>
+                                    <td><?= esc($absensi['nama_mapel']) ?></td>
+                                    <td>
+                                        <?php if ($absensi['is_editable']): ?>
+                                            <span class="badge badge-success">
+                                                <i class="fas fa-unlock"></i> Dapat Diedit
+                                            </span>
+                                            <br><small class="text-muted"><?= number_format($absensi['hours_passed'], 1) ?> jam lalu</small>
+                                        <?php else: ?>
+                                            <span class="badge badge-danger">
+                                                <i class="fas fa-lock"></i> Terkunci
+                                            </span>
+                                            <br><small class="text-muted"><?= number_format($absensi['hours_passed'], 1) ?> jam lalu</small>
+                                            <?php if (!empty($absensi['unlocked_at'])): ?>
+                                                <br><small class="text-warning">
+                                                    <i class="fas fa-info-circle"></i> Pernah di-unlock
+                                                </small>
+                                            <?php endif; ?>
+                                        <?php endif; ?>
+                                    </td>
+                                    <td>
+                                        <?php if ($absensi['is_locked']): ?>
+                                            <button type="button" class="btn btn-warning btn-sm" 
+                                                    onclick="unlockAbsensi(<?= $absensi['id'] ?>, '<?= esc($absensi['nama_guru']) ?>', '<?= esc($absensi['nama_mapel']) ?>', '<?= date('d M Y', strtotime($absensi['tanggal'])) ?>')">
+                                                <i class="fas fa-unlock"></i> Unlock
+                                            </button>
+                                        <?php else: ?>
+                                            <span class="text-muted small">
+                                                <i class="fas fa-check"></i> Dapat diedit
+                                            </span>
+                                        <?php endif; ?>
+                                    </td>
+                                </tr>
+                            <?php endforeach; ?>
+                        <?php endif; ?>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// Check all checkboxes
+document.getElementById('checkAll')?.addEventListener('change', function() {
+    const checkboxes = document.querySelectorAll('.absensi-checkbox');
+    checkboxes.forEach(cb => cb.checked = this.checked);
+    updateSelectedCount();
+});
+
+// Update selected count
+document.querySelectorAll('.absensi-checkbox').forEach(cb => {
+    cb.addEventListener('change', updateSelectedCount);
+});
+
+function updateSelectedCount() {
+    const checked = document.querySelectorAll('.absensi-checkbox:checked');
+    document.getElementById('selectedCount').textContent = checked.length;
+    document.getElementById('bulkUnlockBtn').disabled = checked.length === 0;
+}
+
+// Unlock single absensi
+function unlockAbsensi(id, guru, mapel, tanggal) {
+    if (confirm(`Unlock absensi?\n\nGuru: ${guru}\nMapel: ${mapel}\nTanggal: ${tanggal}\n\nSetelah unlock, guru dapat mengedit selama 24 jam.`)) {
+        window.location.href = '<?= base_url('admin/absensi/unlock/') ?>' + id;
+    }
+}
+
+// Bulk unlock
+document.getElementById('bulkUnlockBtn')?.addEventListener('click', function() {
+    const checked = Array.from(document.querySelectorAll('.absensi-checkbox:checked')).map(cb => cb.value);
+    
+    if (confirm(`Unlock ${checked.length} absensi terpilih?\n\nSemua guru terkait dapat mengedit absensi mereka selama 24 jam.`)) {
+        fetch('<?= base_url('admin/absensi/bulk-unlock') ?>', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+                'X-Requested-With': 'XMLHttpRequest'
+            },
+            body: 'absensi_ids=' + JSON.stringify(checked)
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                alert(data.message);
+                location.reload();
+            } else {
+                alert('Error: ' + data.message);
+            }
+        })
+        .catch(error => {
+            alert('Error: ' + error);
+        });
+    }
+});
+</script>
+
+<?= $this->endSection() ?>

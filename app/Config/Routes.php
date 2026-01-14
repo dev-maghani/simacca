@@ -141,6 +141,11 @@ $routes->group('admin', ['filter' => 'auth'], function ($routes) {
     $routes->get('jadwal/download-template', 'Admin\JadwalController::downloadTemplate', ['filter' => 'role:admin']);
     $routes->get('jadwal/export', 'Admin\JadwalController::export', ['filter' => 'role:admin']);
 
+    // Absensi Management (Unlock Feature)
+    $routes->get('absensi', 'Admin\AbsensiController::index', ['filter' => 'role:admin']);
+    $routes->get('absensi/unlock/(:num)', 'Admin\AbsensiController::unlock/$1', ['filter' => 'role:admin']);
+    $routes->post('absensi/bulk-unlock', 'Admin\AbsensiController::bulkUnlock', ['filter' => 'role:admin']);
+
     // Laporan
     $routes->get('laporan/absensi', 'Admin\LaporanController::absensi', ['filter' => 'role:admin']);
     $routes->get('laporan/absensi-detail', 'Admin\LaporanController::absensiDetail', ['filter' => 'role:admin']);

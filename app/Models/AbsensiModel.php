@@ -19,7 +19,8 @@ class AbsensiModel extends Model
         'materi_pembelajaran',
         'created_by',
         'guru_pengganti_id',
-        'created_at'
+        'created_at',
+        'unlocked_at'
     ];
 
     protected bool $allowEmptyInserts = false;
