@@ -168,6 +168,11 @@ if (!function_exists('get_sidebar_menu')) {
                     'url' => '/admin/jadwal'
                 ],
                 [
+                    'title' => 'Kelola Absensi',
+                    'icon' => 'fas fa-clipboard-check',
+                    'url' => '/admin/absensi'
+                ],
+                [
                     'title' => 'Laporan',
                     'icon' => 'fas fa-chart-bar',
                     'url' => '#',
@@ -296,6 +301,15 @@ if (!function_exists('is_absensi_editable')) {
             return false;
         }
 
+        // If admin unlocked, check against unlocked_at timestamp instead
+        if (!empty($absensi['unlocked_at'])) {
+            $unlockedAt = strtotime($absensi['unlocked_at']);
+            $now = time();
+            $diffHours = ($now - $unlockedAt) / 3600;
+            return $diffHours <= 24; // Editable within 24 hours from unlock
+        }
+
+        // Otherwise, check against created_at (original behavior)
         $createdAt = strtotime($absensi['created_at']);
         $now = time();
         $diffHours = ($now - $createdAt) / 3600;
