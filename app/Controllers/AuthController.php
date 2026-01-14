@@ -84,6 +84,7 @@ class AuthController extends BaseController
                 'username'      => $user['username'],
                 'role'          => $user['role'],
                 'email'         => $user['email'],
+                'profile_photo' => $user['profile_photo'] ?? null,
                 'isLoggedIn'    => true,
                 'loginTime'     => time(),
             ];
@@ -177,6 +178,7 @@ class AuthController extends BaseController
         session()->remove('username');
         session()->remove('role');
         session()->remove('email');
+        session()->remove('profile_photo');
         session()->remove('isLoggedIn');
         session()->remove('loginTime');
         session()->remove('last_activity');
@@ -272,7 +274,7 @@ class AuthController extends BaseController
     {
         // Check if user is logged in
         if (!session()->get('isLoggedIn')) {
-            return redirect()->to('/login')->with('error', 'Login dulu dong ??');
+            return redirect()->to('/login')->with('error', 'Login dulu ya biar bisa ganti password.');
         }
 
         $data = [
@@ -289,7 +291,7 @@ class AuthController extends BaseController
     {
         // Check if user is logged in
         if (!session()->get('isLoggedIn')) {
-            return redirect()->to('/login')->with('error', 'Login dulu dong ??');
+            return redirect()->to('/login')->with('error', 'Login dulu ya.');
         }
 
         $rules = [

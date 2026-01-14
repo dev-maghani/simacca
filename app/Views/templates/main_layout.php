@@ -125,9 +125,17 @@
                                     <button type="button" id="user-menu-button"
                                         class="flex items-center text-sm rounded-full focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
                                         <span class="sr-only">Open user menu</span>
-                                        <div class="h-8 w-8 rounded-full bg-indigo-100 flex items-center justify-center">
-                                            <i class="fas fa-user text-indigo-600"></i>
-                                        </div>
+                                        <?php if (session()->get('profile_photo')): ?>
+                                            <img src="<?= base_url('profile-photo/' . esc(session()->get('profile_photo'))); ?>" 
+                                                 alt="<?= esc(session()->get('nama_lengkap') ?? session()->get('username')); ?>"
+                                                 class="h-8 w-8 rounded-full object-cover border-2 border-indigo-200">
+                                        <?php else: ?>
+                                            <div class="h-8 w-8 rounded-full bg-indigo-100 flex items-center justify-center">
+                                                <span class="text-indigo-600 font-semibold text-xs">
+                                                    <?= strtoupper(substr(session()->get('nama_lengkap') ?? session()->get('username') ?? 'U', 0, 2)); ?>
+                                                </span>
+                                            </div>
+                                        <?php endif; ?>
                                     </button>
 
                                     <!-- Dropdown menu -->

@@ -167,6 +167,19 @@ class JurnalController extends BaseController
             // Move file to uploads directory
             try {
                 $file->move(WRITEPATH . 'uploads/jurnal', $fotoName);
+                
+                // Optimize image (compress without losing visible quality)
+                helper('image');
+                $filePath = WRITEPATH . 'uploads/jurnal/' . $fotoName;
+                $originalSize = filesize($filePath);
+                
+                $optimized = optimize_jurnal_photo($filePath, $filePath);
+                
+                if ($optimized) {
+                    $newSize = filesize($filePath);
+                    $savings = round((($originalSize - $newSize) / $originalSize) * 100, 2);
+                    log_message('info', "Jurnal photo optimized: {$fotoName} - {$savings}% smaller");
+                }
             } catch (\Exception $e) {
                 log_message('error', 'Failed to upload jurnal foto: ' . $e->getMessage());
                 
@@ -415,6 +428,20 @@ class JurnalController extends BaseController
             // Move file to uploads directory
             try {
                 $file->move(WRITEPATH . 'uploads/jurnal', $fotoName);
+                
+                // Optimize image (compress without losing visible quality)
+                helper('image');
+                $filePath = WRITEPATH . 'uploads/jurnal/' . $fotoName;
+                $originalSize = filesize($filePath);
+                
+                $optimized = optimize_jurnal_photo($filePath, $filePath);
+                
+                if ($optimized) {
+                    $newSize = filesize($filePath);
+                    $savings = round((($originalSize - $newSize) / $originalSize) * 100, 2);
+                    log_message('info', "[JURNAL UPDATE] Photo optimized: {$fotoName} - {$savings}% smaller");
+                }
+                
                 $data['foto_dokumentasi'] = $fotoName;
                 
                 log_message('info', '[JURNAL UPDATE] Foto uploaded successfully: ' . $fotoName);

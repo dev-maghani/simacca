@@ -25,13 +25,19 @@
         <div class="flex flex-col md:flex-row items-center">
             <!-- Avatar -->
             <div class="mb-6 md:mb-0 md:mr-8">
-                <div class="h-32 w-32 rounded-full bg-white/20 flex items-center justify-center">
-                    <?php if ($guru['jenis_kelamin'] == 'L'): ?>
-                        <i class="fas fa-male text-5xl"></i>
-                    <?php else: ?>
-                        <i class="fas fa-female text-5xl"></i>
-                    <?php endif; ?>
-                </div>
+                <?php if (!empty($userData['profile_photo'])): ?>
+                    <img src="<?= base_url('profile-photo/' . esc($userData['profile_photo'])); ?>" 
+                         alt="<?= esc($guru['nama_lengkap']); ?>"
+                         class="h-32 w-32 rounded-full object-cover border-4 border-white shadow-lg">
+                <?php else: ?>
+                    <div class="h-32 w-32 rounded-full bg-white/20 flex items-center justify-center border-4 border-white shadow-lg">
+                        <?php if ($guru['jenis_kelamin'] == 'L'): ?>
+                            <i class="fas fa-male text-5xl"></i>
+                        <?php else: ?>
+                            <i class="fas fa-female text-5xl"></i>
+                        <?php endif; ?>
+                    </div>
+                <?php endif; ?>
             </div>
             
             <!-- Profile Info -->

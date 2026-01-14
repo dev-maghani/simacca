@@ -61,6 +61,7 @@ writable/uploads/*
 !writable/uploads/jurnal/
 !writable/uploads/izin/
 !writable/uploads/index.html
+!writable/uploads/profile/index.html
 
 writable/debugbar/*
 !writable/debugbar/index.html

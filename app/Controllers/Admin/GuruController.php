@@ -149,7 +149,7 @@ class GuruController extends BaseController
         $guru = $this->guruModel->getGuruWithMapel($id);
 
         if (!$guru) {
-            session()->setFlashdata('error', 'Ups, guru ini nggak ketemu ??');
+            session()->setFlashdata('error', 'Ups, guru ini nggak ketemu 🔍');
             return redirect()->to('/admin/guru');
         }
 
@@ -179,7 +179,7 @@ class GuruController extends BaseController
         $guru = $this->guruModel->find($id);
 
         if (!$guru) {
-            session()->setFlashdata('error', 'Ups, guru ini nggak ketemu ??');
+            session()->setFlashdata('error', 'Ups, guru ini nggak ketemu 🔍');
             return redirect()->to('/admin/guru');
         }
 
@@ -285,7 +285,7 @@ class GuruController extends BaseController
         $guru = $this->guruModel->find($id);
 
         if (!$guru) {
-            session()->setFlashdata('error', 'Ups, guru ini nggak ketemu ??');
+            session()->setFlashdata('error', 'Ups, guru ini nggak ketemu 🔍');
             return redirect()->to('/admin/guru');
         }
 
@@ -328,7 +328,7 @@ class GuruController extends BaseController
         $guru = $this->guruModel->getGuruWithMapel($id);
 
         if (!$guru) {
-            session()->setFlashdata('error', 'Ups, guru ini nggak ketemu ??');
+            session()->setFlashdata('error', 'Ups, guru ini nggak ketemu 🔍');
             return redirect()->to('/admin/guru');
         }
 

@@ -160,6 +160,22 @@ class IzinController extends BaseController
                 $berkasName = 'izin_' . time() . '_' . uniqid() . '.' . $berkas->getExtension();
                 $berkas->move($uploadPath, $berkasName);
                 log_message('info', '[IZIN SISWA] File uploaded: ' . $berkasName);
+                
+                // Optimize image if it's an image file (skip PDF)
+                $mimeType = $berkas->getMimeType();
+                if (strpos($mimeType, 'image/') === 0) {
+                    helper('image');
+                    $filePath = $uploadPath . '/' . $berkasName;
+                    $originalSize = filesize($filePath);
+                    
+                    $optimized = optimize_izin_photo($filePath, $filePath);
+                    
+                    if ($optimized) {
+                        $newSize = filesize($filePath);
+                        $savings = round((($originalSize - $newSize) / $originalSize) * 100, 2);
+                        log_message('info', "[IZIN SISWA] Image optimized: {$berkasName} - {$savings}% smaller");
+                    }
+                }
             } catch (\Exception $e) {
                 log_message('error', '[IZIN SISWA] File upload failed: ' . $e->getMessage());
                 session()->setFlashdata('error', 'Upload file gagal nih 📁😬');
