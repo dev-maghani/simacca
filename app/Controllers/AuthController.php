@@ -272,7 +272,7 @@ class AuthController extends BaseController
     {
         // Check if user is logged in
         if (!session()->get('isLoggedIn')) {
-            return redirect()->to('/login')->with('error', 'Login dulu dong ??');
+            return redirect()->to('/login')->with('error', 'Login dulu ya biar bisa ganti password.');
         }
 
         $data = [
@@ -289,7 +289,7 @@ class AuthController extends BaseController
     {
         // Check if user is logged in
         if (!session()->get('isLoggedIn')) {
-            return redirect()->to('/login')->with('error', 'Login dulu dong ??');
+            return redirect()->to('/login')->with('error', 'Login dulu ya.');
         }
 
         $rules = [

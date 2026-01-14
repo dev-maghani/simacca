@@ -27,7 +27,7 @@ class ProfileController extends BaseController
     {
         // Check if user is logged in
         if (!session()->get('isLoggedIn')) {
-            return redirect()->to('/login')->with('error', 'Login dulu dong ??');
+            return redirect()->to('/login')->with('error', 'Login dulu ya.');
         }
 
         $userId = session()->get('userId');
@@ -64,7 +64,7 @@ class ProfileController extends BaseController
     {
         // Check if user is logged in
         if (!session()->get('isLoggedIn')) {
-            return redirect()->to('/login')->with('error', 'Login dulu dong ??');
+            return redirect()->to('/login')->with('error', 'Login dulu dong.');
         }
 
         $userId = session()->get('userId');
