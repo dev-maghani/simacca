@@ -259,9 +259,8 @@
                     <form action="<?= base_url('profile/update'); ?>" method="POST" id="changePasswordForm">
                         <?= csrf_field(); ?>
 
-                        <!-- Hidden fields to maintain username and email -->
-                        <input type="hidden" name="username" value="<?= esc($userData['username']); ?>">
-                        <input type="hidden" name="email" value="<?= esc($userData['email'] ?? ''); ?>">
+                        <!-- Hidden field to indicate this is password change only -->
+                        <input type="hidden" name="password_change_only" value="1">
 
                         <!-- New Password -->
                         <div class="mb-6">

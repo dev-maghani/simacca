@@ -15,6 +15,22 @@ if (!function_exists('send_email')) {
         $email = \Config\Services::email();
         
         try {
+            // Get email config
+            $config = config('Email');
+            
+            // Set From email and name
+            $fromEmail = $options['from_email'] ?? $config->fromEmail;
+            $fromName = $options['from_name'] ?? $config->fromName;
+            
+            // Validate From email
+            if (empty($fromEmail)) {
+                log_message('error', 'Email sending failed: No from email configured. Please set email.fromEmail in .env file.');
+                return false;
+            }
+            
+            // Set From header
+            $email->setFrom($fromEmail, $fromName);
+            
             // Set recipients
             $email->setTo($to);
             
@@ -44,13 +60,25 @@ if (!function_exists('send_email')) {
             
             // Log email sending result
             if (!$result) {
-                log_message('error', 'Email sending failed: ' . $email->printDebugger(['headers']));
+                $debugInfo = $email->printDebugger(['headers']);
+                log_message('error', 'Email sending failed: ' . $debugInfo);
+                
+                // Add helpful error messages
+                if (strpos($debugInfo, 'Username and Password not accepted') !== false) {
+                    log_message('error', 'SMTP Authentication failed. For Gmail, use App Password instead of regular password.');
+                    log_message('error', 'See: GMAIL_APP_PASSWORD_SETUP.md or run: php spark email:diagnostics');
+                } elseif (strpos($debugInfo, 'Could not connect to SMTP host') !== false) {
+                    log_message('error', 'SMTP Connection failed. Check SMTPHost and SMTPPort in .env');
+                } elseif (strpos($debugInfo, 'STARTTLS') !== false) {
+                    log_message('error', 'STARTTLS failed. Check SMTPCrypto setting in .env (should be "tls" for port 587)');
+                }
             }
             
             return $result;
             
         } catch (\Exception $e) {
             log_message('error', 'Email exception: ' . $e->getMessage());
+            log_message('error', 'Run diagnostics: php spark email:diagnostics');
             return false;
         }
     }
@@ -127,6 +155,43 @@ if (!function_exists('send_notification_email')) {
             'title' => $title,
             'content' => $content
         ]);
+        
+        return send_email($email, $subject, $message);
+    }
+}
+
+if (!function_exists('send_email_change_notification')) {
+    /**
+     * Send email change notification
+     * 
+     * @param string $email Recipient email (old or new)
+     * @param string $fullName User's full name
+     * @param string $oldEmail Old email address
+     * @param string $newEmail New email address
+     * @param bool $isOldEmail Whether sending to old email address
+     * @return bool Success status
+     */
+    function send_email_change_notification(string $email, string $fullName, string $oldEmail, string $newEmail, bool $isOldEmail = false): bool
+    {
+        // Get IP address
+        $request = \Config\Services::request();
+        $ipAddress = $request->getIPAddress();
+        
+        // Load email template
+        $message = view('emails/email_changed', [
+            'fullName' => $fullName,
+            'oldEmail' => $oldEmail,
+            'newEmail' => $newEmail,
+            'changeTime' => date('d F Y H:i'),
+            'ipAddress' => $ipAddress,
+            'isOldEmail' => $isOldEmail
+        ]);
+        
+        if ($isOldEmail) {
+            $subject = 'SIMACCA - Email Akun Anda Telah Diubah';
+        } else {
+            $subject = 'SIMACCA - Konfirmasi Perubahan Email';
+        }
         
         return send_email($email, $subject, $message);
     }

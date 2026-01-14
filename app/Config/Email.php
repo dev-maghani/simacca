@@ -18,32 +18,50 @@ class Email extends BaseConfig
         parent::__construct();
         
         // Load from environment variables if set
-        if (getenv('email.fromEmail')) {
-            $this->fromEmail = getenv('email.fromEmail');
+        // Use env() helper which is the proper way in CodeIgniter 4
+        $fromEmail = env('email.fromEmail');
+        if ($fromEmail !== null && $fromEmail !== false && $fromEmail !== '') {
+            $this->fromEmail = $fromEmail;
         }
-        if (getenv('email.fromName')) {
-            $this->fromName = getenv('email.fromName');
+        
+        $fromName = env('email.fromName');
+        if ($fromName !== null && $fromName !== false && $fromName !== '') {
+            $this->fromName = $fromName;
         }
-        if (getenv('email.protocol')) {
-            $this->protocol = getenv('email.protocol');
+        
+        $protocol = env('email.protocol');
+        if ($protocol !== null && $protocol !== false && $protocol !== '') {
+            $this->protocol = $protocol;
         }
-        if (getenv('email.SMTPHost')) {
-            $this->SMTPHost = getenv('email.SMTPHost');
+        
+        $smtpHost = env('email.SMTPHost');
+        if ($smtpHost !== null && $smtpHost !== false && $smtpHost !== '') {
+            $this->SMTPHost = $smtpHost;
         }
-        if (getenv('email.SMTPUser')) {
-            $this->SMTPUser = getenv('email.SMTPUser');
+        
+        $smtpUser = env('email.SMTPUser');
+        if ($smtpUser !== null && $smtpUser !== false && $smtpUser !== '') {
+            $this->SMTPUser = $smtpUser;
         }
-        if (getenv('email.SMTPPass')) {
-            $this->SMTPPass = getenv('email.SMTPPass');
+        
+        $smtpPass = env('email.SMTPPass');
+        if ($smtpPass !== null && $smtpPass !== false && $smtpPass !== '') {
+            $this->SMTPPass = $smtpPass;
         }
-        if (getenv('email.SMTPPort')) {
-            $this->SMTPPort = (int) getenv('email.SMTPPort');
+        
+        $smtpPort = env('email.SMTPPort');
+        if ($smtpPort !== null && $smtpPort !== false && $smtpPort !== '') {
+            $this->SMTPPort = (int) $smtpPort;
         }
-        if (getenv('email.SMTPCrypto')) {
-            $this->SMTPCrypto = getenv('email.SMTPCrypto');
+        
+        $smtpCrypto = env('email.SMTPCrypto');
+        if ($smtpCrypto !== null && $smtpCrypto !== false && $smtpCrypto !== '') {
+            $this->SMTPCrypto = $smtpCrypto;
         }
-        if (getenv('email.mailType')) {
-            $this->mailType = getenv('email.mailType');
+        
+        $mailType = env('email.mailType');
+        if ($mailType !== null && $mailType !== false && $mailType !== '') {
+            $this->mailType = $mailType;
         }
     }
 
