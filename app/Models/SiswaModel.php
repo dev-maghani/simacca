@@ -63,7 +63,7 @@ class SiswaModel extends Model
      */
     public function getAllSiswa()
     {
-        return $this->select('siswa.*, users.username, users.email, users.is_active, kelas.nama_kelas')
+        return $this->select('siswa.*, users.username, users.email, users.is_active, users.profile_photo, kelas.nama_kelas')
             ->join('users', 'users.id = siswa.user_id')
             ->join('kelas', 'kelas.id = siswa.kelas_id', 'left')
             ->orderBy('siswa.nama_lengkap', 'ASC')
@@ -75,7 +75,7 @@ class SiswaModel extends Model
      */
     public function getByUserId($userId)
     {
-        return $this->select('siswa.*, kelas.nama_kelas, users.username, users.is_active')
+        return $this->select('siswa.*, kelas.nama_kelas, users.username, users.is_active, users.profile_photo')
             ->join('kelas', 'kelas.id = siswa.kelas_id', 'left')
             ->join('users', 'users.id = siswa.user_id', 'left')
             ->where('siswa.user_id', $userId)
@@ -136,5 +136,21 @@ class SiswaModel extends Model
         return $this
             ->where('kelas_id', $kelasId)
             ->countAllResults();
+    }
+
+    /**
+     * Get siswa with kelas data
+     */
+    public function getSiswaWithKelas($siswaId = null)
+    {
+        $builder = $this->select('siswa.*, kelas.nama_kelas, users.username, users.email, users.is_active, users.profile_photo')
+            ->join('kelas', 'kelas.id = siswa.kelas_id', 'left')
+            ->join('users', 'users.id = siswa.user_id', 'left');
+
+        if ($siswaId) {
+            return $builder->where('siswa.id', $siswaId)->first();
+        }
+
+        return $builder->findAll();
     }
 }

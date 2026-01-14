@@ -137,8 +137,18 @@
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap">
                                 <div class="flex items-center">
-                                    <div class="flex-shrink-0 h-10 w-10 bg-indigo-100 rounded-full flex items-center justify-center">
-                                        <i class="fas fa-user text-indigo-600"></i>
+                                    <div class="flex-shrink-0 h-10 w-10">
+                                        <?php if (!empty($g['profile_photo'])): ?>
+                                            <img src="<?= base_url('profile-photo/' . esc($g['profile_photo'])); ?>" 
+                                                 alt="<?= esc($g['nama_lengkap']); ?>"
+                                                 class="h-10 w-10 rounded-full object-cover border-2 border-indigo-200">
+                                        <?php else: ?>
+                                            <div class="h-10 w-10 bg-indigo-100 rounded-full flex items-center justify-center">
+                                                <span class="text-indigo-600 font-semibold text-sm">
+                                                    <?= strtoupper(substr($g['nama_lengkap'], 0, 2)); ?>
+                                                </span>
+                                            </div>
+                                        <?php endif; ?>
                                     </div>
                                     <div class="ml-4">
                                         <div class="text-sm font-medium text-gray-900"><?= esc($g['nama_lengkap']); ?></div>

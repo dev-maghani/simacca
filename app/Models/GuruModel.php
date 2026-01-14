@@ -63,7 +63,7 @@ class GuruModel extends Model
      */
     public function getAllGuru()
     {
-        return $this->select('guru.*, users.username, users.email, users.is_active, users.role, mata_pelajaran.nama_mapel, kelas.nama_kelas')
+        return $this->select('guru.*, users.username, users.email, users.is_active, users.role, users.profile_photo, mata_pelajaran.nama_mapel, kelas.nama_kelas')
             ->join('users', 'users.id = guru.user_id')
             ->join('mata_pelajaran', 'mata_pelajaran.id = guru.mata_pelajaran_id', 'left')
             ->join('kelas', 'kelas.id = guru.kelas_id', 'left')
@@ -76,7 +76,7 @@ class GuruModel extends Model
      */
     public function getByUserId($userId)
     {
-        return $this->select('guru.*, users.username, users.email, users.is_active, mata_pelajaran.nama_mapel, mata_pelajaran.kode_mapel')
+        return $this->select('guru.*, users.username, users.email, users.is_active, users.profile_photo, mata_pelajaran.nama_mapel, mata_pelajaran.kode_mapel')
             ->join('users', 'users.id = guru.user_id', 'left')
             ->join('mata_pelajaran', 'mata_pelajaran.id = guru.mata_pelajaran_id', 'left')
             ->where('guru.user_id', $userId)
@@ -88,7 +88,7 @@ class GuruModel extends Model
      */
     public function getGuruWithMapel($guruId = null)
     {
-        $builder = $this->select('guru.*, mata_pelajaran.nama_mapel, users.username')
+        $builder = $this->select('guru.*, mata_pelajaran.nama_mapel, users.username, users.profile_photo')
             ->join('mata_pelajaran', 'mata_pelajaran.id = guru.mata_pelajaran_id', 'left')
             ->join('users', 'users.id = guru.user_id');
 
@@ -107,7 +107,7 @@ class GuruModel extends Model
         return $this->where('is_wali_kelas', 1)
             ->join('kelas', 'kelas.id = guru.kelas_id')
             ->join('users', 'users.id = guru.user_id')
-            ->select('guru.*, kelas.nama_kelas, users.username')
+            ->select('guru.*, kelas.nama_kelas, users.username, users.profile_photo')
             ->findAll();
     }
 

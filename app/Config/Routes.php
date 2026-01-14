@@ -226,11 +226,14 @@ $routes->group('siswa', ['filter' => 'auth'], function ($routes) {
 // Profile Routes (for all roles)
 $routes->group('profile', ['filter' => 'auth'], function ($routes) {
     $routes->get('/', 'ProfileController::index');
-    $routes->post('/update', 'ProfileController::update');
+    $routes->post('update', 'ProfileController::update');
+    $routes->post('upload-photo', 'ProfileController::uploadPhoto');
+    $routes->post('delete-photo', 'ProfileController::deletePhoto');
 });
 
 // File Routes (for serving uploaded files)
 $routes->get('files/jurnal/(:segment)', 'FileController::jurnalFoto/$1');
+$routes->get('profile-photo/(:segment)', 'FileController::profilePhoto/$1');
 
 /**
  * -----------------------------------------------------------------
