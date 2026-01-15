@@ -26,6 +26,13 @@ class ProfileCompletionFilter implements FilterInterface
         }
 
         $userId = session()->get('userId');
+        $userRole = session()->get('role');
+        
+        // Skip profile completion check for admin
+        // Admin doesn't need to complete profile (no guru/siswa data required)
+        if ($userRole === 'admin') {
+            return $request;
+        }
         
         // Get URI segments for more precise checking
         $uri = service('uri');

@@ -4,6 +4,237 @@
 
 ---
 
+## [1.5.5] - 2026-01-15
+
+### 🔧 Profile Completion - Exclude Admin Role
+
+**Fixed profile completion requirement for admin users:**
+
+**Issue:**
+- Admin users were forced to complete profile (change password, set email, upload photo)
+- Admin role doesn't have guru/siswa data and shouldn't need profile completion
+- Unnecessary friction for admin users
+
+**Solution:**
+- Skip profile completion check for `role = 'admin'`
+- Admin can login and use system without being redirected to profile page
+- Other roles (guru_mapel, wali_kelas, siswa) still required to complete profile
+
+**Changes:**
+1. **ProfileCompletionFilter.php**
+   - Added early return for admin role (check session)
+   - Skip database query for admin users
+
+2. **UserModel.php - needsProfileCompletion()**
+   - Added admin role check
+   - Return false immediately for admin users
+   - Defense in depth (double check at filter and model level)
+
+**Impact:**
+- ✅ Admin can login without profile completion requirement
+- ✅ Admin can access all admin features immediately
+- ✅ Other roles still enforced to complete profile (security/data quality)
+- ✅ Better UX for admin users
+
+**Files Modified:**
+- `app/Filters/ProfileCompletionFilter.php`
+- `app/Models/UserModel.php`
+
+---
+
+## [1.5.4] - 2026-01-15
+
+### 📝 Documentation Final Cleanup - Feature Guides Removed
+
+**Philosophy: Docs for system setup only, not feature guides**
+
+**Deleted:**
+- `IMPORT_JADWAL_DOCUMENTATION.md` - Feature guide belongs in-app, not in docs/
+
+**Reasoning:**
+- Feature-specific documentation should be **inline in the application** (tooltips, help modals, wizards)
+- `docs/` folder reserved for **system setup only** (installation, deployment, email config)
+- Import jadwal template already has "Petunjuk" sheet with complete instructions
+- In-app help is more discoverable than separate documentation files
+
+**Results:**
+- **9 → 8 files (89% reduction from original 34)**
+- Pure system setup documentation
+- Feature guides integrated into application UI
+
+**What remains (8 essential files):**
+```
+docs/
+├── README.md
+├── guides/ (6 files)
+│   ├── QUICK_START.md ⭐ Setup guide
+│   ├── PANDUAN_INSTALASI.md ⭐ Installation
+│   ├── DEPLOYMENT_GUIDE.md ⭐ Deployment
+│   ├── REQUIREMENTS.md - System requirements
+│   ├── GMAIL_APP_PASSWORD_SETUP.md - Email setup detail
+│   └── ADMIN_UNLOCK_ABSENSI_QUICKSTART.md - Quick feature guide
+└── email/ (1 file)
+    └── EMAIL_SERVICE_GUIDE.md ⭐ Email comprehensive guide
+```
+
+**Documentation Philosophy:**
+- ✅ System setup & configuration → docs/
+- ✅ Complex external integrations (email) → docs/
+- ❌ Feature guides → In-app help
+- ❌ Bug history → CHANGELOG.md
+- ❌ Legacy features → Deleted
+
+---
+
+## [1.5.3] - 2026-01-15
+
+### 🎯 Documentation Aggressive Cleanup
+
+**Major documentation cleanup - Focus on essential user-facing docs only:**
+
+**Deleted (26 files):**
+- 3 redundant guides (DOKUMENTASI_INDEX, GETTING_STARTED, EMAIL_SERVICE_QUICKSTART)
+- 1 duplicate feature doc (IMPORT_JADWAL_USER_FRIENDLY_UPDATE)
+- 8 bugfix logs (development history, not for end users)
+- 4 email notification detail docs (consolidated into EMAIL_SERVICE_GUIDE)
+- 9 legacy archive docs (PROFILE_COMPLETION_* features)
+- 1 old README backup
+
+**Removed empty folders:**
+- `docs/features/` - Content moved to guides
+- `docs/bugfixes/` - Development history removed
+- `docs/archive/` - Legacy docs removed
+
+**Results:**
+- **34 → 9 files (74% reduction, 25 files deleted)**
+- Clean structure: Only guides/ and email/ folders remain
+- Focus: User-facing documentation only
+- Quality over quantity approach
+
+**What remains (9 essential files):**
+```
+docs/
+├── README.md (updated index)
+├── guides/ (7 files)
+│   ├── QUICK_START.md ⭐
+│   ├── PANDUAN_INSTALASI.md ⭐
+│   ├── DEPLOYMENT_GUIDE.md ⭐
+│   ├── REQUIREMENTS.md
+│   ├── GMAIL_APP_PASSWORD_SETUP.md
+│   ├── IMPORT_JADWAL_DOCUMENTATION.md
+│   └── ADMIN_UNLOCK_ABSENSI_QUICKSTART.md
+└── email/ (1 file)
+    └── EMAIL_SERVICE_GUIDE.md ⭐
+```
+
+**Benefits:**
+- ✅ Only essential docs for users (setup, deployment, features)
+- ✅ Bug history moved to CHANGELOG.md (single source of truth)
+- ✅ No duplicate content
+- ✅ Professional documentation structure
+- ✅ Much easier to maintain
+- ✅ New users not overwhelmed
+
+**Files:**
+- `docs/README.md` - Completely rewritten with new structure
+- 26 files deleted (development logs, legacy features, duplicates)
+
+---
+
+## [1.5.2] - 2026-01-15
+
+### 🧹 Documentation Consolidation & Cleanup
+
+**Major documentation cleanup for better maintainability:**
+
+**Deleted (10 redundant files):**
+- Email fixes/logs that are now outdated
+- Duplicate feature documentation
+- Development history files not useful for end users
+
+**Consolidated (3 → 1):**
+- Created `EMAIL_SERVICE_GUIDE.md` - comprehensive 600+ line guide
+- Merged: EMAIL_SERVICE_DOCUMENTATION, EMAIL_SERVICE_IMPLEMENTATION_SUMMARY, EMAIL_PERSONALIZATION_UPDATE
+- All-in-one: Quick Start, Configuration, Testing, Troubleshooting
+
+**Results:**
+- 43 → 34 documentation files (21% reduction)
+- Email docs: 13 → 5 files (62% reduction)
+- One comprehensive guide instead of scattered docs
+- Easier for users to find information
+- No information loss - everything consolidated properly
+
+**Files:**
+- `docs/email/EMAIL_SERVICE_GUIDE.md` (NEW) - Consolidated comprehensive guide
+- `docs/README.md` - Updated with new structure
+- 10 files deleted (redundant/outdated)
+
+---
+
+## [1.5.1] - 2026-01-15
+
+### 📚 Documentation Reorganization
+
+**Major documentation restructure for better user experience:**
+
+**Changes:**
+- Reorganized 46 scattered `.md` files into structured `docs/` folder
+- Created 5 category folders: guides/, features/, bugfixes/, email/, archive/
+- Completely rewrote `README.md` with modern, user-friendly layout
+- Added `docs/README.md` as documentation index
+- Backed up old README to `docs/archive/README.old.md`
+
+**New Structure:**
+```
+docs/
+├── guides/      (10 files) - Installation, deployment, setup guides
+├── features/    (2 files)  - New feature documentation  
+├── bugfixes/    (8 files)  - Bug fix logs and patches
+├── email/       (13 files) - Email service documentation
+└── archive/     (9 files)  - Legacy/deprecated docs
+```
+
+**Benefits:**
+- ✅ 90% cleaner root directory (46 → 5 files)
+- ✅ Easy navigation with emoji-based categorization
+- ✅ Quick start guide (5 minutes installation)
+- ✅ Better maintainability for future docs
+- ✅ New user friendly with clear documentation paths
+
+**Files:**
+- `README.md` - Completely rewritten
+- `docs/README.md` - New documentation index (NEW)
+- `TODO.md` - Updated with reorganization notes
+- 43 files moved and organized
+
+---
+
+## [1.5.0] - 2026-01-15
+
+### 🔄 Image Auto-Rotation Feature
+
+**EXIF Auto-Rotate for Mobile Photos:**
+- Auto-rotate JPEG images based on EXIF Orientation metadata
+- Fixes landscape photos from mobile cameras displaying incorrectly
+- Handles all 8 EXIF orientation values (rotate + flip)
+- Integrated into jurnal KBM photo upload
+- Graceful degradation if EXIF extension unavailable
+
+**Technical:**
+- Updated `optimize_image()` function in `image_helper.php`
+- Fixed file size logging for same source/destination files
+- Works automatically on all image optimization calls
+
+**Impact:**
+- ✅ Photos display correctly regardless of camera orientation
+- ✅ No manual rotation needed
+- ✅ Backward compatible with existing photos
+
+**Files Modified:**
+- `app/Helpers/image_helper.php` - Added 60+ lines EXIF auto-rotate logic
+
+---
+
 ## [1.4.0] - 2026-01-15
 
 ### 📸 Added - Profile Photo & Image Optimization System

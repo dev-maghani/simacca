@@ -175,6 +175,378 @@
 
 ## 🐛 Bug dan Perbaikan
 
+### Recently Added ✅ (2026-01-15)
+
+#### Profile Completion - Exclude Admin Role (v1.5.5)
+**Status:** ✅ COMPLETED
+
+**Problem:**
+- Admin users dipaksa complete profile (change password, email, upload photo)
+- Admin tidak punya data guru/siswa, tidak perlu profile completion
+- Mengganggu workflow admin saat first login
+
+**Solution Implemented:**
+**Exclude admin role dari profile completion check**
+
+**Changes:**
+1. **ProfileCompletionFilter.php** - Filter level check
+   - Check `session('role')` early in before() method
+   - Return immediately jika admin (skip semua logic)
+   - Performance: Tidak query database untuk admin
+
+2. **UserModel::needsProfileCompletion()** - Model level check
+   - Check `$user['role']` dari database
+   - Return false immediately untuk admin
+   - Defense in depth: Double check di filter & model
+
+**Logic Flow:**
+```
+User Login → ProfileCompletionFilter
+   ↓
+Check isLoggedIn? → No → Skip
+   ↓ Yes
+Check role = admin? → Yes → Skip (NEW!)
+   ↓ No
+Check profile_completed session? → Yes → Skip
+   ↓ No
+Query DB: needsProfileCompletion()
+   ↓
+   Check role = admin? → Yes → Return false (NEW!)
+   ↓ No
+   Check tracking fields → Empty → Return true
+```
+
+**Affected Roles:**
+- ✅ **admin** - SKIP profile completion (NEW)
+- ❌ **guru_mapel** - REQUIRED to complete profile
+- ❌ **wali_kelas** - REQUIRED to complete profile
+- ❌ **siswa** - REQUIRED to complete profile
+
+**Why admin is exempt:**
+- Admin tidak punya data guru/siswa
+- Admin role fokus ke management, bukan personal data
+- Profile completion untuk data quality (guru/siswa), tidak relevan untuk admin
+
+**Impact:**
+- ✅ Admin bisa langsung akses dashboard tanpa redirect ke profile
+- ✅ Admin tidak dipaksa set email/upload foto
+- ✅ Better admin UX (no unnecessary steps)
+- ✅ Other roles tetap enforced (data quality maintained)
+
+**Files Modified:**
+- `app/Filters/ProfileCompletionFilter.php` - Added admin role check
+- `app/Models/UserModel.php` - Added admin exemption in needsProfileCompletion()
+
+---
+
+#### Documentation Final Cleanup - Feature Guides Removed (v1.5.4)
+**Status:** ✅ COMPLETED
+
+**Problem:**
+- Masih ada 1 feature guide di docs/ (IMPORT_JADWAL_DOCUMENTATION.md)
+- Tidak konsisten dengan philosophy "docs hanya untuk system setup"
+- Feature documentation seharusnya inline di aplikasi
+
+**Solution Implemented:**
+**DELETE feature guide - Keep docs/ for system setup only**
+
+**Deleted:**
+- `docs/guides/IMPORT_JADWAL_DOCUMENTATION.md` (12.2 KB)
+  - Panduan import jadwal via Excel
+  - Template format, step-by-step, troubleshooting
+  - → Feature guide belongs IN-APP, not in docs/
+
+**Philosophy Clarification:**
+```
+docs/ = System Setup & Configuration ONLY
+├── Installation guides ✅
+├── Deployment guides ✅
+├── Email setup (external integration) ✅
+├── System requirements ✅
+└── Feature guides ❌ → Belongs in-app (tooltips, help modals)
+```
+
+**Alternative for Users:**
+- Import jadwal template sudah punya sheet **"Petunjuk"** lengkap
+- UI form import sudah self-explanatory
+- Error messages di sistem sudah clear
+- Future: Add in-app help modal/accordion di halaman import
+
+**Final Structure:**
+```
+docs/ (8 files total)
+├── README.md
+├── guides/ (6 files)
+│   ├── QUICK_START.md ⭐ CRITICAL - Setup sistem
+│   ├── PANDUAN_INSTALASI.md ⭐ CRITICAL - Installation
+│   ├── DEPLOYMENT_GUIDE.md ⭐ HIGH - Deployment
+│   ├── REQUIREMENTS.md - System requirements
+│   ├── GMAIL_APP_PASSWORD_SETUP.md - Email external setup
+│   └── ADMIN_UNLOCK_ABSENSI_QUICKSTART.md - Quick feature reference
+└── email/ (1 file)
+    └── EMAIL_SERVICE_GUIDE.md ⭐ CRITICAL - Email integration
+```
+
+**Impact:**
+- ✅ **34 → 8 files** (76% reduction, 26 files deleted total)
+- ✅ **Consistent philosophy** - Docs for setup, features in-app
+- ✅ **Cleaner structure** - No ambiguity about what belongs in docs/
+- ✅ **Better UX** - Feature help where users need it (in the app)
+
+**Documentation Categories:**
+1. **System Setup** → docs/ ✅
+   - Installation, deployment, requirements
+2. **External Integrations** → docs/ ✅
+   - Email (Gmail setup, SMTP config)
+3. **Feature Guides** → In-app ✅
+   - Import jadwal, unlock absensi, etc
+4. **Bug History** → CHANGELOG.md ✅
+5. **Legacy Features** → Deleted ✅
+
+**Statistics:**
+- Original: 43 files (before v1.5.1 reorganization)
+- After reorganization: 34 files
+- After consolidation: 9 files
+- After aggressive cleanup: 8 files
+- **Total reduction: 81% (43 → 8)**
+
+**Files Modified:**
+- Deleted: `docs/guides/IMPORT_JADWAL_DOCUMENTATION.md`
+- Updated: `docs/README.md`, `README.md`, `CHANGELOG.md`, `TODO.md`
+
+---
+
+#### Documentation Aggressive Cleanup (v1.5.3)
+**Status:** ✅ COMPLETED
+
+**Problem:**
+- 34 files dokumentasi - terlalu banyak untuk user
+- Banyak development logs yang tidak relevan untuk end users
+- Bugfix history membingungkan (user tidak perlu tahu bug history)
+- Legacy features masih ada di archive (tidak dipakai lagi)
+
+**Solution Implemented:**
+**AGGRESSIVE CLEANUP - Delete 26 files, keep only 9 essential files**
+
+1. **Deleted Redundant Guides (3 files)**
+   - DOKUMENTASI_INDEX.md → Duplicate dengan docs/README.md
+   - GETTING_STARTED.md → Overlap dengan README utama
+   - EMAIL_SERVICE_QUICKSTART.md → Sudah di EMAIL_SERVICE_GUIDE.md
+
+2. **Deleted Features Folder (1 file)**
+   - IMPORT_JADWAL_USER_FRIENDLY_UPDATE.md → Info sudah di IMPORT_JADWAL_DOCUMENTATION
+
+3. **Deleted ALL Bugfixes (8 files)**
+   - All BUGFIX_*.md files → Development history, tidak untuk users
+   - Info penting sudah di CHANGELOG.md
+
+4. **Deleted Email Notification Details (4 files)**
+   - ADMIN_PASSWORD_CHANGE_EMAIL_NOTIFICATION.md
+   - SELF_PASSWORD_CHANGE_NOTIFICATION.md
+   - EMAIL_CHANGE_NOTIFICATION_FEATURE.md
+   - GURU_SISWA_PASSWORD_UPDATE_VERIFICATION.md
+   - → Semua info sudah di EMAIL_SERVICE_GUIDE.md
+
+5. **Deleted ALL Archive (9 files)**
+   - All PROFILE_COMPLETION_*.md → Legacy feature tidak dipakai
+   - README.old.md → Backup, tidak perlu
+
+6. **Removed Empty Folders**
+   - docs/features/ → Deleted
+   - docs/bugfixes/ → Deleted
+   - docs/archive/ → Deleted
+
+**Final Structure:**
+```
+docs/ (9 files total)
+├── README.md
+├── guides/ (7 files)
+│   ├── QUICK_START.md ⭐ CRITICAL
+│   ├── PANDUAN_INSTALASI.md ⭐ CRITICAL
+│   ├── DEPLOYMENT_GUIDE.md ⭐ HIGH
+│   ├── REQUIREMENTS.md
+│   ├── GMAIL_APP_PASSWORD_SETUP.md
+│   ├── IMPORT_JADWAL_DOCUMENTATION.md
+│   └── ADMIN_UNLOCK_ABSENSI_QUICKSTART.md
+└── email/ (1 file)
+    └── EMAIL_SERVICE_GUIDE.md ⭐ CRITICAL
+```
+
+**Impact:**
+- ✅ **34 → 9 files** (74% reduction, 25 files deleted)
+- ✅ **Only essential user-facing docs** - Setup, deployment, features
+- ✅ **No development history** - Focus on "how to use", not "how we fixed bugs"
+- ✅ **Professional structure** - Production docs should be clean
+- ✅ **Easy maintenance** - 9 files jauh lebih mudah maintain
+- ✅ **New user friendly** - Tidak overwhelmed dengan banyak file
+
+**Philosophy:**
+- Bug history → CHANGELOG.md (single source of truth)
+- Legacy features → Deleted (not relevant anymore)
+- Duplicate content → Deleted (one source of truth)
+- User focus → Only docs user actually needs
+
+**Statistics:**
+- Before: 34 files (10 guides, 2 features, 8 bugfixes, 5 email, 9 archive)
+- After: 9 files (7 guides, 1 email, 1 index)
+- Deleted: 25 files + 3 empty folders
+- Reduction: 74%
+
+**Files Modified:**
+- `docs/README.md` - Rewritten with new structure + documentation philosophy
+- `CHANGELOG.md` - Added v1.5.3 entry
+- `TODO.md` - Added cleanup notes
+- 26 files deleted
+
+---
+
+#### Documentation Consolidation & Cleanup (v1.5.2)
+**Status:** ✅ COMPLETED
+
+**Problem:**
+- 43 files di folder `docs/` - banyak duplikasi dan overlap
+- Email documentation: 13 files dengan konten redundant
+- File fix logs yang sudah tidak relevan (development history)
+- Feature docs yang duplicate dengan guides
+
+**Solution Implemented:**
+1. **Deleted Redundant Files (10 files)**
+   - Email fixes/logs: EMAIL_AUTHENTICATION_FIX, EMAIL_SERVICE_FIX_LOG, EMAIL_UPDATE_DEBUG_GUIDE, EMAIL_UPDATE_FINAL_FIX, EMAIL_SMTP_CONTENT_FIX, EMAIL_SERVICE_VERIFICATION
+   - Duplicate feature: FEATURE_ADMIN_UNLOCK_ABSENSI (duplicate of quickstart guide)
+
+2. **Consolidated Email Documentation**
+   - Created: `EMAIL_SERVICE_GUIDE.md` (600+ lines comprehensive guide)
+   - Merged 3 major docs: EMAIL_SERVICE_DOCUMENTATION, EMAIL_SERVICE_IMPLEMENTATION_SUMMARY, EMAIL_PERSONALIZATION_UPDATE
+   - Sections: Quick Start, Configuration, Gmail Setup, Testing, Features, Troubleshooting
+   - Kept separate: Individual notification feature docs (ADMIN_PASSWORD_CHANGE, SELF_PASSWORD_CHANGE, EMAIL_CHANGE_NOTIFICATION, GURU_SISWA_PASSWORD_UPDATE)
+
+3. **Updated Documentation Index**
+   - Updated `docs/README.md` dengan struktur baru
+   - Highlighted EMAIL_SERVICE_GUIDE.md sebagai comprehensive guide
+   - Added file counts untuk setiap kategori
+   - Fixed broken links dan references
+
+**Impact:**
+- ✅ **43 → 34 files** (21% reduction, 9 files removed)
+- ✅ **Email docs: 13 → 5 files** (62% reduction)
+- ✅ **Features: 2 → 1 file** (moved duplicate to guides)
+- ✅ **One comprehensive email guide** instead of scattered docs
+- ✅ **Easier navigation** for users
+- ✅ **Less maintenance burden**
+- ✅ **No loss of information** - all important content consolidated
+
+**Statistics:**
+- Before: 43 files (13 email, 2 features)
+- After: 34 files (5 email, 1 features)
+- Reduction: 9 files (21%)
+- New consolidated guide: EMAIL_SERVICE_GUIDE.md
+
+**Files Modified:**
+- `docs/README.md` - Updated with new structure
+- `docs/email/EMAIL_SERVICE_GUIDE.md` - NEW consolidated guide
+- Deleted 10 redundant files
+- TODO.md, CHANGELOG.md - Updated with cleanup notes
+
+---
+
+#### Documentation Reorganization (v1.5.1)
+**Status:** ✅ COMPLETED
+
+**Problem:**
+- 46 file `.md` berserakan di root directory
+- Sangat membingungkan untuk new users
+- Sulit menemukan dokumentasi yang dibutuhkan
+- Tidak ada struktur folder yang jelas
+
+**Solution Implemented:**
+1. **Buat Struktur Folder Terorganisir**
+   ```
+   docs/
+   ├── guides/          📖 Panduan instalasi, deployment, setup (10 files)
+   ├── features/        ✨ Dokumentasi fitur baru (2 files)
+   ├── bugfixes/        🐛 Log perbaikan bug (8 files)
+   ├── email/           📧 Email service & notifikasi (13 files)
+   └── archive/         📦 Dokumentasi legacy (9 files)
+   ```
+
+2. **Kategorisasi & Pindahkan Files**
+   - Guides: QUICK_START, PANDUAN_INSTALASI, DEPLOYMENT_GUIDE, dll
+   - Features: FEATURE_ADMIN_UNLOCK_ABSENSI, IMPORT_JADWAL_USER_FRIENDLY_UPDATE
+   - Bugfixes: BUGFIX_*, PASSWORD_*_FIX, USERNAME_VALIDATION_BUG_FIX, dll
+   - Email: EMAIL_SERVICE_*, EMAIL_*_FIX, *_EMAIL_NOTIFICATION, dll
+   - Archive: PROFILE_COMPLETION_* (legacy features)
+
+3. **Create User-Friendly README.md**
+   - Clean, modern layout dengan emoji
+   - Quick start section (8 steps, 5 minutes)
+   - Clear navigation ke semua docs
+   - Technology stack & features highlight
+   - Troubleshooting quick reference
+   - Command reference table
+
+4. **Create docs/README.md**
+   - Index lengkap semua dokumentasi
+   - Organized by category
+   - Quick search tips
+   - Links ke semua files
+
+**Impact:**
+- ✅ **Root directory bersih** - Hanya 5 file penting (README, CHANGELOG, TODO, FEATURES, CONTRIBUTING)
+- ✅ **43 files organized** - Semua docs kategorisasi rapi di folder `docs/`
+- ✅ **New user friendly** - README yang jelas dengan quick start 5 menit
+- ✅ **Easy navigation** - Struktur folder intuitif dengan emoji guide
+- ✅ **Better maintenance** - Mudah tambah/update docs di masa depan
+
+**Files Modified:**
+- `README.md` - Completely rewritten, old version backed up to `docs/archive/README.old.md`
+- `docs/README.md` - New index for all documentation
+- 43 files moved from root to `docs/` subfolders
+
+**Statistics:**
+- Total markdown files: 48
+- Root directory: 5 files (90% reduction)
+- docs/ directory: 43 files (organized)
+- Folders created: 5
+
+---
+
+#### Jurnal KBM - Auto-Rotate Foto Dokumentasi (v1.5.0)
+**Status:** ✅ COMPLETED
+
+**Problem:**
+- Foto dokumentasi jurnal KBM yang diambil secara landscape dari kamera HP sering tampil dengan orientasi yang salah (miring/terbalik)
+- Ini terjadi karena banyak kamera HP (terutama iPhone dan Android) tidak merotate pixel foto, melainkan menyimpan orientasi di metadata EXIF
+- Saat foto di-upload dan di-resize, metadata EXIF hilang tapi pixel tidak dirotate, sehingga foto tampil salah
+
+**Solution Implemented:**
+1. **EXIF Auto-Rotate di Image Helper** (`app/Helpers/image_helper.php`)
+   - Tambah logic untuk membaca EXIF Orientation (nilai 1-8) sebelum resize/compress
+   - Implementasi rotate dan flip sesuai standar EXIF orientation:
+     - Orientation 3: Rotate 180°
+     - Orientation 6: Rotate 90° CW (landscape kanan)
+     - Orientation 8: Rotate 90° CCW (landscape kiri)
+     - Orientation 2,4,5,7: Handle mirror horizontal/vertical
+   - Update dimensi gambar setelah rotasi untuk resize yang akurat
+   
+2. **Perbaikan Logging File Size**
+   - Fix bug di logging ketika source dan destination file sama
+   - Simpan original file size di awal proses untuk perhitungan "% smaller" yang akurat
+
+**Impact:**
+- Upload foto dokumentasi di **Guru/Jurnal (Create & Edit)** otomatis benar orientasinya
+- Tidak perlu ubah controller atau view - semua handled di image optimization layer
+- Backward compatible - foto tanpa EXIF atau non-JPEG tetap diproses normal
+
+**Technical Details:**
+- Function affected: `optimize_image()` dan `optimize_jurnal_photo()`
+- Requires: PHP GD extension (already available) + EXIF extension (optional but recommended)
+- Graceful degradation: Jika EXIF tidak tersedia, auto-rotate di-skip tanpa error
+
+**Files Modified:**
+- `app/Helpers/image_helper.php` - Added EXIF auto-rotate logic (60+ lines)
+
+---
+
 ### Recently Added ✅ (2026-01-14)
 
 #### Mobile-First UI/UX (v1.4.0)
