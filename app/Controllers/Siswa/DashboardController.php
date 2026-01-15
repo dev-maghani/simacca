@@ -17,6 +17,8 @@ class DashboardController extends BaseController
 
     public function __construct()
     {
+        helper('controller'); // Load controller helper
+        
         $this->siswaModel = new SiswaModel();
         $this->jadwalModel = new JadwalMengajarModel();
         $this->absensiDetailModel = new AbsensiDetailModel();
@@ -25,17 +27,14 @@ class DashboardController extends BaseController
 
     public function index()
     {
-        // Get siswa data
-        $userId = session()->get('user_id');
-        $siswa = $this->siswaModel->getByUserId($userId);
-
-        if (!$siswa) {
-            return redirect()->to('/access-denied')->with('error', 'Data siswa tidak ditemukan');
+        // Get siswa data using helper
+        $siswa = get_current_siswa('Data siswa tidak ditemukan');
+        if ($siswa instanceof \CodeIgniter\HTTP\RedirectResponse) {
+            return $siswa; // Return redirect if siswa not found
         }
 
         // Get jadwal hari ini
-        $hariIni = date('l');
-        $hariIndonesia = $this->convertDayToIndonesian($hariIni);
+        $hariIndonesia = get_current_day_indonesian();
         
         $jadwalHariIni = $this->jadwalModel
             ->select('jadwal_mengajar.*, mata_pelajaran.nama_mapel, guru.nama_lengkap as nama_guru')
@@ -47,28 +46,20 @@ class DashboardController extends BaseController
             ->findAll();
 
         // Get statistik kehadiran bulan ini
-        $startDate = date('Y-m-01');
-        $endDate = date('Y-m-t');
+        $dateRange = get_month_date_range();
+        $startDate = $dateRange['start'];
+        $endDate = $dateRange['end'];
 
         $kehadiran = $this->absensiDetailModel
-            ->select('
-                COUNT(*) as total,
-                SUM(CASE WHEN status = "hadir" THEN 1 ELSE 0 END) as hadir,
-                SUM(CASE WHEN status = "sakit" THEN 1 ELSE 0 END) as sakit,
-                SUM(CASE WHEN status = "izin" THEN 1 ELSE 0 END) as izin,
-                SUM(CASE WHEN status = "alpa" THEN 1 ELSE 0 END) as alpa
-            ')
+            ->select(get_attendance_stats_query())
             ->join('absensi', 'absensi.id = absensi_detail.absensi_id')
             ->where('absensi_detail.siswa_id', $siswa['id'])
             ->where('absensi.tanggal >=', $startDate)
             ->where('absensi.tanggal <=', $endDate)
             ->first();
 
-        // Calculate percentage
-        $persentaseKehadiran = 0;
-        if ($kehadiran['total'] > 0) {
-            $persentaseKehadiran = round(($kehadiran['hadir'] / $kehadiran['total']) * 100, 1);
-        }
+        // Calculate percentage using helper
+        $persentaseKehadiran = calculate_percentage($kehadiran['hadir'] ?? 0, $kehadiran['total'] ?? 0);
 
         // Get izin status
         $izinPending = $this->izinSiswaModel
@@ -106,15 +97,5 @@ class DashboardController extends BaseController
         return view('siswa/dashboard', $data);
     }
 
-    private function convertDayToIndonesian($day)
-    {
-        $days = [
-            'Monday' => 'Senin',
-            'Tuesday' => 'Selasa',
-            'Wednesday' => 'Rabu',
-            'Thursday' => 'Kamis',
-            'Friday' => 'Jumat',
-        ];
-        return $days[$day] ?? $day;
-    }
+    // convertDayToIndonesian() removed - now using helper function
 }

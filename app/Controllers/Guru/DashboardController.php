@@ -24,6 +24,8 @@ class DashboardController extends BaseController
 
     public function __construct()
     {
+        helper('controller'); // Load controller helper
+        
         $this->guruModel = new GuruModel();
         $this->jadwalModel = new JadwalMengajarModel();
         $this->absensiModel = new AbsensiModel();
@@ -41,13 +43,10 @@ class DashboardController extends BaseController
      */
     public function index()
     {
-        $userId = $this->session->get('user_id');
-
-        // Get guru data
-        $guru = $this->guruModel->getByUserId($userId);
-        if (!$guru) {
-            $this->session->setFlashdata('error', 'Data guru nggak ketemu 🔍');
-            return redirect()->to('/login');
+        // Get guru data using helper
+        $guru = get_current_guru('Data guru nggak ketemu 🔍');
+        if ($guru instanceof \CodeIgniter\HTTP\RedirectResponse) {
+            return $guru; // Return redirect if guru not found
         }
 
         $guruId = $guru['id'];
