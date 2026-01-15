@@ -47,9 +47,9 @@ class ProfileCompletionFilter implements FilterInterface
         $userModel = new UserModel();
         if ($userModel->needsProfileCompletion($userId)) {
             // Set flash message to inform user
-            session()->setFlashdata('warning', 'Lengkapi profil kamu dulu ya! Ganti password, isi email, dan upload foto profil 📝✨');
+            session()->setFlashdata('info', 'Selamat datang! 🎉 Silakan lengkapi profil Anda terlebih dahulu: perbarui password, isi email, dan upload foto profil.');
             
-            // Redirect to profile page
+            // Redirect to profile edit page
             return redirect()->to('/profile');
         }
         

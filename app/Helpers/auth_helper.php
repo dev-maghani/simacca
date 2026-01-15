@@ -295,6 +295,27 @@ if (!function_exists('get_status_badge')) {
     }
 }
 
+if (!function_exists('get_dashboard_url')) {
+    /**
+     * Get dashboard URL based on user role
+     */
+    function get_dashboard_url($role = null)
+    {
+        if ($role === null) {
+            $role = session()->get('role');
+        }
+
+        $dashboards = [
+            'admin' => '/admin/dashboard',
+            'guru_mapel' => '/guru/dashboard',
+            'wali_kelas' => '/walikelas/dashboard',
+            'siswa' => '/siswa/dashboard'
+        ];
+
+        return $dashboards[$role] ?? '/';
+    }
+}
+
 if (!function_exists('is_absensi_editable')) {
     function is_absensi_editable($absensi) {
         if (empty($absensi) || empty($absensi['created_at'])) {
