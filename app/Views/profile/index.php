@@ -186,138 +186,130 @@
 
         <!-- Forms Section -->
         <div class="lg:col-span-2 space-y-6">
-            <!-- Edit Profile Form -->
+            <!-- Edit Profile Form - Combined -->
             <div class="bg-white rounded-lg shadow">
                 <div class="p-4 border-b border-gray-200 bg-gradient-to-r from-blue-500 to-indigo-600 text-white rounded-t-lg">
                     <h2 class="text-lg font-semibold flex items-center">
-                        <i class="fas fa-edit mr-2"></i>
-                        Edit Profil
+                        <i class="fas fa-user-edit mr-2"></i>
+                        Edit Profil & Keamanan
                     </h2>
-                    <p class="text-sm opacity-80 mt-1">Update informasi akun Anda</p>
+                    <p class="text-sm opacity-80 mt-1">Update informasi akun dan password Anda dalam satu kali simpan</p>
                 </div>
                 <div class="p-6">
-                    <form action="<?= base_url('profile/update'); ?>" method="POST">
+                    <form action="<?= base_url('profile/update'); ?>" method="POST" id="profileForm">
                         <?= csrf_field(); ?>
 
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                            <!-- Username -->
-                            <div class="md:col-span-2">
-                                <label for="username" class="block text-sm font-medium text-gray-700 mb-2">
-                                    <i class="fas fa-user mr-2 text-gray-500"></i>
-                                    Username <span class="text-red-500">*</span>
-                                </label>
-                                <input type="text" 
-                                       id="username" 
-                                       name="username" 
-                                       value="<?= esc(old('username', $userData['username'])); ?>"
-                                       required
-                                       class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
-                                <?php if (session()->has('errors') && isset(session('errors')['username'])): ?>
-                                    <p class="text-xs text-red-500 mt-1"><?= esc(session('errors')['username']); ?></p>
-                                <?php endif; ?>
-                            </div>
+                        <!-- Profile Information Section -->
+                        <div class="mb-8">
+                            <h3 class="text-md font-semibold text-gray-700 mb-4 pb-2 border-b border-gray-200">
+                                <i class="fas fa-id-card mr-2 text-blue-500"></i>
+                                Informasi Akun
+                            </h3>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <!-- Username -->
+                                <div class="md:col-span-2">
+                                    <label for="username" class="block text-sm font-medium text-gray-700 mb-2">
+                                        <i class="fas fa-user mr-2 text-gray-500"></i>
+                                        Username <span class="text-red-500">*</span>
+                                    </label>
+                                    <input type="text" 
+                                           id="username" 
+                                           name="username" 
+                                           value="<?= esc(old('username', $userData['username'])); ?>"
+                                           required
+                                           class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                                    <?php if (session()->has('errors') && isset(session('errors')['username'])): ?>
+                                        <p class="text-xs text-red-500 mt-1"><?= esc(session('errors')['username']); ?></p>
+                                    <?php endif; ?>
+                                </div>
 
-                            <!-- Email -->
-                            <div class="md:col-span-2">
-                                <label for="email" class="block text-sm font-medium text-gray-700 mb-2">
-                                    <i class="fas fa-envelope mr-2 text-blue-500"></i>
-                                    Email
-                                </label>
-                                <input type="email" 
-                                       id="email" 
-                                       name="email" 
-                                       value="<?= esc(old('email', $userData['email'] ?? '')); ?>"
-                                       class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
-                                <?php if (session()->has('errors') && isset(session('errors')['email'])): ?>
-                                    <p class="text-xs text-red-500 mt-1"><?= esc(session('errors')['email']); ?></p>
-                                <?php endif; ?>
+                                <!-- Email -->
+                                <div class="md:col-span-2">
+                                    <label for="email" class="block text-sm font-medium text-gray-700 mb-2">
+                                        <i class="fas fa-envelope mr-2 text-blue-500"></i>
+                                        Email
+                                    </label>
+                                    <input type="email" 
+                                           id="email" 
+                                           name="email" 
+                                           value="<?= esc(old('email', $userData['email'] ?? '')); ?>"
+                                           class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                                    <?php if (session()->has('errors') && isset(session('errors')['email'])): ?>
+                                        <p class="text-xs text-red-500 mt-1"><?= esc(session('errors')['email']); ?></p>
+                                    <?php endif; ?>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Password Change Section -->
+                        <div class="mb-8">
+                            <h3 class="text-md font-semibold text-gray-700 mb-4 pb-2 border-b border-gray-200">
+                                <i class="fas fa-key mr-2 text-purple-500"></i>
+                                Ubah Password (Opsional)
+                            </h3>
+                            <div class="space-y-6">
+                                <!-- New Password -->
+                                <div>
+                                    <label for="password" class="block text-sm font-medium text-gray-700 mb-2">
+                                        <i class="fas fa-lock mr-2 text-purple-500"></i>
+                                        Password Baru
+                                    </label>
+                                    <div class="relative">
+                                        <input type="password" 
+                                               id="password" 
+                                               name="password" 
+                                               minlength="6"
+                                               placeholder="Kosongkan jika tidak ingin mengubah"
+                                               class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent pr-10">
+                                        <button type="button" 
+                                                onclick="togglePassword('password')" 
+                                                class="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600">
+                                            <i class="fas fa-eye" id="password-icon"></i>
+                                        </button>
+                                    </div>
+                                    <p class="text-xs text-gray-500 mt-1">Minimal 6 karakter. Kosongkan jika tidak ingin mengubah password.</p>
+                                    <?php if (session()->has('errors') && isset(session('errors')['password'])): ?>
+                                        <p class="text-xs text-red-500 mt-1"><?= esc(session('errors')['password']); ?></p>
+                                    <?php endif; ?>
+                                </div>
+
+                                <!-- Confirm Password -->
+                                <div>
+                                    <label for="confirm_password" class="block text-sm font-medium text-gray-700 mb-2">
+                                        <i class="fas fa-lock mr-2 text-purple-500"></i>
+                                        Konfirmasi Password Baru
+                                    </label>
+                                    <div class="relative">
+                                        <input type="password" 
+                                               id="confirm_password" 
+                                               name="confirm_password" 
+                                               minlength="6"
+                                               placeholder="Masukkan ulang password baru"
+                                               class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent pr-10">
+                                        <button type="button" 
+                                                onclick="togglePassword('confirm_password')" 
+                                                class="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600">
+                                            <i class="fas fa-eye" id="confirm_password-icon"></i>
+                                        </button>
+                                    </div>
+                                    <p class="text-xs text-gray-500 mt-1" id="passwordMatch"></p>
+                                    <?php if (session()->has('errors') && isset(session('errors')['confirm_password'])): ?>
+                                        <p class="text-xs text-red-500 mt-1"><?= esc(session('errors')['confirm_password']); ?></p>
+                                    <?php endif; ?>
+                                </div>
                             </div>
                         </div>
 
                         <!-- Submit Button -->
-                        <div class="mt-6">
+                        <div class="flex items-center justify-between pt-4 border-t border-gray-200">
+                            <p class="text-sm text-gray-600">
+                                <i class="fas fa-info-circle mr-1 text-blue-500"></i>
+                                Semua perubahan akan disimpan sekaligus
+                            </p>
                             <button type="submit" 
-                                    class="w-full md:w-auto px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium">
+                                    class="px-8 py-3 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-lg hover:from-blue-700 hover:to-indigo-700 transition-all font-medium shadow-md hover:shadow-lg transform hover:scale-105">
                                 <i class="fas fa-save mr-2"></i>
-                                Simpan Perubahan
-                            </button>
-                        </div>
-                    </form>
-                </div>
-            </div>
-
-            <!-- Change Password Form -->
-            <div class="bg-white rounded-lg shadow">
-                <div class="p-4 border-b border-gray-200 bg-gradient-to-r from-purple-500 to-pink-600 text-white rounded-t-lg">
-                    <h2 class="text-lg font-semibold flex items-center">
-                        <i class="fas fa-key mr-2"></i>
-                        Ubah Password
-                    </h2>
-                    <p class="text-sm opacity-80 mt-1">Perbarui password untuk keamanan akun</p>
-                </div>
-                <div class="p-6">
-                    <form action="<?= base_url('profile/update'); ?>" method="POST" id="changePasswordForm">
-                        <?= csrf_field(); ?>
-
-                        <!-- Hidden field to indicate this is password change only -->
-                        <input type="hidden" name="password_change_only" value="1">
-
-                        <!-- New Password -->
-                        <div class="mb-6">
-                            <label for="password" class="block text-sm font-medium text-gray-700 mb-2">
-                                <i class="fas fa-lock mr-2 text-purple-500"></i>
-                                Password Baru
-                            </label>
-                            <div class="relative">
-                                <input type="password" 
-                                       id="password" 
-                                       name="password" 
-                                       minlength="6"
-                                       placeholder="Kosongkan jika tidak ingin mengubah"
-                                       class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent pr-10">
-                                <button type="button" 
-                                        onclick="togglePassword('password')" 
-                                        class="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600">
-                                    <i class="fas fa-eye" id="password-icon"></i>
-                                </button>
-                            </div>
-                            <p class="text-xs text-gray-500 mt-1">Minimal 6 karakter. Kosongkan jika tidak ingin mengubah password.</p>
-                            <?php if (session()->has('errors') && isset(session('errors')['password'])): ?>
-                                <p class="text-xs text-red-500 mt-1"><?= esc(session('errors')['password']); ?></p>
-                            <?php endif; ?>
-                        </div>
-
-                        <!-- Confirm Password -->
-                        <div class="mb-6">
-                            <label for="confirm_password" class="block text-sm font-medium text-gray-700 mb-2">
-                                <i class="fas fa-lock mr-2 text-purple-500"></i>
-                                Konfirmasi Password Baru
-                            </label>
-                            <div class="relative">
-                                <input type="password" 
-                                       id="confirm_password" 
-                                       name="confirm_password" 
-                                       minlength="6"
-                                       placeholder="Masukkan ulang password baru"
-                                       class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent pr-10">
-                                <button type="button" 
-                                        onclick="togglePassword('confirm_password')" 
-                                        class="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600">
-                                    <i class="fas fa-eye" id="confirm_password-icon"></i>
-                                </button>
-                            </div>
-                            <p class="text-xs text-gray-500 mt-1" id="passwordMatch"></p>
-                            <?php if (session()->has('errors') && isset(session('errors')['confirm_password'])): ?>
-                                <p class="text-xs text-red-500 mt-1"><?= esc(session('errors')['confirm_password']); ?></p>
-                            <?php endif; ?>
-                        </div>
-
-                        <!-- Submit Button -->
-                        <div>
-                            <button type="submit" 
-                                    class="w-full md:w-auto px-6 py-3 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors font-medium">
-                                <i class="fas fa-save mr-2"></i>
-                                Simpan Perubahan
+                                Simpan Semua Perubahan
                             </button>
                         </div>
                     </form>
@@ -389,7 +381,7 @@ if (confirmPassword) {
 }
 
 // Form validation
-document.getElementById('changePasswordForm').addEventListener('submit', function(e) {
+document.getElementById('profileForm').addEventListener('submit', function(e) {
     // Only validate if password field is filled
     if (password.value) {
         if (password.value !== confirmPassword.value) {
@@ -403,11 +395,6 @@ document.getElementById('changePasswordForm').addEventListener('submit', functio
             e.preventDefault();
             alert('Password baru minimal 6 karakter!');
             password.focus();
-            return false;
-        }
-        
-        if (!confirm('Apakah Anda yakin ingin mengubah password?')) {
-            e.preventDefault();
             return false;
         }
     }

@@ -113,41 +113,38 @@ class ProfileController extends BaseController
         // Get current user data
         $userData = $this->userModel->find($userId);
         
-        // Check if this is password change only
-        $isPasswordChangeOnly = $this->request->getPost('password_change_only') === '1';
-
         $rules = [];
         $updateData = [];
-
-        if ($isPasswordChangeOnly) {
-            // Password change only - don't update username or email
-            if ($this->request->getPost('password')) {
-                $rules['password'] = 'required|min_length[6]';
-                $rules['confirm_password'] = 'required|matches[password]';
-            } else {
-                return redirect()->back()->with('error', 'Password baru harus diisi.');
-            }
+        
+        // Profile update (username and email)
+        $rules['email'] = 'permit_empty|valid_email';
+        
+        // Build update data for profile
+        $newUsername = $this->request->getPost('username');
+        $updateData['username'] = $newUsername;
+        
+        // Jika username berubah, validasi unique (exclude current user)
+        if ($newUsername != $userData['username']) {
+            $rules['username'] = 'required|is_unique[users.username,id,' . $userId . ']';
         } else {
-            // Profile update (username and email)
-            $rules['email'] = 'permit_empty|valid_email';
-            
-            // Build update data for profile
-            $newUsername = $this->request->getPost('username');
-            $updateData['username'] = $newUsername;
-            
-            // Jika username berubah, validasi unique (exclude current user)
-            if ($newUsername != $userData['username']) {
-                $rules['username'] = 'required|is_unique[users.username,id,' . $userId . ']';
-            } else {
-                // Username tidak berubah, tapi tetap required
-                $rules['username'] = 'required';
-            }
-            
-            // Only update email if it's provided
-            $newEmail = $this->request->getPost('email');
-            if (!empty($newEmail)) {
-                $updateData['email'] = $newEmail;
-            }
+            // Username tidak berubah, tapi tetap required
+            $rules['username'] = 'required';
+        }
+        
+        // Only update email if it's provided
+        $newEmail = $this->request->getPost('email');
+        if (!empty($newEmail)) {
+            $updateData['email'] = $newEmail;
+        }
+        
+        // Check if password is being changed
+        $isPasswordChanged = false;
+        $plainPassword = null;
+        if (!empty($this->request->getPost('password'))) {
+            $isPasswordChanged = true;
+            $plainPassword = $this->request->getPost('password');
+            $rules['password'] = 'required|min_length[6]';
+            $rules['confirm_password'] = 'required|matches[password]';
         }
 
         // Validate
@@ -156,10 +153,7 @@ class ProfileController extends BaseController
         }
 
         // Handle password change
-        // Store plain password for email notification
-        $plainPassword = null;
-        if ($this->request->getPost('password')) {
-            $plainPassword = $this->request->getPost('password');
+        if ($isPasswordChanged) {
             // Don't hash here - let the Model's beforeUpdate callback handle it
             $updateData['password'] = $plainPassword;
             // Track password change timestamp
@@ -180,7 +174,7 @@ class ProfileController extends BaseController
         // Log what we're about to update (for debugging)
         log_message('info', 'ProfileController update - User ID: ' . $userId);
         log_message('info', 'ProfileController update - Update data: ' . json_encode($updateData));
-        log_message('info', 'ProfileController update - Is password change only: ' . ($isPasswordChangeOnly ? 'YES' : 'NO'));
+        log_message('info', 'ProfileController update - Is password changed: ' . ($isPasswordChanged ? 'YES' : 'NO'));
         
         // Update database - skip Model validation since we already validated in controller
         $this->userModel->skipValidation(true);
@@ -204,77 +198,122 @@ class ProfileController extends BaseController
             log_message('error', 'ProfileController update - Errors: ' . json_encode($this->userModel->errors()));
         }
 
+        // Check if this is first time profile edit (password AND email never changed before)
+        // We check BEFORE update to see the original state
+        $isFirstProfileEdit = empty($userData['password_changed_at']) 
+            && empty($userData['email_changed_at']);
+        
+        // Get the updated user data
+        $updatedUser = $this->userModel->find($userId);
+        
+        // Log for debugging
+        log_message('info', 'ProfileController update - Is first profile edit: ' . ($isFirstProfileEdit ? 'YES' : 'NO'));
+        log_message('info', 'ProfileController update - Old password_changed_at: ' . ($userData['password_changed_at'] ?? 'NULL'));
+        log_message('info', 'ProfileController update - Old email_changed_at: ' . ($userData['email_changed_at'] ?? 'NULL'));
+        log_message('info', 'ProfileController update - New password_changed_at: ' . ($updatedUser['password_changed_at'] ?? 'NULL'));
+        log_message('info', 'ProfileController update - New email_changed_at: ' . ($updatedUser['email_changed_at'] ?? 'NULL'));
+
         // Update session if username or email changed
         if (isset($updateData['username'])) {
             session()->set('username', $updateData['username']);
             log_message('info', 'ProfileController update - Session username updated');
         }
         
-        // Handle email change notification
-        if (isset($updateData['email']) && $updateData['email'] !== $userData['email']) {
+        if (isset($updateData['email'])) {
             session()->set('email', $updateData['email']);
             log_message('info', 'ProfileController update - Session email updated to: ' . $updateData['email']);
-            
-            // Send notification emails
-            helper('email');
-            
-            $oldEmail = $userData['email'];
-            $newEmail = $updateData['email'];
-            
-            // Get user's full name based on role
-            $fullName = $this->getUserFullName($userId, $role);
-            
-            // Send to old email (security notification)
-            if (!empty($oldEmail)) {
-                $oldEmailSent = send_email_change_notification($oldEmail, $fullName, $oldEmail, $newEmail, true);
-                if ($oldEmailSent) {
-                    log_message('info', 'ProfileController update - Email change notification sent to old email: ' . $oldEmail);
-                } else {
-                    log_message('error', 'ProfileController update - Failed to send notification to old email: ' . $oldEmail);
-                }
-            }
-            
-            // Send to new email (confirmation)
-            $newEmailSent = send_email_change_notification($newEmail, $fullName, $oldEmail, $newEmail, false);
-            if ($newEmailSent) {
-                log_message('info', 'ProfileController update - Email change notification sent to new email: ' . $newEmail);
-            } else {
-                log_message('error', 'ProfileController update - Failed to send notification to new email: ' . $newEmail);
-            }
-        } elseif (isset($updateData['email'])) {
-            session()->set('email', $updateData['email']);
-            log_message('info', 'ProfileController update - Session email updated (no change detected)');
         }
-
-        // Send email notification if password was changed
-        if ($isPasswordChangeOnly && $plainPassword && !empty($userData['email'])) {
+        
+        // Send welcome email if this is first time user edits their profile
+        // (first time changing password AND email)
+        if ($isFirstProfileEdit && $isPasswordChanged && !empty($updatedUser['email'])) {
             helper('email');
             
             // Get user's full name
             $fullName = $this->getUserFullName($userId, $role);
             
-            $emailSent = send_password_changed_by_self_notification(
-                $userData['email'],
+            log_message('info', 'ProfileController update - Sending welcome email (first profile edit)');
+            
+            // Send welcome email with new password
+            $welcomeSent = send_welcome_email(
+                $updatedUser['email'],
+                $updatedUser['username'],
+                $plainPassword, // Send the new password they just set
+                $role,
                 $fullName,
-                $userData['username'],
-                $plainPassword  // Pass plain text password
+                $updatedUser['email'] // Pass email to display in template
             );
             
-            if ($emailSent) {
-                log_message('info', 'ProfileController update - Self password change notification sent to: ' . $userData['email']);
+            if ($welcomeSent) {
+                log_message('info', 'ProfileController update - Welcome email sent to: ' . $updatedUser['email']);
             } else {
-                log_message('warning', 'ProfileController update - Failed to send self password notification to: ' . $userData['email']);
+                log_message('warning', 'ProfileController update - Failed to send welcome email to: ' . $updatedUser['email']);
+            }
+        }
+        // For non-first-edit updates, send appropriate notifications
+        else {
+            helper('email');
+            $fullName = $this->getUserFullName($userId, $role);
+            
+            log_message('info', 'ProfileController update - Sending regular update notifications');
+            
+            // Send email change notification (only if email actually changed)
+            if (isset($updateData['email']) && $updateData['email'] !== $userData['email']) {
+                $oldEmail = $userData['email'];
+                $newEmail = $updateData['email'];
+                
+                log_message('info', 'ProfileController update - Email changed from: ' . ($oldEmail ?? 'NULL') . ' to: ' . $newEmail);
+                
+                // Send to old email (security notification)
+                if (!empty($oldEmail)) {
+                    $oldEmailSent = send_email_change_notification($oldEmail, $fullName, $oldEmail, $newEmail, true);
+                    if ($oldEmailSent) {
+                        log_message('info', 'ProfileController update - Email change notification sent to old email: ' . $oldEmail);
+                    } else {
+                        log_message('error', 'ProfileController update - Failed to send notification to old email: ' . $oldEmail);
+                    }
+                }
+                
+                // Send to new email (confirmation)
+                $newEmailSent = send_email_change_notification($newEmail, $fullName, $oldEmail, $newEmail, false);
+                if ($newEmailSent) {
+                    log_message('info', 'ProfileController update - Email change notification sent to new email: ' . $newEmail);
+                } else {
+                    log_message('error', 'ProfileController update - Failed to send notification to new email: ' . $newEmail);
+                }
+            }
+            
+            // Send password change notification (only if password changed)
+            if ($isPasswordChanged && $plainPassword && !empty($updatedUser['email'])) {
+                log_message('info', 'ProfileController update - Password changed, sending notification');
+                
+                $emailSent = send_password_changed_by_self_notification(
+                    $updatedUser['email'],
+                    $fullName,
+                    $updatedUser['username'],
+                    $plainPassword
+                );
+                
+                if ($emailSent) {
+                    log_message('info', 'ProfileController update - Self password change notification sent to: ' . $updatedUser['email']);
+                } else {
+                    log_message('warning', 'ProfileController update - Failed to send self password notification to: ' . $updatedUser['email']);
+                }
             }
         }
         
-        // Success message
-        if ($isPasswordChangeOnly) {
-            session()->setFlashdata('success', 'Password berhasil diubah! 🔐✨');
+        // Success message and redirect to dashboard
+        helper('auth');
+        $dashboardUrl = get_dashboard_url($role);
+        
+        if ($isFirstProfileEdit && $isPasswordChanged) {
+            // Special message for first time profile completion with email check reminder
+            session()->setFlashdata('success', 'Selamat datang di SIMACCA! 🎉 Profil Anda telah diperbarui. Silakan periksa email Bapak/Ibu untuk informasi akun lengkap (username, email, dan password). 📧✨');
         } else {
-            session()->setFlashdata('success', 'Profil updated! Looking good 😎✨');
+            session()->setFlashdata('success', 'Profil berhasil diperbarui! 🎉✨');
         }
         
-        return redirect()->back();
+        return redirect()->to($dashboardUrl);
     }
 
     /**

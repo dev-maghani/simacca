@@ -12,11 +12,15 @@ if (!function_exists('send_email')) {
      */
     function send_email($to, string $subject, string $message, array $options = []): bool
     {
-        $email = \Config\Services::email();
-        
         try {
             // Get email config
             $config = config('Email');
+            
+            // Create email instance with proper configuration
+            $email = \Config\Services::email();
+            
+            // Clear any previous data
+            $email->clear();
             
             // Set From email and name
             $fromEmail = $options['from_email'] ?? $config->fromEmail;
@@ -31,6 +35,9 @@ if (!function_exists('send_email')) {
             // Set From header
             $email->setFrom($fromEmail, $fromName);
             
+            // Set Reply-To to same as From to avoid confusion
+            $email->setReplyTo($fromEmail, $fromName);
+            
             // Set recipients
             $email->setTo($to);
             
@@ -44,9 +51,15 @@ if (!function_exists('send_email')) {
                 $email->setBCC($options['bcc']);
             }
             
-            // Set subject and message
+            // Set subject
             $email->setSubject($subject);
-            $email->setMessage($message);
+            
+            // Set message with proper line breaks for email
+            // Clean up message and ensure proper formatting
+            $cleanMessage = str_replace("\r\n", "\n", $message);
+            $cleanMessage = str_replace("\r", "\n", $cleanMessage);
+            $cleanMessage = str_replace("\n", "\r\n", $cleanMessage);
+            $email->setMessage($cleanMessage);
             
             // Add attachments if provided
             if (!empty($options['attachments'])) {
@@ -60,7 +73,7 @@ if (!function_exists('send_email')) {
             
             // Log email sending result
             if (!$result) {
-                $debugInfo = $email->printDebugger(['headers']);
+                $debugInfo = $email->printDebugger(['headers', 'subject', 'body']);
                 log_message('error', 'Email sending failed: ' . $debugInfo);
                 
                 // Add helpful error messages
@@ -71,13 +84,18 @@ if (!function_exists('send_email')) {
                     log_message('error', 'SMTP Connection failed. Check SMTPHost and SMTPPort in .env');
                 } elseif (strpos($debugInfo, 'STARTTLS') !== false) {
                     log_message('error', 'STARTTLS failed. Check SMTPCrypto setting in .env (should be "tls" for port 587)');
+                } elseif (strpos($debugInfo, '354') !== false && strpos($debugInfo, 'data:') !== false) {
+                    log_message('error', 'Email content rejected. Check email format and content-type header.');
                 }
+            } else {
+                log_message('info', 'Email successfully sent to: ' . (is_array($to) ? implode(', ', $to) : $to));
             }
             
             return $result;
             
         } catch (\Exception $e) {
             log_message('error', 'Email exception: ' . $e->getMessage());
+            log_message('error', 'Stack trace: ' . $e->getTraceAsString());
             log_message('error', 'Run diagnostics: php spark email:diagnostics');
             return false;
         }
@@ -116,23 +134,27 @@ if (!function_exists('send_welcome_email')) {
      * 
      * @param string $email Recipient email
      * @param string $username User's username
-     * @param string $temporaryPassword Temporary password
+     * @param string $temporaryPassword Temporary password (optional, for new users)
      * @param string $role User role
+     * @param string $fullName Full name (optional)
      * @return bool Success status
      */
-    function send_welcome_email(string $email, string $username, string $temporaryPassword, string $role): bool
+    function send_welcome_email(string $email, string $username, string $temporaryPassword = null, string $role = '', string $fullName = '', string $userEmail = ''): bool
     {
         $loginUrl = base_url('login');
         
         // Load email template
         $message = view('emails/welcome', [
             'username' => $username,
+            'fullName' => $fullName ?: $username,
+            'email' => $userEmail ?: $email, // Email to display in template
             'temporaryPassword' => $temporaryPassword,
             'role' => $role,
-            'loginUrl' => $loginUrl
+            'loginUrl' => $loginUrl,
+            'isProfileCompletion' => empty($temporaryPassword) // True if this is profile completion welcome
         ]);
         
-        $subject = 'Selamat Datang di SIMACCA';
+        $subject = 'Selamat Datang di SIMACCA! 🎉';
         
         return send_email($email, $subject, $message);
     }
