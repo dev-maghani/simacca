@@ -58,10 +58,10 @@ writable/session/*
 !writable/session/index.html
 
 writable/uploads/*
-!writable/uploads/jurnal/
+!writable/uploads/jurnal/index.html
 !writable/uploads/izin/
 !writable/uploads/index.html
-!writable/uploads/profile/
+!writable/uploads/profile/index.html
 
 writable/debugbar/*
 !writable/debugbar/index.html

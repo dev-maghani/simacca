@@ -42,3 +42,16 @@ Stack trace:
 #1 {main}
   thrown in /home2/smknbone/simaccaProject/app/Config/Database.php on line 10
 [14-Jan-2026 00:37:26 UTC] PHP Warning:  chdir(): No such file or directory (errno 2) in /home2/smknbone/simaccaProject/spark on line 66
+[15-Jan-2026 03:27:50 UTC] PHP Warning:  chdir(): No such file or directory (errno 2) in /home2/smknbone/simaccaProject/spark on line 66
+[15-Jan-2026 03:28:01 UTC] PHP Warning:  chdir(): No such file or directory (errno 2) in /home2/smknbone/simaccaProject/spark on line 66
+[15-Jan-2026 04:20:23 UTC] PHP Warning:  chdir(): No such file or directory (errno 2) in /home2/smknbone/simaccaProject/spark on line 66
+[15-Jan-2026 04:23:33 UTC] PHP Warning:  chdir(): No such file or directory (errno 2) in /home2/smknbone/simaccaProject/spark on line 66
+[15-Jan-2026 04:25:34 UTC] PHP Warning:  chdir(): No such file or directory (errno 2) in /home2/smknbone/simaccaProject/spark on line 66
+[15-Jan-2026 04:25:47 UTC] PHP Warning:  chdir(): No such file or directory (errno 2) in /home2/smknbone/simaccaProject/spark on line 66
+[15-Jan-2026 04:26:01 UTC] PHP Warning:  chdir(): No such file or directory (errno 2) in /home2/smknbone/simaccaProject/spark on line 66
+[15-Jan-2026 04:26:09 UTC] PHP Warning:  chdir(): No such file or directory (errno 2) in /home2/smknbone/simaccaProject/spark on line 66
+[15-Jan-2026 04:26:17 UTC] PHP Warning:  chdir(): No such file or directory (errno 2) in /home2/smknbone/simaccaProject/spark on line 66
+[15-Jan-2026 04:26:50 UTC] PHP Warning:  chdir(): No such file or directory (errno 2) in /home2/smknbone/simaccaProject/spark on line 66
+[15-Jan-2026 04:28:01 UTC] PHP Warning:  chdir(): No such file or directory (errno 2) in /home2/smknbone/simaccaProject/spark on line 66
+[15-Jan-2026 04:28:14 UTC] PHP Warning:  chdir(): No such file or directory (errno 2) in /home2/smknbone/simaccaProject/spark on line 66
+[15-Jan-2026 04:28:24 UTC] PHP Warning:  chdir(): No such file or directory (errno 2) in /home2/smknbone/simaccaProject/spark on line 66
