@@ -166,6 +166,17 @@ class ProfileController extends BaseController
             $updateData['password_changed_at'] = date('Y-m-d H:i:s');
         }
 
+        // Handle email change tracking BEFORE database update
+        if (isset($updateData['email'])) {
+            if ($updateData['email'] !== $userData['email']) {
+                // Email is being changed
+                $updateData['email_changed_at'] = date('Y-m-d H:i:s');
+            } elseif (empty($userData['email_changed_at'])) {
+                // Email is being set for first time (no previous timestamp)
+                $updateData['email_changed_at'] = date('Y-m-d H:i:s');
+            }
+        }
+
         // Log what we're about to update (for debugging)
         log_message('info', 'ProfileController update - User ID: ' . $userId);
         log_message('info', 'ProfileController update - Update data: ' . json_encode($updateData));
@@ -183,6 +194,11 @@ class ProfileController extends BaseController
             // Verify the update by fetching from database
             $verifyUser = $this->userModel->find($userId);
             log_message('info', 'ProfileController update - Verified email in DB: ' . ($verifyUser['email'] ?? 'NULL'));
+            log_message('info', 'ProfileController update - Verified email_changed_at: ' . ($verifyUser['email_changed_at'] ?? 'NULL'));
+            log_message('info', 'ProfileController update - Verified password_changed_at: ' . ($verifyUser['password_changed_at'] ?? 'NULL'));
+            
+            // Clear profile completion check cache after successful update
+            session()->remove('profile_completed');
         } else {
             log_message('error', 'ProfileController update - Database update: FAILED');
             log_message('error', 'ProfileController update - Errors: ' . json_encode($this->userModel->errors()));
@@ -197,8 +213,6 @@ class ProfileController extends BaseController
         // Handle email change notification
         if (isset($updateData['email']) && $updateData['email'] !== $userData['email']) {
             session()->set('email', $updateData['email']);
-            // Track email change timestamp
-            $updateData['email_changed_at'] = date('Y-m-d H:i:s');
             log_message('info', 'ProfileController update - Session email updated to: ' . $updateData['email']);
             
             // Send notification emails
@@ -229,10 +243,6 @@ class ProfileController extends BaseController
             }
         } elseif (isset($updateData['email'])) {
             session()->set('email', $updateData['email']);
-            // If email is being set for first time (even without change), track it
-            if (empty($userData['email_changed_at'])) {
-                $updateData['email_changed_at'] = date('Y-m-d H:i:s');
-            }
             log_message('info', 'ProfileController update - Session email updated (no change detected)');
         }
 
@@ -342,6 +352,9 @@ class ProfileController extends BaseController
 
                 // Update session
                 session()->set('profile_photo', $newName);
+                
+                // Clear profile completion check cache
+                session()->remove('profile_completed');
 
                 // Delete old photo if exists
                 if ($oldPhoto && file_exists($uploadPath . $oldPhoto)) {
