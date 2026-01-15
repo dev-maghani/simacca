@@ -27,13 +27,23 @@ class ProfileCompletionFilter implements FilterInterface
 
         $userId = session()->get('userId');
         
-        // Skip check if already on profile page or logout
-        $currentUrl = uri_string();
-        if (strpos($currentUrl, 'profile') !== false || strpos($currentUrl, 'logout') !== false) {
+        // Get URI segments for more precise checking
+        $uri = service('uri');
+        $segment1 = $uri->getSegment(1); // First segment (e.g., 'profile', 'admin', 'guru')
+        
+        // Skip check if on profile routes or logout
+        // Only check first segment to avoid matching URLs like /admin/user-profile
+        if ($segment1 === 'profile' || $segment1 === 'logout' || $segment1 === 'login') {
+            return $request;
+        }
+        
+        // Performance optimization: Check session cache first
+        // If profile was already marked as completed in this session, skip database check
+        if (session()->get('profile_completed') === true) {
             return $request;
         }
 
-        // Check if profile needs completion
+        // Check if profile needs completion (database query)
         $userModel = new UserModel();
         if ($userModel->needsProfileCompletion($userId)) {
             // Set flash message to inform user
@@ -42,6 +52,9 @@ class ProfileCompletionFilter implements FilterInterface
             // Redirect to profile page
             return redirect()->to('/profile');
         }
+        
+        // Profile is complete, cache this status in session to avoid repeated DB queries
+        session()->set('profile_completed', true);
 
         return $request;
     }
