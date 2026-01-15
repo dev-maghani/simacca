@@ -155,7 +155,7 @@ class SiswaController extends BaseController
         $siswa = $this->siswaModel->getSiswaWithWaliKelas($id);
 
         if (!$siswa) {
-            session()->setFlashdata('error', 'Hmm, siswa ini nggak ketemu.');
+            session()->setFlashdata('error', 'Hmm, siswa ini nggak ketemu ??');
             return redirect()->to('/admin/siswa');
         }
 
@@ -185,7 +185,7 @@ class SiswaController extends BaseController
         $siswa = $this->siswaModel->find($id);
 
         if (!$siswa) {
-            session()->setFlashdata('error', 'Hmm, siswa ini nggak ketemu.');
+            session()->setFlashdata('error', 'Hmm, siswa ini nggak ketemu ??');
             return redirect()->to('/admin/siswa');
         }
 
@@ -262,6 +262,7 @@ class SiswaController extends BaseController
                 throw new \Exception('Gagal mengupdate data');
             }
 
+<<<<<<< HEAD
             // Send email notification if password was changed
             if ($plainPassword && !empty($userData['email'])) {
                 helper('email');
@@ -284,6 +285,9 @@ class SiswaController extends BaseController
             }
 
             session()->setFlashdata('success', 'Nice! Data siswa sudah diperbarui.');
+=======
+            session()->setFlashdata('success', 'Nice! Data siswa sudah diperbarui ??');
+>>>>>>> parent of f35805c (fix: menghapus ?? pada beberapa pesan)
             return redirect()->to('/admin/siswa');
         } catch (\Exception $e) {
             $db->transRollback();
@@ -300,7 +304,7 @@ class SiswaController extends BaseController
         $siswa = $this->siswaModel->find($id);
 
         if (!$siswa) {
-            session()->setFlashdata('error', 'Hmm, siswa ini nggak ketemu.');
+            session()->setFlashdata('error', 'Hmm, siswa ini nggak ketemu ??');
             return redirect()->to('/admin/siswa');
         }
 
@@ -321,7 +325,7 @@ class SiswaController extends BaseController
                 throw new \Exception('Gagal menghapus data');
             }
 
-            session()->setFlashdata('success', 'Sip, Data siswa sudah dihapus ya! 🗑️');
+            session()->setFlashdata('success', 'Data siswa sudah dihapus ?');
             return redirect()->to('/admin/siswa');
         } catch (\Exception $e) {
             $db->transRollback();
@@ -338,7 +342,7 @@ class SiswaController extends BaseController
         $siswa = $this->siswaModel->getSiswaWithWaliKelas($id);
 
         if (!$siswa) {
-            session()->setFlashdata('error', 'Hmm, siswa ini nggak ketemu.');
+            session()->setFlashdata('error', 'Hmm, siswa ini nggak ketemu ??');
             return redirect()->to('/admin/siswa');
         }
 
@@ -400,14 +404,14 @@ class SiswaController extends BaseController
         $siswa = $this->siswaModel->find($id);
 
         if (!$siswa) {
-            session()->setFlashdata('error', 'Hmm, siswa ini nggak ketemu.');
+            session()->setFlashdata('error', 'Hmm, siswa ini nggak ketemu ??');
             return redirect()->to('/admin/siswa');
         }
 
         $user = $this->userModel->find($siswa['user_id']);
 
         if (!$user) {
-            session()->setFlashdata('error', 'Ups, user ini nggak ketemu.');
+            session()->setFlashdata('error', 'Ups, user ini nggak ketemu ??');
             return redirect()->to('/admin/siswa');
         }
 
@@ -417,7 +421,7 @@ class SiswaController extends BaseController
         $this->userModel->update($siswa['user_id'], ['is_active' => $newStatus]);
 
         $statusText = $newStatus ? 'diaktifkan' : 'dinonaktifkan';
-        session()->setFlashdata('success', $statusText == 'diaktifkan' ? "Siswa aktif kembali! Let's go." : 'Siswa dinonaktifkan. Take care!');
+        session()->setFlashdata('success', $statusText == 'diaktifkan' ? 'Siswa aktif kembali! Let''s go ??' : 'Siswa dinonaktifkan. Take care! ??');
 
         return redirect()->to('/admin/siswa');
     }
@@ -818,7 +822,7 @@ class SiswaController extends BaseController
         $ids = $this->request->getPost('ids');
 
         if (empty($ids)) {
-            session()->setFlashdata('error', 'Eh, pilih siswanya dulu dong!');
+            session()->setFlashdata('error', 'Eh, pilih siswanya dulu dong ??');
             return redirect()->to('/admin/siswa');
         }
 

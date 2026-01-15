@@ -110,13 +110,13 @@ class JadwalController extends BaseController
 
         // Check for schedule conflict for teacher
         if ($this->jadwalModel->checkConflict($guruId, $hari, $jamMulai, $jamSelesai)) {
-            $this->session->setFlashdata('error', 'Guru bentrok nih! Ada jadwal lain di jam yang sama');
+            $this->session->setFlashdata('error', 'Guru bentrok nih! Ada jadwal lain di jam yang sama ??');
             return redirect()->back()->withInput();
         }
 
         // Check for schedule conflict for class
         if ($this->jadwalModel->checkKelasConflict($kelasId, $hari, $jamMulai, $jamSelesai)) {
-            $this->session->setFlashdata('error', 'Kelas udah ada jadwal di jam ini');
+            $this->session->setFlashdata('error', 'Kelas udah ada jadwal di jam ini ??');
             return redirect()->back()->withInput();
         }
 
@@ -137,7 +137,7 @@ class JadwalController extends BaseController
             $this->session->setFlashdata('success', "Jadwal baru siap! Let's teach");
             return redirect()->to('/admin/jadwal');
         } else {
-            $this->session->setFlashdata('error', 'Oops, jadwal gagal ditambahkan');
+            $this->session->setFlashdata('error', 'Oops, jadwal gagal ditambahkan ??');
             return redirect()->back()->withInput();
         }
     }
@@ -205,13 +205,13 @@ class JadwalController extends BaseController
 
         // Check for schedule conflict for teacher (excluding current)
         if ($this->jadwalModel->checkConflict($guruId, $hari, $jamMulai, $jamSelesai, $id)) {
-            $this->session->setFlashdata('error', 'Guru bentrok nih! Ada jadwal lain di jam yang sama');
+            $this->session->setFlashdata('error', 'Guru bentrok nih! Ada jadwal lain di jam yang sama ??');
             return redirect()->back()->withInput();
         }
 
         // Check for schedule conflict for class (excluding current)
         if ($this->jadwalModel->checkKelasConflict($kelasId, $hari, $jamMulai, $jamSelesai, $id)) {
-            $this->session->setFlashdata('error', 'Kelas udah ada jadwal di jam ini');
+            $this->session->setFlashdata('error', 'Kelas udah ada jadwal di jam ini ??');
             return redirect()->back()->withInput();
         }
 
@@ -230,10 +230,10 @@ class JadwalController extends BaseController
 
         // Update database
         if ($this->jadwalModel->save($data)) {
-            $this->session->setFlashdata('success', 'Jadwal updated! All set');
+            $this->session->setFlashdata('success', 'Jadwal updated! All set ??');
             return redirect()->to('/admin/jadwal');
         } else {
-            $this->session->setFlashdata('error', 'Waduh, update jadwal gagal');
+            $this->session->setFlashdata('error', 'Waduh, update jadwal gagal ??');
             return redirect()->back()->withInput();
         }
     }
@@ -261,15 +261,15 @@ class JadwalController extends BaseController
             ->countAllResults();
 
         if ($checkAbsensi > 0) {
-            $this->session->setFlashdata('error', 'Jadwal udah ada absensinya, nggak bisa dihapus ya!');
+            $this->session->setFlashdata('error', 'Jadwal udah ada absensinya, nggak bisa dihapus ya ??');
             return redirect()->back();
         }
 
         // Delete from database
         if ($this->jadwalModel->delete($id)) {
-            $this->session->setFlashdata('success', 'Sip, Jadwal sudah dihapus ya! 🗑️');
+            $this->session->setFlashdata('success', 'Jadwal sudah dihapus ?');
         } else {
-            $this->session->setFlashdata('error', 'Hmm, gagal hapus jadwal!');
+            $this->session->setFlashdata('error', 'Hmm, gagal hapus jadwal ??');
         }
 
         return redirect()->to('/admin/jadwal');

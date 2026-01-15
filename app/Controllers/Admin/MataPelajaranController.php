@@ -91,7 +91,7 @@ class MataPelajaranController extends BaseController
             $this->session->setFlashdata('success', 'Sip! Mapel baru sudah masuk.');
             return redirect()->to('/admin/mata-pelajaran');
         } else {
-            $this->session->setFlashdata('error', 'Oops, mapel gagal ditambahkan.');
+            $this->session->setFlashdata('error', 'Oops, mapel gagal ditambahkan ??');
             return redirect()->back()->withInput();
         }
     }
@@ -158,10 +158,10 @@ class MataPelajaranController extends BaseController
 
         // Update database
         if ($this->mataPelajaranModel->save($data)) {
-            $this->session->setFlashdata('success', 'Done! Mapel sudah diperbarui.');
+            $this->session->setFlashdata('success', 'Done! Mapel sudah diperbarui ??');
             return redirect()->to('/admin/mata-pelajaran');
         } else {
-            $this->session->setFlashdata('error', 'Waduh, update mapel gagal nih.');
+            $this->session->setFlashdata('error', 'Waduh, update mapel gagal nih ??');
             return redirect()->back()->withInput();
         }
     }
@@ -189,7 +189,7 @@ class MataPelajaranController extends BaseController
             ->countAllResults();
 
         if ($checkUsage > 0) {
-            $this->session->setFlashdata('error', 'Mapel ini masih dipake di jadwal, belum bisa dihapus ya.');
+            $this->session->setFlashdata('error', 'Mapel ini masih dipake di jadwal, belum bisa dihapus ya ??');
             return redirect()->back();
         }
 
@@ -205,9 +205,9 @@ class MataPelajaranController extends BaseController
 
         // Delete from database
         if ($this->mataPelajaranModel->delete($id)) {
-            $this->session->setFlashdata('success', 'Done, Mata pelajaran sudah dihapus!');
+            $this->session->setFlashdata('success', 'Mapel sudah dihapus ?');
         } else {
-            $this->session->setFlashdata('error', 'Hmm, gagal hapus mapel.');
+            $this->session->setFlashdata('error', 'Hmm, gagal hapus mapel ??');
         }
 
         return redirect()->to('/admin/mata-pelajaran');

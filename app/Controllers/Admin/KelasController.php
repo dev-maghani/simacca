@@ -120,7 +120,7 @@ class KelasController extends BaseController
         $kelas = $this->kelasModel->find($id);
         
         if (!$kelas) {
-            session()->setFlashdata('error', 'Wah, kelas ini nggak ketemu');
+            session()->setFlashdata('error', 'Wah, kelas ini nggak ketemu ??');
             return redirect()->to('/admin/kelas');
         }
 
@@ -155,7 +155,7 @@ class KelasController extends BaseController
         $kelas = $this->kelasModel->find($id);
         
         if (!$kelas) {
-            session()->setFlashdata('error', 'Wah, kelas ini nggak ketemu');
+            session()->setFlashdata('error', 'Wah, kelas ini nggak ketemu ??');
             return redirect()->to('/admin/kelas');
         }
 
@@ -214,7 +214,7 @@ class KelasController extends BaseController
                 throw new \Exception('Gagal mengupdate data');
             }
 
-            session()->setFlashdata('success', 'Oke! Data kelas sudah diperbarui');
+            session()->setFlashdata('success', 'Oke! Data kelas sudah diperbarui ??');
             return redirect()->to('/admin/kelas');
 
         } catch (\Exception $e) {
@@ -232,14 +232,14 @@ class KelasController extends BaseController
         $kelas = $this->kelasModel->find($id);
         
         if (!$kelas) {
-            session()->setFlashdata('error', 'Wah, kelas ini nggak ketemu');
+            session()->setFlashdata('error', 'Wah, kelas ini nggak ketemu ??');
             return redirect()->to('/admin/kelas');
         }
 
         // Check if kelas has siswa
         $siswaCount = $this->siswaModel->where('kelas_id', $id)->countAllResults();
         if ($siswaCount > 0) {
-            session()->setFlashdata('error', "Kelas masih ada {$siswaCount} siswa nih. Pindahkan dulu ya");
+            session()->setFlashdata('error', "Kelas masih ada {$siswaCount} siswa nih. Pindahkan dulu ya ??");
             return redirect()->to('/admin/kelas');
         }
 
@@ -265,7 +265,7 @@ class KelasController extends BaseController
                 throw new \Exception('Gagal menghapus data');
             }
 
-            session()->setFlashdata('success', 'Kelas berhasil dihapus ✓');
+            session()->setFlashdata('success', 'Kelas berhasil dihapus ?');
             return redirect()->to('/admin/kelas');
 
         } catch (\Exception $e) {
@@ -283,7 +283,7 @@ class KelasController extends BaseController
         $kelas = $this->kelasModel->getKelasWithJumlahSiswa($id);
         
         if (!$kelas) {
-            session()->setFlashdata('error', 'Wah, kelas ini nggak ketemu');
+            session()->setFlashdata('error', 'Wah, kelas ini nggak ketemu ??');
             return redirect()->to('/admin/kelas');
         }
 
