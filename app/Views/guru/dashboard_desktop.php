@@ -54,69 +54,41 @@
 
     <!-- Stats Cards -->
     <div class="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-        <div class="bg-white rounded-lg shadow p-4 hover:shadow-lg transition-shadow">
-            <div class="flex items-center">
-                <div class="p-3 rounded-full bg-blue-100 text-blue-600 mr-4">
-                    <i class="fas fa-calendar-alt text-xl"></i>
-                </div>
-                <div>
-                    <p class="text-sm text-gray-500">Total Jadwal</p>
-                    <p class="text-2xl font-bold"><?= $stats['total_jadwal']; ?></p>
-                </div>
-            </div>
-            <div class="mt-2 text-xs text-gray-500">
-                <i class="fas fa-clock mr-1"></i>
-                <?= $stats['absensi_hari_ini']; ?> absensi hari ini
-            </div>
-        </div>
+        <?= stat_card(
+            'Total Jadwal', 
+            $stats['total_jadwal'], 
+            'calendar-alt', 
+            'blue', 
+            '', 
+            '<i class="fas fa-clock mr-1"></i>' . $stats['absensi_hari_ini'] . ' absensi hari ini'
+        ); ?>
 
-        <div class="bg-white rounded-lg shadow p-4 hover:shadow-lg transition-shadow">
-            <div class="flex items-center">
-                <div class="p-3 rounded-full bg-green-100 text-green-600 mr-4">
-                    <i class="fas fa-clipboard-check text-xl"></i>
-                </div>
-                <div>
-                    <p class="text-sm text-gray-500">Absensi Bulan Ini</p>
-                    <p class="text-2xl font-bold"><?= $stats['absensi_bulan_ini']; ?></p>
-                </div>
-            </div>
-            <div class="mt-2 text-xs text-gray-500">
-                <i class="fas fa-chart-line mr-1"></i>
-                <?= $stats['absensi_bulan_ini']; ?> pertemuan
-            </div>
-        </div>
+        <?= stat_card(
+            'Absensi Bulan Ini', 
+            $stats['absensi_bulan_ini'], 
+            'clipboard-check', 
+            'green', 
+            '', 
+            '<i class="fas fa-chart-line mr-1"></i>' . $stats['absensi_bulan_ini'] . ' pertemuan'
+        ); ?>
 
-        <div class="bg-white rounded-lg shadow p-4 hover:shadow-lg transition-shadow">
-            <div class="flex items-center">
-                <div class="p-3 rounded-full bg-purple-100 text-purple-600 mr-4">
-                    <i class="fas fa-book text-xl"></i>
-                </div>
-                <div>
-                    <p class="text-sm text-gray-500">Jurnal Bulan Ini</p>
-                    <p class="text-2xl font-bold"><?= $stats['jurnal_bulan_ini']; ?></p>
-                </div>
-            </div>
-            <div class="mt-2 text-xs text-gray-500">
-                <i class="fas fa-check-circle mr-1"></i>
-                <?= $stats['jurnal_bulan_ini']; ?> dokumen
-            </div>
-        </div>
+        <?= stat_card(
+            'Jurnal Bulan Ini', 
+            $stats['jurnal_bulan_ini'], 
+            'book', 
+            'purple', 
+            '', 
+            '<i class="fas fa-check-circle mr-1"></i>' . $stats['jurnal_bulan_ini'] . ' dokumen'
+        ); ?>
 
-        <div class="bg-white rounded-lg shadow p-4 hover:shadow-lg transition-shadow">
-            <div class="flex items-center">
-                <div class="p-3 rounded-full bg-yellow-100 text-yellow-600 mr-4">
-                    <i class="fas fa-school text-xl"></i>
-                </div>
-                <div>
-                    <p class="text-sm text-gray-500">Kelas yang Diajar</p>
-                    <p class="text-2xl font-bold"><?= $stats['total_kelas']; ?></p>
-                </div>
-            </div>
-            <div class="mt-2 text-xs text-gray-500">
-                <i class="fas fa-users mr-1"></i>
-                <?= $stats['total_kelas']; ?> kelas berbeda
-            </div>
-        </div>
+        <?= stat_card(
+            'Kelas yang Diajar', 
+            $stats['total_kelas'], 
+            'school', 
+            'yellow', 
+            '', 
+            '<i class="fas fa-users mr-1"></i>' . $stats['total_kelas'] . ' kelas berbeda'
+        ); ?>
     </div>
 
     <!-- Main Content Grid -->
