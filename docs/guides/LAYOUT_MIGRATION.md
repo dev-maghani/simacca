@@ -377,9 +377,25 @@ Auth views should **NOT** be migrated to desktop/mobile layout system because:
 - **Code Reduction**: -38 lines (-4.3%)
 - **See**: [Complete migration details](#1-guru-dashboard) above
 
-**Absensi Views** - ⏳ **PENDING**
+**Absensi Views** - ✅ **COMPLETED**
 - [ ] `app/Views/guru/absensi/index.php`
-- [ ] `app/Views/guru/absensi/create.php`
+- [x] `app/Views/guru/absensi/create.php` - ✅ **Device Router Pattern** (2026-01-17)
+  - [x] `app/Views/guru/absensi/create_mobile.php` - Mobile optimized (850 lines)
+  - [x] `app/Views/guru/absensi/create_desktop.php` - Desktop optimized (862 lines)
+  - **Status**: ✅ **Fully optimized** - No shared component migration needed
+  - **Pattern**: Device Router Pattern (complex form with jadwal selection)
+  - **Components Used**: 
+    - ✅ Using `render_alerts()` for flash messages
+    - ✅ Custom form implementation (required for complex JavaScript interactions)
+  - **Issues Fixed** (2026-01-17): 
+    - ✅ Removed duplicate date field after jadwal selection
+    - ✅ Fixed JavaScript errors (null addEventListener, null value)
+    - ✅ Separated JS code by PHP conditional (jadwal selected vs not selected)
+  - **Why Not Using form_input()/form_select()**:
+    - Complex JavaScript dependencies (auto-detect hari, mode selection, AJAX loading)
+    - Custom styling with icons, help text, and dynamic interactions
+    - Event listeners require specific element IDs
+    - Manual implementation is more maintainable for this use case
 - [ ] `app/Views/guru/absensi/edit.php`
 - [ ] `app/Views/guru/absensi/show.php`
 - [ ] `app/Views/guru/absensi/print.php`
@@ -397,13 +413,18 @@ Auth views should **NOT** be migrated to desktop/mobile layout system because:
 - [ ] `app/Views/guru/laporan/index_enhanced.php`
 - [ ] `app/Views/guru/laporan/print.php`
 
-**Migration Progress**: 1/15+ files (6.7%)
+**Migration Progress**: 2/15+ files (13.3%)
 
 **Recommended Next Steps**:
 1. Migrate `absensi/index.php` (high priority - mobile usage)
-2. Migrate `jurnal/index.php` (high priority - mobile usage)
-3. Consider Device Router Pattern for complex views
-4. Use shared components (`stat_card()`, `empty_state()`, etc.)
+2. Migrate `absensi/edit.php` (similar to create, but simpler)
+3. Migrate `jurnal/index.php` (high priority - mobile usage)
+4. Consider Device Router Pattern for complex views
+5. Use shared components where appropriate:
+   - ✅ Always use `render_alerts()` for flash messages
+   - ✅ Use `form_input()`, `form_select()` for simple forms
+   - ⚠️ Use manual forms for complex JavaScript interactions
+   - ✅ Use `stat_card()`, `empty_state()` for consistent UI
 
 ### Wali Kelas Views (8+ files)
 - [ ] `app/Views/walikelas/dashboard.php`
