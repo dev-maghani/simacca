@@ -59,6 +59,12 @@ class AbsensiController extends BaseController
         // Get absensi by guru
         $absensi = $this->absensiModel->getByGuru($guruId, $tanggal);
 
+        // Add can_edit and can_delete flags to each absensi
+        foreach ($absensi as &$item) {
+            $item['can_edit'] = $this->isAbsensiEditable($item);
+            $item['can_delete'] = $this->isAbsensiEditable($item);
+        }
+
         $absensiId = $this->request->getGet('absensi_id');
         // Get all classes taught by this teacher
         $kelasOptions = $this->getKelasOptions($guruId);
