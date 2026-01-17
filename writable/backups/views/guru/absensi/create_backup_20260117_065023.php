@@ -193,7 +193,7 @@
                         </div>
                         <div class="px-4 py-2 bg-blue-50 border border-blue-200 rounded-lg">
                             <span class="text-sm text-gray-600">Tanggal:</span>
-                            <span class="font-bold text-blue-700 ml-2"><?= date('d/m/Y', strtotime($tanggal)); ?></span>
+                            <span class="font-bold text-blue-700 ml-2"><?= ($tanggal instanceof \DateTimeInterface) ? $tanggal->format('d/m/Y') : date('d/m/Y', strtotime($tanggal)); ?></span>
                         </div>
                     </div>
 

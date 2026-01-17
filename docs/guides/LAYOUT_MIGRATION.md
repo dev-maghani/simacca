@@ -419,7 +419,7 @@ Auth views should **NOT** be migrated to desktop/mobile layout system because:
 - [ ] `app/Views/guru/laporan/index_enhanced.php`
 - [ ] `app/Views/guru/laporan/print.php`
 
-**Migration Progress**: 2/15+ files (13.3%)
+**Migration Progress**: 3/15+ files (20%)
 
 **Recommended Next Steps**:
 1. ~~Migrate `absensi/index.php`~~ ✅ COMPLETED (2026-01-17)

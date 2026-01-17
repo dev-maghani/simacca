@@ -103,8 +103,8 @@
         <?php if (empty($absensi)): ?>
             <div class="p-16">
                 <?= empty_state(
-                    'clipboard-list', 
-                    'Belum Ada Data Absensi', 
+                    'clipboard-list',
+                    'Belum Ada Data Absensi',
                     'Mulai dengan menginput data absensi pertama Anda',
                     'Input Absensi Pertama',
                     base_url('guru/absensi/tambah')
@@ -193,25 +193,24 @@
                                 </div>
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap text-center">
-                                <div class="flex items-center justify-center space-x-2">
-                                    <a href="<?= base_url('guru/absensi/show/' . $item['id']); ?>"
-                                        class="inline-flex items-center px-3 py-1.5 bg-blue-100 hover:bg-blue-200 text-blue-700 text-xs font-semibold rounded-lg transition-all"
-                                        title="Lihat Detail">
-                                        <i class="fas fa-eye"></i>
-                                    </a>
-                                    <?php if ($item['can_edit']): ?>
+                                <div class="flex justify-center space-x-2">
+
+                                    <?php if (is_absensi_editable($item)): ?>
                                         <a href="<?= base_url('guru/absensi/edit/' . $item['id']); ?>"
-                                            class="inline-flex items-center px-3 py-1.5 bg-yellow-100 hover:bg-yellow-200 text-yellow-700 text-xs font-semibold rounded-lg transition-all"
-                                            title="Edit">
+                                            class="p-2 bg-yellow-100 hover:bg-yellow-200 text-yellow-600 rounded-lg transition-all transform hover:scale-110" title="Edit">
                                             <i class="fas fa-edit"></i>
                                         </a>
                                     <?php endif; ?>
-                                    <?php if ($item['can_delete']): ?>
-                                        <button onclick="confirmDelete(<?= $item['id']; ?>)"
-                                            class="inline-flex items-center px-3 py-1.5 bg-red-100 hover:bg-red-200 text-red-700 text-xs font-semibold rounded-lg transition-all"
-                                            title="Hapus">
-                                            <i class="fas fa-trash"></i>
-                                        </button>
+                                    <a href="<?= base_url('guru/absensi/print/' . $item['id']); ?>"
+                                        class="p-2 bg-purple-100 hover:bg-purple-200 text-purple-600 rounded-lg transition-all transform hover:scale-110" title="Cetak" target="_blank">
+                                        <i class="fas fa-print"></i>
+                                    </a>
+                                    <?php if (is_absensi_editable($item)): ?>
+                                        <a href="#"
+                                            onclick="confirmDelete('<?= $item['id']; ?>')"
+                                            class="p-2 bg-red-100 hover:bg-red-200 text-red-600 rounded-lg transition-all transform hover:scale-110" title="Hapus">
+                                            <i class="fas fa-trash-alt"></i>
+                                        </a>
                                     <?php endif; ?>
                                 </div>
                             </td>
@@ -227,10 +226,10 @@
 
 <?= $this->section('scripts') ?>
 <script>
-function confirmDelete(id) {
-    if (confirm('Apakah Anda yakin ingin menghapus absensi ini?\n\nCatatan: Hanya dapat dihapus dalam 24 jam setelah dibuat.')) {
-        window.location.href = '<?= base_url('guru/absensi/delete/'); ?>' + id;
+    function confirmDelete(id) {
+        if (confirm('Apakah Anda yakin ingin menghapus absensi ini?\n\nCatatan: Hanya dapat dihapus dalam 24 jam setelah dibuat.')) {
+            window.location.href = '<?= base_url('guru/absensi/delete/'); ?>' + id;
+        }
     }
-}
 </script>
 <?= $this->endSection() ?>

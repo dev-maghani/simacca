@@ -32,8 +32,8 @@
 
         <!-- Filter Section - Collapsible -->
         <div class="bg-white rounded-xl shadow-md mb-4 overflow-hidden">
-            <div class="flex items-center justify-between p-4 bg-gray-50 cursor-pointer" 
-                 onclick="toggleFilter()" id="filterHeader">
+            <div class="flex items-center justify-between p-4 bg-gray-50 cursor-pointer"
+                onclick="toggleFilter()" id="filterHeader">
                 <div class="flex items-center">
                     <div class="p-2 bg-purple-500 rounded-lg mr-3">
                         <i class="fas fa-filter text-white text-sm"></i>
@@ -96,8 +96,8 @@
         <!-- Absensi List - Card Based -->
         <?php if (empty($absensi)): ?>
             <?= empty_state(
-                'clipboard-list', 
-                'Belum Ada Data Absensi', 
+                'clipboard-list',
+                'Belum Ada Data Absensi',
                 'Mulai dengan menginput data absensi pertama Anda',
                 'Input Absensi',
                 base_url('guru/absensi/tambah')
@@ -110,7 +110,7 @@
                     $hadir = isset($item['hadir']) ? $item['hadir'] : 0;
                     $total = isset($item['total_siswa']) ? $item['total_siswa'] : 0;
                     $barColor = $percentage >= 80 ? 'bg-green-500' : ($percentage >= 60 ? 'bg-yellow-500' : 'bg-red-500');
-                    
+
                     $formatter = new IntlDateFormatter(
                         'id_ID',
                         IntlDateFormatter::FULL,
@@ -179,20 +179,20 @@
 
                             <!-- Actions -->
                             <div class="flex gap-2">
-                                <a href="<?= base_url('guru/absensi/show/' . $item['id']); ?>"
-                                    class="flex-1 px-3 py-2 bg-blue-50 hover:bg-blue-100 text-blue-600 text-xs font-semibold rounded-lg text-center active:scale-95 transition-all">
-                                    <i class="fas fa-eye mr-1"></i> Detail
+                                <a href="<?= base_url('guru/absensi/print/' . $item['id']); ?>"
+                                    class="flex-1 px-3 py-2 bg-purple-100 hover:bg-purple-200 text-purple-600 text-xs font-semibold rounded-lg text-center transition-all active:scale-95" title="Cetak" target="_blank">
+                                    <i class="fas fa-print"></i> Print
                                 </a>
-                                <?php if ($item['can_edit']): ?>
+                                <?php if (is_absensi_editable($item)): ?>
                                     <a href="<?= base_url('guru/absensi/edit/' . $item['id']); ?>"
-                                        class="flex-1 px-3 py-2 bg-yellow-50 hover:bg-yellow-100 text-yellow-600 text-xs font-semibold rounded-lg text-center active:scale-95 transition-all">
+                                        class="flex-1 px-3 py-2 bg-yellow-100 hover:bg-yellow-200 text-yellow-600 rounded-lg text-center transition-all active:scale-95" title="Edit">
                                         <i class="fas fa-edit mr-1"></i> Edit
                                     </a>
                                 <?php endif; ?>
-                                <?php if ($item['can_delete']): ?>
+                                <?php if (is_absensi_editable($item)): ?>
                                     <button onclick="confirmDelete(<?= $item['id']; ?>)"
-                                        class="px-3 py-2 bg-red-50 hover:bg-red-100 text-red-600 text-xs font-semibold rounded-lg active:scale-95 transition-all">
-                                        <i class="fas fa-trash"></i>
+                                        class="px-3 py-2 bg-red-100 hover:bg-red-200 text-red-600 rounded-lg transition-all active:scale-95" title="Hapus">
+                                        <i class="fas fa-trash-alt"></i>
                                     </button>
                                 <?php endif; ?>
                             </div>
@@ -208,31 +208,31 @@
 
 <?= $this->section('scripts') ?>
 <script>
-function confirmDelete(id) {
-    if (confirm('Apakah Anda yakin ingin menghapus absensi ini?\n\nCatatan: Hanya dapat dihapus dalam 24 jam setelah dibuat.')) {
-        window.location.href = '<?= base_url('guru/absensi/delete/'); ?>' + id;
+    function confirmDelete(id) {
+        if (confirm('Apakah Anda yakin ingin menghapus absensi ini?\n\nCatatan: Hanya dapat dihapus dalam 24 jam setelah dibuat.')) {
+            window.location.href = '<?= base_url('guru/absensi/delete/'); ?>' + id;
+        }
     }
-}
 
-function toggleFilter() {
-    const filterForm = document.getElementById('filterForm');
-    const toggleIcon = document.getElementById('filterToggleIcon');
-    
-    if (filterForm.classList.contains('hidden')) {
-        filterForm.classList.remove('hidden');
-        toggleIcon.classList.add('rotate-180');
-    } else {
-        filterForm.classList.add('hidden');
-        toggleIcon.classList.remove('rotate-180');
-    }
-}
+    function toggleFilter() {
+        const filterForm = document.getElementById('filterForm');
+        const toggleIcon = document.getElementById('filterToggleIcon');
 
-// Auto-show filter if there are active filters
-document.addEventListener('DOMContentLoaded', function() {
-    const hasActiveFilters = <?= $tanggal || $kelasId || $search ? 'true' : 'false' ?>;
-    if (hasActiveFilters) {
-        toggleFilter();
+        if (filterForm.classList.contains('hidden')) {
+            filterForm.classList.remove('hidden');
+            toggleIcon.classList.add('rotate-180');
+        } else {
+            filterForm.classList.add('hidden');
+            toggleIcon.classList.remove('rotate-180');
+        }
     }
-});
+
+    // Auto-show filter if there are active filters
+    document.addEventListener('DOMContentLoaded', function() {
+        const hasActiveFilters = <?= $tanggal || $kelasId || $search ? 'true' : 'false' ?>;
+        if (hasActiveFilters) {
+            toggleFilter();
+        }
+    });
 </script>
 <?= $this->endSection() ?>
