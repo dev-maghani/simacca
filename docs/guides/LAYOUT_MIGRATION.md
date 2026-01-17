@@ -377,12 +377,18 @@ Auth views should **NOT** be migrated to desktop/mobile layout system because:
 - **Code Reduction**: -38 lines (-4.3%)
 - **See**: [Complete migration details](#1-guru-dashboard) above
 
-**Absensi Views** - ⏳ **PENDING**
-- [ ] `app/Views/guru/absensi/index.php`
-- [ ] `app/Views/guru/absensi/create.php`
-- [ ] `app/Views/guru/absensi/edit.php`
-- [ ] `app/Views/guru/absensi/show.php`
-- [ ] `app/Views/guru/absensi/print.php`
+**Absensi Views** - 🔄 **IN PROGRESS** (1/5 completed)
+- [x] `app/Views/guru/absensi/index.php` - ✅ **COMPLETED** (2026-01-17)
+  - **Pattern**: Device Router (20 lines)
+  - **Mobile**: index_mobile.php (239 lines)
+  - **Desktop**: index_desktop.php (237 lines)
+  - **Components**: stat_card (8x), empty_state (2x)
+  - **Total**: 496 lines (3 files)
+  - **See**: `docs/summary/GURU_ABSENSI_INDEX_MIGRATION.md`
+- [ ] `app/Views/guru/absensi/create.php` - ⏳ PENDING (970 lines, HIGH priority)
+- [ ] `app/Views/guru/absensi/edit.php` - ⏳ PENDING (713 lines, HIGH priority)
+- [ ] `app/Views/guru/absensi/show.php` - ⏳ PENDING (373 lines, MEDIUM priority)
+- [ ] `app/Views/guru/absensi/print.php` - ⏳ PENDING (313 lines, LOW priority)
 
 **Jurnal Views** - ⏳ **PENDING**
 - [ ] `app/Views/guru/jurnal/index.php`
@@ -397,13 +403,20 @@ Auth views should **NOT** be migrated to desktop/mobile layout system because:
 - [ ] `app/Views/guru/laporan/index_enhanced.php`
 - [ ] `app/Views/guru/laporan/print.php`
 
-**Migration Progress**: 1/15+ files (6.7%)
+**Migration Progress**: 2/15+ files (13.3%)
 
 **Recommended Next Steps**:
-1. Migrate `absensi/index.php` (high priority - mobile usage)
-2. Migrate `jurnal/index.php` (high priority - mobile usage)
-3. Consider Device Router Pattern for complex views
-4. Use shared components (`stat_card()`, `empty_state()`, etc.)
+1. ~~Migrate `absensi/index.php`~~ ✅ COMPLETED (2026-01-17)
+2. Migrate `absensi/create.php` (high priority - form-heavy, 970 lines)
+3. Migrate `absensi/edit.php` (high priority - form editing, 713 lines)
+4. Migrate `jurnal/index.php` (high priority - mobile usage)
+5. Continue with other absensi views (show.php, print.php)
+
+**Migration Pattern Established**:
+- ✅ Device Router Pattern (recommended for all views)
+- ✅ Shared components (`stat_card()`, `empty_state()`, `render_flash_message()`)
+- ✅ Separate mobile/desktop optimization
+- ✅ Comprehensive documentation in `docs/summary/`
 
 ### Wali Kelas Views (8+ files)
 - [ ] `app/Views/walikelas/dashboard.php`
