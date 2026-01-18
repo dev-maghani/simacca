@@ -26,7 +26,8 @@ class JurnalController extends BaseController
     public function index()
     {
         // Get guru data from session
-        $userId = session()->get('user_id');
+        // Support both 'user_id' and 'userId' for backward compatibility
+        $userId = session()->get('user_id') ?? session()->get('userId');
         $guru = $this->guruModel->getByUserId($userId);
 
         if (!$guru) {
@@ -72,7 +73,8 @@ class JurnalController extends BaseController
     public function create($absensiId)
     {
         // Get guru data from session
-        $userId = session()->get('user_id');
+        // Support both 'user_id' and 'userId' for backward compatibility
+        $userId = session()->get('user_id') ?? session()->get('userId');
         $guru = $this->guruModel->getByUserId($userId);
 
         if (!$guru) {
@@ -246,7 +248,8 @@ class JurnalController extends BaseController
     public function edit($jurnalId)
     {
         // Get guru data from session
-        $userId = session()->get('user_id');
+        // Support both 'user_id' and 'userId' for backward compatibility
+        $userId = session()->get('user_id') ?? session()->get('userId');
         $guru = $this->guruModel->getByUserId($userId);
 
         if (!$guru) {
@@ -296,7 +299,8 @@ class JurnalController extends BaseController
     public function show($kelasId)
     {
         // Get guru data from session
-        $userId = session()->get('user_id');
+        // Support both 'user_id' and 'userId' for backward compatibility
+        $userId = session()->get('user_id') ?? session()->get('userId');
         $guru = $this->guruModel->getByUserId($userId);
 
         if (!$guru) {
@@ -534,7 +538,8 @@ class JurnalController extends BaseController
     public function print($kelasId = null)
     {
         // Get guru data from session
-        $userId = session()->get('user_id');
+        // Support both 'user_id' and 'userId' for backward compatibility
+        $userId = session()->get('user_id') ?? session()->get('userId');
         $guru = $this->guruModel->getByUserId($userId);
 
         if (!$guru) {
