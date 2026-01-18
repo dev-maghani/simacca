@@ -41,7 +41,8 @@ class DashboardController extends BaseController
      */
     public function index()
     {
-        $userId = $this->session->get('user_id');
+        // Support both 'user_id' and 'userId' for backward compatibility
+        $userId = $this->session->get('user_id') ?? $this->session->get('userId');
 
         // Get guru data
         $guru = $this->guruModel->getByUserId($userId);
@@ -326,7 +327,8 @@ class DashboardController extends BaseController
     {
         // Note: Auth check handled by filters
         $action = $this->request->getPost('action');
-        $userId = $this->session->get('user_id');
+        // Support both 'user_id' and 'userId' for backward compatibility
+        $userId = $this->session->get('user_id') ?? $this->session->get('userId');
         $guru = $this->guruModel->getByUserId($userId);
 
         if (!$guru) {
