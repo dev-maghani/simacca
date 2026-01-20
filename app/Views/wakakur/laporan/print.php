@@ -373,11 +373,15 @@
 </head>
 
 <body>
+    <button onclick="window.print()" class="print-button no-print">
+        <i class="fas fa-print"></i> Cetak Laporan
+    </button>
+
     <!-- Header dengan Logo -->
     <div class="header">
         <div class="header-content">
             <div class="logo">
-                <img src="<?= base_url('assets/images/sekolah.png') ?>" alt="Logo Sekolah" height="64px" />
+                <img src="<?= base_url('assets/images/sekolah.png') ?>" alt="Logo Sekolah" height="64" width="64" loading="eager" />
             </div>
             <div class="header-text">
                 <h3>PEMERINTAH PROPINSI SULAWESI SELATAN</h1>
@@ -388,7 +392,7 @@
                         <p><em>Email : smkn8bone@gmail.com</em></p>
             </div>
             <div class="logo">
-                <img src="<?= base_url('assets/images/provinsi.png') ?>" alt="Logo Provinsi" height="64px">
+                <img src="<?= base_url('assets/images/provinsi.png') ?>" alt="Logo Provinsi" height="64" width="64" loading="eager">
             </div>
         </div>
     </div>
@@ -533,7 +537,7 @@
                                 <td class="center"><?= $jadwal['jumlah_alpa']; ?></td>
                                 <td class="foto-cell">
                                     <?php if (!empty($jadwal['foto_dokumentasi'])): ?>
-                                        <img src="<?= base_url('files/jurnal/' . $jadwal['foto_dokumentasi']); ?>" alt="Foto">
+                                        <img src="<?= base_url('files/jurnal/' . $jadwal['foto_dokumentasi']); ?>" alt="Foto" loading="lazy">
                                     <?php else: ?>
                                         -
                                     <?php endif; ?>
@@ -568,23 +572,23 @@
         <p><strong>Keterangan:</strong></p>
         <table style="margin-left: 15px; margin-top: 3px; font-size: 8pt;">
             <tr>
-                <td style="width: 25px;">H</td>
-                <td style="width: 8px;">:</td>
+                <td style="width: 1%;">H</td>
+                <td style="width: 1%;">:</td>
                 <td style="width: 100px;">Hadir</td>
             </tr>
             <tr>
-                <td style="width: 25px;">S</td>
-                <td style="width: 8px;">:</td>
+                <td style="width: 1%;">S</td>
+                <td style="width: 1%;">:</td>
                 <td style="width: 100px;">Sakit</td>
             </tr>
             <tr>
-                <td style="width: 25px;">I</td>
-                <td style="width: 8px;">:</td>
+                <td style="width: 1%;">I</td>
+                <td style="width: 1%;">:</td>
                 <td style="width: 100px;">Izin</td>
             </tr>
             <tr>
-                <td style="width: 25px;">A</td>
-                <td style="width: 8px;">:</td>
+                <td style="width: 1%;">A</td>
+                <td style="width: 1%;">:</td>
                 <td>Alpa (Tanpa Keterangan)</td>
             </tr>
         </table>
@@ -610,9 +614,9 @@
 
     <script>
         // Auto print when page loads
-        window.onload = function() {
-            window.print();
-        };
+        // window.onload = function() {
+        //    window.print();
+        // };
     </script>
 </body>
 
