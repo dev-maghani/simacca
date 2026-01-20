@@ -427,50 +427,8 @@
 
     <!-- Summary Section - HYBRID APPROACH -->
     <div class="summary-section">
-        <!-- Perspektif 1: Session-Based (Existing) -->
-        <div class="summary-box" style="margin-bottom: 15px; border: 2px solid #3b82f6;">
-            <h3 style="color: #3b82f6; margin-bottom: 10px;">📊 Ringkasan Kehadiran (Perspektif Sesi Pembelajaran)</h3>
-            <p style="font-size: 8pt; color: #666; margin-bottom: 10px; font-style: italic;">
-                Menghitung total record kehadiran dari semua jadwal yang terisi
-            </p>
-            <div class="summary-grid">
-                <div class="summary-item">
-                    <div class="label">Hadir</div>
-                    <div class="value" style="color: #10b981;"><?= $totalStats['hadir']; ?>×</div>
-                </div>
-                <div class="summary-item">
-                    <div class="label">Sakit</div>
-                    <div class="value" style="color: #f59e0b;"><?= $totalStats['sakit']; ?>×</div>
-                </div>
-                <div class="summary-item">
-                    <div class="label">Izin</div>
-                    <div class="value" style="color: #3b82f6;"><?= $totalStats['izin']; ?>×</div>
-                </div>
-                <div class="summary-item">
-                    <div class="label">Alpa</div>
-                    <div class="value" style="color: #ef4444;"><?= $totalStats['alpa']; ?>×</div>
-                </div>
-                <div class="summary-item">
-                    <div class="label">Total Record</div>
-                    <div class="value"><?= $totalStats['total']; ?></div>
-                </div>
-                <div class="summary-item">
-                    <div class="label">Sudah Isi</div>
-                    <div class="value" style="color: #10b981;"><?= $totalStats['jadwal_sudah_isi']; ?></div>
-                </div>
-                <div class="summary-item">
-                    <div class="label">Belum Isi</div>
-                    <div class="value" style="color: #ef4444;"><?= $totalStats['jadwal_belum_isi']; ?></div>
-                </div>
-            </div>
-            <p class="mt-20 text-small" style="text-align: center;">
-                <strong>Rata-rata Kehadiran per Sesi: <?= $totalStats['percentage']; ?>% | Pengisian: <?= $totalStats['percentage_isi']; ?>% (<?= $totalStats['jadwal_sudah_isi']; ?>/<?= $totalStats['total_jadwal']; ?> jadwal)</strong>
-            </p>
-        </div>
-
-        <!-- Perspektif 2: Student-Based (NEW) -->
         <div class="summary-box" style="border: 2px solid #10b981;">
-            <h3 style="color: #10b981; margin-bottom: 10px;">👥 Ringkasan Kehadiran (Perspektif Siswa)</h3>
+            <h3 style="color: #10b981; margin-bottom: 10px;">Ringkasan Pengisian Guru dan Kehadiran Murid</h3>
             <p style="font-size: 8pt; color: #666; margin-bottom: 10px; font-style: italic;">
                 Menghitung kategori kehadiran per siswa dari total <?= $siswaStats['total_siswa']; ?> siswa yang tercatat pada tanggal ini
             </p>
@@ -482,10 +440,10 @@
                         <?= $siswaStats['hadir_semua']; ?> siswa
                     </div>
                     <div class="text-small" style="color: #666; margin-top: 5px;">
-                        <?php 
-                            $pctHadirSemua = $siswaStats['total_siswa'] > 0 
-                                ? round(($siswaStats['hadir_semua'] / $siswaStats['total_siswa']) * 100, 1) 
-                                : 0;
+                        <?php
+                        $pctHadirSemua = $siswaStats['total_siswa'] > 0
+                            ? round(($siswaStats['hadir_semua'] / $siswaStats['total_siswa']) * 100, 1)
+                            : 0;
                         ?>
                         (<?= $pctHadirSemua; ?>%)
                     </div>
@@ -498,10 +456,10 @@
                         <?= $siswaStats['sakit_semua']; ?> siswa
                     </div>
                     <div class="text-small" style="color: #666; margin-top: 5px;">
-                        <?php 
-                            $pctSakitSemua = $siswaStats['total_siswa'] > 0 
-                                ? round(($siswaStats['sakit_semua'] / $siswaStats['total_siswa']) * 100, 1) 
-                                : 0;
+                        <?php
+                        $pctSakitSemua = $siswaStats['total_siswa'] > 0
+                            ? round(($siswaStats['sakit_semua'] / $siswaStats['total_siswa']) * 100, 1)
+                            : 0;
                         ?>
                         (<?= $pctSakitSemua; ?>%)
                     </div>
@@ -513,10 +471,10 @@
                         <?= $siswaStats['izin_semua']; ?> siswa
                     </div>
                     <div class="text-small" style="color: #666; margin-top: 5px;">
-                        <?php 
-                            $pctIzinSemua = $siswaStats['total_siswa'] > 0 
-                                ? round(($siswaStats['izin_semua'] / $siswaStats['total_siswa']) * 100, 1) 
-                                : 0;
+                        <?php
+                        $pctIzinSemua = $siswaStats['total_siswa'] > 0
+                            ? round(($siswaStats['izin_semua'] / $siswaStats['total_siswa']) * 100, 1)
+                            : 0;
                         ?>
                         (<?= $pctIzinSemua; ?>%)
                     </div>
@@ -528,10 +486,10 @@
                         <?= $siswaStats['alpa_semua']; ?> siswa
                     </div>
                     <div class="text-small" style="color: #dc2626; margin-top: 5px; font-weight: bold;">
-                        <?php 
-                            $pctAlpaSemua = $siswaStats['total_siswa'] > 0 
-                                ? round(($siswaStats['alpa_semua'] / $siswaStats['total_siswa']) * 100, 1) 
-                                : 0;
+                        <?php
+                        $pctAlpaSemua = $siswaStats['total_siswa'] > 0
+                            ? round(($siswaStats['alpa_semua'] / $siswaStats['total_siswa']) * 100, 1)
+                            : 0;
                         ?>
                         (<?= $pctAlpaSemua; ?>%) - CRITICAL!
                     </div>
@@ -544,10 +502,10 @@
                         <?= $siswaStats['hadir_sakit']; ?> siswa
                     </div>
                     <div class="text-small" style="color: #666; margin-top: 5px;">
-                        <?php 
-                            $pctHadirSakit = $siswaStats['total_siswa'] > 0 
-                                ? round(($siswaStats['hadir_sakit'] / $siswaStats['total_siswa']) * 100, 1) 
-                                : 0;
+                        <?php
+                        $pctHadirSakit = $siswaStats['total_siswa'] > 0
+                            ? round(($siswaStats['hadir_sakit'] / $siswaStats['total_siswa']) * 100, 1)
+                            : 0;
                         ?>
                         (<?= $pctHadirSakit; ?>%)
                     </div>
@@ -559,10 +517,10 @@
                         <?= $siswaStats['hadir_izin']; ?> siswa
                     </div>
                     <div class="text-small" style="color: #666; margin-top: 5px;">
-                        <?php 
-                            $pctHadirIzin = $siswaStats['total_siswa'] > 0 
-                                ? round(($siswaStats['hadir_izin'] / $siswaStats['total_siswa']) * 100, 1) 
-                                : 0;
+                        <?php
+                        $pctHadirIzin = $siswaStats['total_siswa'] > 0
+                            ? round(($siswaStats['hadir_izin'] / $siswaStats['total_siswa']) * 100, 1)
+                            : 0;
                         ?>
                         (<?= $pctHadirIzin; ?>%)
                     </div>
@@ -574,10 +532,10 @@
                         <?= $siswaStats['hadir_alpa']; ?> siswa
                     </div>
                     <div class="text-small" style="color: #ef4444; margin-top: 5px; font-weight: bold;">
-                        <?php 
-                            $pctHadirAlpa = $siswaStats['total_siswa'] > 0 
-                                ? round(($siswaStats['hadir_alpa'] / $siswaStats['total_siswa']) * 100, 1) 
-                                : 0;
+                        <?php
+                        $pctHadirAlpa = $siswaStats['total_siswa'] > 0
+                            ? round(($siswaStats['hadir_alpa'] / $siswaStats['total_siswa']) * 100, 1)
+                            : 0;
                         ?>
                         (<?= $pctHadirAlpa; ?>%) - PERHATIAN!
                     </div>
@@ -590,10 +548,10 @@
                         <?= $siswaStats['tidak_tercatat']; ?> siswa
                     </div>
                     <div class="text-small" style="color: #666; margin-top: 5px;">
-                        <?php 
-                            $pctTidakTercatat = $siswaStats['total_siswa'] > 0 
-                                ? round(($siswaStats['tidak_tercatat'] / $siswaStats['total_siswa']) * 100, 1) 
-                                : 0;
+                        <?php
+                        $pctTidakTercatat = $siswaStats['total_siswa'] > 0
+                            ? round(($siswaStats['tidak_tercatat'] / $siswaStats['total_siswa']) * 100, 1)
+                            : 0;
                         ?>
                         (<?= $pctTidakTercatat; ?>%)
                     </div>
@@ -605,12 +563,29 @@
                         <?= $siswaStats['lainnya']; ?> siswa
                     </div>
                     <div class="text-small" style="color: #666; margin-top: 5px;">
-                        <?php 
-                            $pctLainnya = $siswaStats['total_siswa'] > 0 
-                                ? round(($siswaStats['lainnya'] / $siswaStats['total_siswa']) * 100, 1) 
-                                : 0;
+                        <?php
+                        $pctLainnya = $siswaStats['total_siswa'] > 0
+                            ? round(($siswaStats['lainnya'] / $siswaStats['total_siswa']) * 100, 1)
+                            : 0;
                         ?>
                         (<?= $pctLainnya; ?>%)
+                    </div>
+                </div>
+
+                <div class="summary-item">
+                    <div class="label">Sudah Isi</div>
+                    <div class="value" style="color: #10b981;"><?= $totalStats['jadwal_sudah_isi']; ?> Jadwal</div>
+                    <!-- New Code -->
+                    <div class="text-small" style="color: #666; margin-top: 5px;">
+                        (<?= $totalStats['percentage_isi']; ?>%)
+                    </div>
+                </div>
+                <div class="summary-item">
+                    <div class="label">Belum Isi</div>
+                    <div class="value" style="color: #ef4444;"><?= $totalStats['jadwal_belum_isi']; ?> Jadwal</div>
+                    <!-- New Code -->
+                    <div class="text-small" style="color: #666; margin-top: 5px;">
+                        (<?= 100-$totalStats['percentage_isi']; ?>%)
                     </div>
                 </div>
             </div>
