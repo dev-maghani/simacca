@@ -230,4 +230,254 @@ class AbsensiDetailModel extends Model
         }
         return $rows;
     }
+
+    /**
+     * Get statistik kehadiran per siswa (student-centric approach)
+     * Menghitung berapa siswa yang hadir sempurna, ada alpa, dll
+     * 
+     * @param string $tanggal Tanggal yang dicek
+     * @param int|null $kelasId Filter kelas (null = semua kelas)
+     * @return array Statistik per siswa dengan kategori kehadiran
+     */
+    public function getStatistikPerSiswa(string $tanggal, ?int $kelasId = null): array
+    {
+        // Step 1: Hitung total jadwal yang sudah terisi PER KELAS pada tanggal tersebut
+        $builderJadwalPerKelas = $this->db->table('absensi a')
+            ->select('jm.kelas_id, COUNT(DISTINCT a.id) as total_jadwal_terisi')
+            ->join('jadwal_mengajar jm', 'jm.id = a.jadwal_mengajar_id')
+            ->where('a.tanggal', $tanggal);
+        
+        if ($kelasId) {
+            $builderJadwalPerKelas->where('jm.kelas_id', $kelasId);
+        }
+        
+        $builderJadwalPerKelas->groupBy('jm.kelas_id');
+        $jadwalPerKelasData = $builderJadwalPerKelas->get()->getResultArray();
+        
+        // Buat lookup untuk total jadwal per kelas
+        $jadwalPerKelasLookup = [];
+        $totalJadwalTerisi = 0;
+        foreach ($jadwalPerKelasData as $row) {
+            $jadwalPerKelasLookup[$row['kelas_id']] = (int)$row['total_jadwal_terisi'];
+            $totalJadwalTerisi += (int)$row['total_jadwal_terisi'];
+        }
+
+        // Jika tidak ada jadwal terisi, return data kosong
+        if ($totalJadwalTerisi === 0) {
+            return [
+                'total_siswa' => 0,
+                'hadir_semua' => 0,
+                'sakit_semua' => 0,
+                'izin_semua' => 0,
+                'alpa_semua' => 0,
+                'hadir_sakit' => 0,
+                'hadir_izin' => 0,
+                'hadir_alpa' => 0,
+                'tidak_tercatat' => 0,
+                'lainnya' => 0,
+                'total_jadwal_terisi' => 0,
+                'detail_siswa' => []
+            ];
+        }
+
+        // Step 2a: Get kelas-kelas yang ada jadwal pada tanggal ini
+        $kelasYangAdaJadwal = array_keys($jadwalPerKelasLookup);
+        
+        if (empty($kelasYangAdaJadwal)) {
+            return [
+                'total_siswa' => 0,
+                'hadir_semua' => 0,
+                'sakit_semua' => 0,
+                'izin_semua' => 0,
+                'alpa_semua' => 0,
+                'hadir_sakit' => 0,
+                'hadir_izin' => 0,
+                'hadir_alpa' => 0,
+                'tidak_tercatat' => 0,
+                'lainnya' => 0,
+                'total_jadwal_terisi' => 0,
+                'detail_siswa' => []
+            ];
+        }
+
+        // Step 2b: Get SEMUA siswa dari kelas yang ada jadwal (termasuk yang tidak tercatat)
+        $builderAllSiswa = $this->db->table('siswa s')
+            ->select('s.id as siswa_id,
+                s.nama_lengkap,
+                s.nis,
+                s.kelas_id,
+                k.nama_kelas')
+            ->join('kelas k', 'k.id = s.kelas_id')
+            ->whereIn('s.kelas_id', $kelasYangAdaJadwal);
+        
+        if ($kelasId) {
+            $builderAllSiswa->where('s.kelas_id', $kelasId);
+        }
+        
+        $allSiswaData = $builderAllSiswa->get()->getResultArray();
+
+        // Step 2c: Get statistik untuk siswa yang TERCATAT di absensi_detail
+        $builderStats = $this->db->table('absensi_detail ad')
+            ->select('s.id as siswa_id,
+                COUNT(DISTINCT ad.absensi_id) as total_sesi_diikuti,
+                SUM(CASE WHEN ad.status = "hadir" THEN 1 ELSE 0 END) as total_hadir,
+                SUM(CASE WHEN ad.status = "sakit" THEN 1 ELSE 0 END) as total_sakit,
+                SUM(CASE WHEN ad.status = "izin" THEN 1 ELSE 0 END) as total_izin,
+                SUM(CASE WHEN ad.status = "alpa" THEN 1 ELSE 0 END) as total_alpa')
+            ->join('absensi a', 'a.id = ad.absensi_id')
+            ->join('siswa s', 's.id = ad.siswa_id')
+            ->where('a.tanggal', $tanggal)
+            ->whereIn('s.kelas_id', $kelasYangAdaJadwal);
+
+        if ($kelasId) {
+            $builderStats->where('s.kelas_id', $kelasId);
+        }
+
+        $builderStats->groupBy('s.id');
+        $statsData = $builderStats->get()->getResultArray();
+        
+        // Buat lookup untuk stats
+        $statsLookup = [];
+        foreach ($statsData as $stat) {
+            $statsLookup[$stat['siswa_id']] = $stat;
+        }
+        
+        // Total siswa (semua siswa dari kelas yang ada jadwal)
+        $totalSiswa = count($allSiswaData);
+
+        // Step 3: Kategorikan siswa dan hitung statistik
+        // SIMPLIFIKASI: 7 KATEGORI UTAMA + 2 KATEGORI TAMBAHAN
+        $kategorisasi = [
+            'hadir_semua' => 0,      // Hadir di semua mapel
+            'sakit_semua' => 0,      // Sakit di semua mapel
+            'izin_semua' => 0,       // Izin di semua mapel
+            'alpa_semua' => 0,       // Alpa di semua mapel
+            'hadir_sakit' => 0,      // Hadir sebagian + Sakit sebagian
+            'hadir_izin' => 0,       // Hadir sebagian + Izin sebagian
+            'hadir_alpa' => 0,       // Hadir sebagian + Alpa sebagian
+            'tidak_tercatat' => 0,   // Tidak ada record sama sekali
+            'lainnya' => 0           // Kombinasi lainnya
+        ];
+
+        $detailSiswa = [];
+
+        // Loop semua siswa dari kelas yang ada jadwal
+        foreach ($allSiswaData as $siswa) {
+            $siswaId = (int)$siswa['siswa_id'];
+            $kelasIdSiswa = (int)$siswa['kelas_id'];
+            
+            // Get stats untuk siswa ini (jika ada)
+            $stats = $statsLookup[$siswaId] ?? null;
+            
+            // Get total jadwal terisi untuk kelas siswa ini
+            $totalJadwalKelasIni = $jadwalPerKelasLookup[$kelasIdSiswa] ?? 0;
+            
+            // Tentukan kategori
+            $kategori = '';
+            
+            if ($stats === null) {
+                // Siswa TIDAK TERCATAT sama sekali di tanggal ini
+                $kategori = 'tidak_tercatat';
+                $kategorisasi['tidak_tercatat']++;
+                
+                $detailSiswa[] = [
+                    'siswa_id' => $siswaId,
+                    'nama_lengkap' => $siswa['nama_lengkap'],
+                    'nis' => $siswa['nis'],
+                    'nama_kelas' => $siswa['nama_kelas'],
+                    'kelas_id' => $kelasIdSiswa,
+                    'total_hadir' => 0,
+                    'total_sakit' => 0,
+                    'total_izin' => 0,
+                    'total_alpa' => 0,
+                    'total_sesi_diikuti' => 0,
+                    'total_jadwal_kelas' => $totalJadwalKelasIni,
+                    'kategori' => $kategori,
+                    'persentase_hadir' => 0
+                ];
+            } else {
+                // Siswa tercatat, hitung dari stats
+                $totalHadir = (int)$stats['total_hadir'];
+                $totalSakit = (int)$stats['total_sakit'];
+                $totalIzin = (int)$stats['total_izin'];
+                $totalAlpa = (int)$stats['total_alpa'];
+                $totalSesiDiikuti = (int)$stats['total_sesi_diikuti'];
+                
+                // SIMPLIFIKASI: 7 KATEGORI JELAS
+                
+                if ($totalHadir === $totalJadwalKelasIni && $totalHadir === $totalSesiDiikuti) {
+                    // 1. Hadir di SEMUA jadwal kelasnya
+                    $kategori = 'hadir_semua';
+                    $kategorisasi['hadir_semua']++;
+                    
+                } elseif ($totalSakit === $totalJadwalKelasIni && $totalSakit === $totalSesiDiikuti) {
+                    // 2. Sakit di SEMUA jadwal kelasnya
+                    $kategori = 'sakit_semua';
+                    $kategorisasi['sakit_semua']++;
+                    
+                } elseif ($totalIzin === $totalJadwalKelasIni && $totalIzin === $totalSesiDiikuti) {
+                    // 3. Izin di SEMUA jadwal kelasnya
+                    $kategori = 'izin_semua';
+                    $kategorisasi['izin_semua']++;
+                    
+                } elseif ($totalAlpa === $totalJadwalKelasIni && $totalAlpa === $totalSesiDiikuti) {
+                    // 4. Alpa di SEMUA jadwal kelasnya
+                    $kategori = 'alpa_semua';
+                    $kategorisasi['alpa_semua']++;
+                    
+                } elseif ($totalHadir > 0 && $totalSakit > 0 && $totalIzin === 0 && $totalAlpa === 0) {
+                    // 5. Hadir di beberapa mapel, Sakit di beberapa mapel
+                    $kategori = 'hadir_sakit';
+                    $kategorisasi['hadir_sakit']++;
+                    
+                } elseif ($totalHadir > 0 && $totalIzin > 0 && $totalSakit === 0 && $totalAlpa === 0) {
+                    // 6. Hadir di beberapa mapel, Izin di beberapa mapel
+                    $kategori = 'hadir_izin';
+                    $kategorisasi['hadir_izin']++;
+                    
+                } elseif ($totalHadir > 0 && $totalAlpa > 0) {
+                    // 7. Hadir di beberapa mapel, Alpa di beberapa mapel
+                    $kategori = 'hadir_alpa';
+                    $kategorisasi['hadir_alpa']++;
+                    
+                } else {
+                    // Kategori lainnya yang tidak masuk 7 kategori utama
+                    // Contoh: kombinasi sakit+izin, sakit+alpa, izin+alpa, atau campuran 3
+                    $kategori = 'lainnya';
+                    $kategorisasi['lainnya']++;
+                }
+
+                $detailSiswa[] = [
+                    'siswa_id' => $siswaId,
+                    'nama_lengkap' => $siswa['nama_lengkap'],
+                    'nis' => $siswa['nis'],
+                    'nama_kelas' => $siswa['nama_kelas'],
+                    'kelas_id' => $kelasIdSiswa,
+                    'total_hadir' => $totalHadir,
+                    'total_sakit' => $totalSakit,
+                    'total_izin' => $totalIzin,
+                    'total_alpa' => $totalAlpa,
+                    'total_sesi_diikuti' => $totalSesiDiikuti,
+                    'total_jadwal_kelas' => $totalJadwalKelasIni,
+                    'kategori' => $kategori,
+                    'persentase_hadir' => $totalJadwalKelasIni > 0 ? round(($totalHadir / $totalJadwalKelasIni) * 100, 2) : 0
+                ];
+            }
+        }
+
+        return [
+            'total_siswa' => $totalSiswa,
+            'hadir_semua' => $kategorisasi['hadir_semua'],
+            'sakit_semua' => $kategorisasi['sakit_semua'],
+            'izin_semua' => $kategorisasi['izin_semua'],
+            'alpa_semua' => $kategorisasi['alpa_semua'],
+            'hadir_sakit' => $kategorisasi['hadir_sakit'],
+            'hadir_izin' => $kategorisasi['hadir_izin'],
+            'hadir_alpa' => $kategorisasi['hadir_alpa'],
+            'tidak_tercatat' => $kategorisasi['tidak_tercatat'],
+            'lainnya' => $kategorisasi['lainnya'],
+            'total_jadwal_terisi' => $totalJadwalTerisi,
+            'detail_siswa' => $detailSiswa
+        ];
+    }
 }

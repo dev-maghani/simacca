@@ -155,6 +155,9 @@ class LaporanController extends BaseController
         $totalStats['percentage'] = $totalStats['total'] > 0 ? round(($totalStats['hadir'] / $totalStats['total']) * 100, 2) : 0;
         $totalStats['percentage_isi'] = $totalStats['total_jadwal'] > 0 ? round(($totalStats['jadwal_sudah_isi'] / $totalStats['total_jadwal']) * 100, 2) : 0;
 
+        // Get statistik per siswa (student-centric approach)
+        $siswaStats = $this->absensiDetailModel->getStatistikPerSiswa($tanggal, $kelasId);
+
         $data = [
             'title' => 'Cetak Laporan Absensi Detail - Wakakur',
             'guru' => $guru,
@@ -163,6 +166,7 @@ class LaporanController extends BaseController
             'kelasList' => $kelasList,
             'laporanPerHari' => $laporanPerHari,
             'totalStats' => $totalStats,
+            'siswaStats' => $siswaStats, // NEW: Student-centric statistics
         ];
 
         return view('wakakur/laporan/print', $data);

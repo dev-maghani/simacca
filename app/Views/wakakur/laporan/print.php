@@ -425,29 +425,33 @@
         <?php endif; ?>
     </div>
 
-    <!-- Summary Section -->
+    <!-- Summary Section - HYBRID APPROACH -->
     <div class="summary-section">
-        <div class="summary-box">
-            <h3>Ringkasan Kehadiran & Pengisian</h3>
+        <!-- Perspektif 1: Session-Based (Existing) -->
+        <div class="summary-box" style="margin-bottom: 15px; border: 2px solid #3b82f6;">
+            <h3 style="color: #3b82f6; margin-bottom: 10px;">📊 Ringkasan Kehadiran (Perspektif Sesi Pembelajaran)</h3>
+            <p style="font-size: 8pt; color: #666; margin-bottom: 10px; font-style: italic;">
+                Menghitung total record kehadiran dari semua jadwal yang terisi
+            </p>
             <div class="summary-grid">
                 <div class="summary-item">
                     <div class="label">Hadir</div>
-                    <div class="value" style="color: #10b981;"><?= $totalStats['hadir']; ?></div>
+                    <div class="value" style="color: #10b981;"><?= $totalStats['hadir']; ?>×</div>
                 </div>
                 <div class="summary-item">
                     <div class="label">Sakit</div>
-                    <div class="value" style="color: #f59e0b;"><?= $totalStats['sakit']; ?></div>
+                    <div class="value" style="color: #f59e0b;"><?= $totalStats['sakit']; ?>×</div>
                 </div>
                 <div class="summary-item">
                     <div class="label">Izin</div>
-                    <div class="value" style="color: #3b82f6;"><?= $totalStats['izin']; ?></div>
+                    <div class="value" style="color: #3b82f6;"><?= $totalStats['izin']; ?>×</div>
                 </div>
                 <div class="summary-item">
                     <div class="label">Alpa</div>
-                    <div class="value" style="color: #ef4444;"><?= $totalStats['alpa']; ?></div>
+                    <div class="value" style="color: #ef4444;"><?= $totalStats['alpa']; ?>×</div>
                 </div>
                 <div class="summary-item">
-                    <div class="label">Total Absensi</div>
+                    <div class="label">Total Record</div>
                     <div class="value"><?= $totalStats['total']; ?></div>
                 </div>
                 <div class="summary-item">
@@ -460,7 +464,161 @@
                 </div>
             </div>
             <p class="mt-20 text-small" style="text-align: center;">
-                <strong>Kehadiran: <?= $totalStats['percentage']; ?>% | Pengisian: <?= $totalStats['percentage_isi']; ?>% (<?= $totalStats['jadwal_sudah_isi']; ?>/<?= $totalStats['total_jadwal']; ?> jadwal)</strong>
+                <strong>Rata-rata Kehadiran per Sesi: <?= $totalStats['percentage']; ?>% | Pengisian: <?= $totalStats['percentage_isi']; ?>% (<?= $totalStats['jadwal_sudah_isi']; ?>/<?= $totalStats['total_jadwal']; ?> jadwal)</strong>
+            </p>
+        </div>
+
+        <!-- Perspektif 2: Student-Based (NEW) -->
+        <div class="summary-box" style="border: 2px solid #10b981;">
+            <h3 style="color: #10b981; margin-bottom: 10px;">👥 Ringkasan Kehadiran (Perspektif Siswa)</h3>
+            <p style="font-size: 8pt; color: #666; margin-bottom: 10px; font-style: italic;">
+                Menghitung kategori kehadiran per siswa dari total <?= $siswaStats['total_siswa']; ?> siswa yang tercatat pada tanggal ini
+            </p>
+            <div class="summary-grid">
+                <!-- KATEGORI HADIR PENUH -->
+                <div class="summary-item">
+                    <div class="label">✅ Hadir Semua Mapel</div>
+                    <div class="value" style="color: #10b981; font-weight: bold;">
+                        <?= $siswaStats['hadir_semua']; ?> siswa
+                    </div>
+                    <div class="text-small" style="color: #666; margin-top: 5px;">
+                        <?php 
+                            $pctHadirSemua = $siswaStats['total_siswa'] > 0 
+                                ? round(($siswaStats['hadir_semua'] / $siswaStats['total_siswa']) * 100, 1) 
+                                : 0;
+                        ?>
+                        (<?= $pctHadirSemua; ?>%)
+                    </div>
+                </div>
+
+                <!-- KATEGORI TIDAK HADIR PENUH -->
+                <div class="summary-item">
+                    <div class="label">🤒 Sakit Semua Mapel</div>
+                    <div class="value" style="color: #f59e0b; font-weight: bold;">
+                        <?= $siswaStats['sakit_semua']; ?> siswa
+                    </div>
+                    <div class="text-small" style="color: #666; margin-top: 5px;">
+                        <?php 
+                            $pctSakitSemua = $siswaStats['total_siswa'] > 0 
+                                ? round(($siswaStats['sakit_semua'] / $siswaStats['total_siswa']) * 100, 1) 
+                                : 0;
+                        ?>
+                        (<?= $pctSakitSemua; ?>%)
+                    </div>
+                </div>
+
+                <div class="summary-item">
+                    <div class="label">📝 Izin Semua Mapel</div>
+                    <div class="value" style="color: #3b82f6; font-weight: bold;">
+                        <?= $siswaStats['izin_semua']; ?> siswa
+                    </div>
+                    <div class="text-small" style="color: #666; margin-top: 5px;">
+                        <?php 
+                            $pctIzinSemua = $siswaStats['total_siswa'] > 0 
+                                ? round(($siswaStats['izin_semua'] / $siswaStats['total_siswa']) * 100, 1) 
+                                : 0;
+                        ?>
+                        (<?= $pctIzinSemua; ?>%)
+                    </div>
+                </div>
+
+                <div class="summary-item">
+                    <div class="label">🔴 Alpa Semua Mapel</div>
+                    <div class="value" style="color: #dc2626; font-weight: bold; background-color: #fee2e2; padding: 5px; border-radius: 4px;">
+                        <?= $siswaStats['alpa_semua']; ?> siswa
+                    </div>
+                    <div class="text-small" style="color: #dc2626; margin-top: 5px; font-weight: bold;">
+                        <?php 
+                            $pctAlpaSemua = $siswaStats['total_siswa'] > 0 
+                                ? round(($siswaStats['alpa_semua'] / $siswaStats['total_siswa']) * 100, 1) 
+                                : 0;
+                        ?>
+                        (<?= $pctAlpaSemua; ?>%) - CRITICAL!
+                    </div>
+                </div>
+
+                <!-- KATEGORI HADIR SEBAGIAN -->
+                <div class="summary-item">
+                    <div class="label">✅🤒 Hadir + Sakit</div>
+                    <div class="value" style="color: #f59e0b;">
+                        <?= $siswaStats['hadir_sakit']; ?> siswa
+                    </div>
+                    <div class="text-small" style="color: #666; margin-top: 5px;">
+                        <?php 
+                            $pctHadirSakit = $siswaStats['total_siswa'] > 0 
+                                ? round(($siswaStats['hadir_sakit'] / $siswaStats['total_siswa']) * 100, 1) 
+                                : 0;
+                        ?>
+                        (<?= $pctHadirSakit; ?>%)
+                    </div>
+                </div>
+
+                <div class="summary-item">
+                    <div class="label">✅📝 Hadir + Izin</div>
+                    <div class="value" style="color: #3b82f6;">
+                        <?= $siswaStats['hadir_izin']; ?> siswa
+                    </div>
+                    <div class="text-small" style="color: #666; margin-top: 5px;">
+                        <?php 
+                            $pctHadirIzin = $siswaStats['total_siswa'] > 0 
+                                ? round(($siswaStats['hadir_izin'] / $siswaStats['total_siswa']) * 100, 1) 
+                                : 0;
+                        ?>
+                        (<?= $pctHadirIzin; ?>%)
+                    </div>
+                </div>
+
+                <div class="summary-item">
+                    <div class="label">✅⚠️ Hadir + Alpa</div>
+                    <div class="value" style="color: #ef4444; font-weight: bold;">
+                        <?= $siswaStats['hadir_alpa']; ?> siswa
+                    </div>
+                    <div class="text-small" style="color: #ef4444; margin-top: 5px; font-weight: bold;">
+                        <?php 
+                            $pctHadirAlpa = $siswaStats['total_siswa'] > 0 
+                                ? round(($siswaStats['hadir_alpa'] / $siswaStats['total_siswa']) * 100, 1) 
+                                : 0;
+                        ?>
+                        (<?= $pctHadirAlpa; ?>%) - PERHATIAN!
+                    </div>
+                </div>
+
+                <!-- KATEGORI LAINNYA -->
+                <div class="summary-item">
+                    <div class="label">❓ Tidak Tercatat</div>
+                    <div class="value" style="color: #6b7280;">
+                        <?= $siswaStats['tidak_tercatat']; ?> siswa
+                    </div>
+                    <div class="text-small" style="color: #666; margin-top: 5px;">
+                        <?php 
+                            $pctTidakTercatat = $siswaStats['total_siswa'] > 0 
+                                ? round(($siswaStats['tidak_tercatat'] / $siswaStats['total_siswa']) * 100, 1) 
+                                : 0;
+                        ?>
+                        (<?= $pctTidakTercatat; ?>%)
+                    </div>
+                </div>
+
+                <div class="summary-item">
+                    <div class="label">🔀 Lainnya</div>
+                    <div class="value" style="color: #8b5cf6;">
+                        <?= $siswaStats['lainnya']; ?> siswa
+                    </div>
+                    <div class="text-small" style="color: #666; margin-top: 5px;">
+                        <?php 
+                            $pctLainnya = $siswaStats['total_siswa'] > 0 
+                                ? round(($siswaStats['lainnya'] / $siswaStats['total_siswa']) * 100, 1) 
+                                : 0;
+                        ?>
+                        (<?= $pctLainnya; ?>%)
+                    </div>
+                </div>
+            </div>
+            <p class="mt-20 text-small" style="text-align: center; background-color: #f0fdf4; padding: 8px; border-radius: 4px;">
+                <strong>Total Siswa: <?= $siswaStats['total_siswa']; ?> orang | Jadwal Terisi: <?= $siswaStats['total_jadwal_terisi']; ?> sesi pembelajaran</strong>
+            </p>
+            <p class="mt-10 text-small" style="text-align: center; color: #666; font-style: italic;">
+                💡 <em>Catatan: <strong>"Hadir Semua Mapel"</strong> = hadir 100% di semua mapel. <strong>"Sakit/Izin/Alpa Semua Mapel"</strong> = status tersebut di 100% mapel. <strong>"Hadir + X"</strong> = hadir di beberapa mapel, X di beberapa mapel lainnya. <strong>"Tidak Tercatat"</strong> = tidak ada record sama sekali. <strong>"Lainnya"</strong> = kombinasi kompleks (misal: sakit+izin+alpa).</em>
             </p>
         </div>
     </div>
