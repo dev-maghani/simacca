@@ -482,17 +482,28 @@
 
                 <div class="summary-item">
                     <div class="label">🔴 Alpa Semua Mapel</div>
-                    <div class="value" style="color: #dc2626; font-weight: bold; background-color: #fee2e2; padding: 5px; border-radius: 4px;">
-                        <?= $siswaStats['alpa_semua']; ?> siswa
-                    </div>
-                    <div class="text-small" style="color: #dc2626; margin-top: 5px; font-weight: bold;">
-                        <?php
-                        $pctAlpaSemua = $siswaStats['total_siswa'] > 0
-                            ? round(($siswaStats['alpa_semua'] / $siswaStats['total_siswa']) * 100, 1)
-                            : 0;
-                        ?>
-                        (<?= $pctAlpaSemua; ?>%) - CRITICAL!
-                    </div>
+                    <?php
+                    $pctAlpaSemua = $siswaStats['total_siswa'] > 0
+                        ? round(($siswaStats['alpa_semua'] / $siswaStats['total_siswa']) * 100, 1)
+                        : 0;
+                    ?>
+                    <?php if ($pctAlpaSemua > 20): ?>
+                        <div class="value" style="color: #dc2626; font-weight: bold; background-color: #fee2e2; padding: 5px; border-radius: 4px;">
+                            <?= $siswaStats['alpa_semua']; ?> siswa
+                        </div>
+
+                        <div class="text-small" style="color: #dc2626; margin-top: 5px; font-weight: bold;">
+                            (<?= $pctAlpaSemua; ?>%) - CRITICAL!
+                        </div>
+                    <?php else: ?>
+                        <div class="value" style="color: #10b981; font-weight: bold; background-color: #D1FAE5; padding: 5px; border-radius: 4px;">
+                            <?= $siswaStats['alpa_semua']; ?> siswa
+                        </div>
+                        <div class="text-small" style="color: #10b981; margin-top: 5px; font-weight: bold;">
+                            (<?= $pctAlpaSemua; ?>%) - AMAN!
+                        </div>
+
+                    <?php endif; ?>
                 </div>
 
                 <!-- KATEGORI HADIR SEBAGIAN -->
@@ -585,7 +596,7 @@
                     <div class="value" style="color: #ef4444;"><?= $totalStats['jadwal_belum_isi']; ?> Jadwal</div>
                     <!-- New Code -->
                     <div class="text-small" style="color: #666; margin-top: 5px;">
-                        (<?= 100-$totalStats['percentage_isi']; ?>%)
+                        (<?= 100 - $totalStats['percentage_isi']; ?>%)
                     </div>
                 </div>
             </div>
