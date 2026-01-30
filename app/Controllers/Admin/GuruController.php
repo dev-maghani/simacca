@@ -253,7 +253,6 @@ class GuruController extends BaseController
             ];
 
             $this->guruModel->update($id, $guruData);
-            // dd($this->guruModel->getLastQuery()->getQuery());
 
             // 3. Handle wali kelas assignment
             $kelasId = $this->request->getPost('kelas_id');
