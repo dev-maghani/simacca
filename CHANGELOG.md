@@ -1,5 +1,64 @@
 # 📋 CHANGELOG - Sistem Absensi Siswa
 
+## [1.6.0] - 2026-01-30
+
+### 📦 Documentation Reorganization
+**Type:** Maintenance | **Impact:** HIGH - Better project maintainability
+
+#### Changes Made:
+1. **Created Archive Structure (docs/archive/)**
+   - **COMPLETED_FEATURES.md** (~1400 lines) - All finished features by module
+   - **BUG_FIXES.md** (~600 lines) - Bug history with solutions
+   - **IMPLEMENTATION_DETAILS.md** (~900 lines) - Technical documentation
+   - **ACHIEVEMENTS.md** (~700 lines) - Major milestones and metrics
+   - Total: ~3600 lines of historical content organized
+
+2. **Restructured ARCHIVE.md**
+   - Converted from content file to index/navigation file
+   - Added quick statistics summary
+   - Added navigation guide for different user types
+   - Links to all 4 specialized archive files
+   - Timeline overview and impact summary
+
+3. **Restructured TODO.md**
+   - Reduced from 1823 lines to ~882 lines (52% reduction)
+   - Removed all completed tasks (moved to archive)
+   - Removed redundant bug fix documentation
+   - Removed duplicate feature descriptions
+   - Kept only: Current priorities, active tasks, future enhancements, guidelines
+   - Updated references to point to new archive structure
+
+4. **File Organization**
+   - TODO.md: Active development tasks only (~882 lines)
+   - ARCHIVE.md: Index with navigation (~200 lines)
+   - docs/archive/*.md: Specialized historical records (~3600 lines)
+   - CHANGELOG.md: Version history (this file)
+
+#### Impact:
+- ✅ **52% file size reduction** - TODO.md easier to navigate (1823 → 882 lines)
+- ✅ **Organized archive** - 4 specialized files for different purposes
+- ✅ **Better navigation** - ARCHIVE.md as index with quick stats
+- ✅ **Clear separation** - Active work vs historical record
+- ✅ **Better maintenance** - Focus on what's next, not what's done
+- ✅ **Preserved history** - Nothing deleted, just organized (~3600 lines archived)
+- ✅ **Improved onboarding** - New developers see current priorities first
+- ✅ **Professional structure** - Production-ready documentation organization
+
+#### Files Created:
+- `docs/archive/COMPLETED_FEATURES.md` - All completed features (~1400 lines)
+- `docs/archive/BUG_FIXES.md` - Bug history with solutions (~600 lines)
+- `docs/archive/IMPLEMENTATION_DETAILS.md` - Technical docs (~900 lines)
+- `docs/archive/ACHIEVEMENTS.md` - Major milestones (~700 lines)
+
+#### Files Modified:
+- `TODO.md` - Cleaned and restructured (1823 → 882 lines, 52% reduction)
+- `ARCHIVE.md` - Converted to index/navigation file (~200 lines)
+- `CHANGELOG.md` - Added this entry
+
+---
+
+# 📋 CHANGELOG - Sistem Absensi Siswa
+
 ## Ringkasan Perubahan Aplikasi
 
 ---

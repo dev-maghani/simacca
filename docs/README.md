@@ -1,96 +1,84 @@
 # 📚 SIMACCA Documentation
 
-**Sistem Manajemen Absensi Sekolah - Complete Documentation Index**
+> **Welcome to SIMACCA (Sistem Informasi Manajemen Administrasi Catatan dan Absensi) Documentation Center**
 
-Welcome to SIMACCA documentation! This index will help you find the right documentation for your needs.
-
----
-
-## 🗂️ Documentation Structure
-
-```
-docs/
-├── README.md                    (You are here)
-├── guides/                      (How-to guides & tutorials)
-├── summary/                     (Technical summaries & specs)
-└── email/                       (Email service documentation)
-```
+This directory contains all project documentation organized by category for easy navigation and reference.
 
 ---
 
-## 🚀 Getting Started
+## 📂 Documentation Structure
 
-### New to SIMACCA?
+### 🗂️ Archive (`archive/`)
+Historical records and completed work documentation.
 
-Start here for a quick setup:
+- **[ACHIEVEMENTS.md](archive/ACHIEVEMENTS.md)** - Major milestones and project achievements
+- **[BUG_FIXES.md](archive/BUG_FIXES.md)** - History of resolved bugs with solutions
+- **[COMPLETED_FEATURES.md](archive/COMPLETED_FEATURES.md)** - All completed features by module
+- **[IMPLEMENTATION_DETAILS.md](archive/IMPLEMENTATION_DETAILS.md)** - Technical implementation documentation (includes: Email System, Template System, Image Optimization, Guru Pengganti, Security, Database Fixes, Routes Optimization, Hybrid Statistics)
 
-1. **[Quick Start Guide](guides/QUICK_START.md)** ⚡  
-   *5-minute setup guide - get SIMACCA running fast!*
-
-2. **[System Requirements](guides/REQUIREMENTS.md)** 📋  
-   *Check if your system meets the requirements*
-
-3. **[Panduan Instalasi Lengkap](guides/PANDUAN_INSTALASI.md)** 📖  
-   *Complete installation guide (Bahasa Indonesia)*
-
-### For Developers
-
-Start building with SIMACCA:
-
-1. **[Layouts Complete Guide](guides/LAYOUTS_COMPLETE_GUIDE.md)** 📱💻  
-   *Everything about desktop & mobile layouts*
-
-2. **[Routes Optimization Summary](summary/ROUTES_OPTIMIZATION_SUMMARY.md)** 🛣️  
-   *Understanding route structure*
+**Purpose:** Reference for project history, learning from past issues, understanding implemented features.
 
 ---
 
-## 📖 Documentation by Category
+### 🔍 Audit (`audit/`)
+Code quality, security, and architecture reviews.
 
-### 🏗️ Installation & Setup
+- **[CODE_QUALITY_ARCHITECTURE_AUDIT_2026-01-30.md](audit/CODE_QUALITY_ARCHITECTURE_AUDIT_2026-01-30.md)** - Comprehensive code quality assessment
+- **[SECURITY_AUDIT_REPORT.md](audit/SECURITY_AUDIT_REPORT.md)** - Security audit results and recommendations
 
-| Document | Description | Target Audience |
-|----------|-------------|-----------------|
-| [Quick Start Guide](guides/QUICK_START.md) | 5-minute setup | Everyone |
-| [Panduan Instalasi](guides/PANDUAN_INSTALASI.md) | Complete installation (ID) | Admins, Sysadmins |
-| [System Requirements](guides/REQUIREMENTS.md) | Hardware & software requirements | Admins, Sysadmins |
-| [Deployment Guide](guides/DEPLOYMENT_GUIDE.md) | Production deployment | DevOps, Sysadmins |
+**Purpose:** Maintain code quality, identify improvements, track technical debt, security compliance.
 
-### 🔧 Configuration
+---
 
-| Document | Description | Target Audience |
-|----------|-------------|-----------------|
-| [Gmail App Password Setup](guides/GMAIL_APP_PASSWORD_SETUP.md) | Email configuration | Admins, Developers |
-| [Email Service Guide](email/EMAIL_SERVICE_GUIDE.md) | Email service documentation | Developers |
+### 📧 Email (`email/`)
+Email service configuration and usage documentation.
 
-### 📱 Development
+- **[EMAIL_SERVICE_GUIDE.md](email/EMAIL_SERVICE_GUIDE.md)** - Complete email service setup and usage guide
 
-| Document | Description | Target Audience |
-|----------|-------------|-----------------|
-| [Layouts Complete Guide](guides/LAYOUTS_COMPLETE_GUIDE.md) | Desktop & mobile layouts | Developers |
-| [Routes Optimization Summary](summary/ROUTES_OPTIMIZATION_SUMMARY.md) | Route architecture | Developers |
-| [Database Fix Summary](summary/DATABASE_FIX_SUMMARY.md) | Database schema reference | Developers |
+**Purpose:** Email configuration, troubleshooting, and best practices.
 
-### 👥 User Guides
+---
 
-| Document | Description | Target Audience |
-|----------|-------------|-----------------|
-| [Admin Unlock Absensi](guides/ADMIN_UNLOCK_ABSENSI_QUICKSTART.md) | Admin feature guide | Admins |
-| [Wakakur Role Guide](guides/WAKAKUR_ROLE_GUIDE.md) | Wakakur role documentation | Wakakur, Admins |
+### 📖 Guides (`guides/`)
+User guides, setup instructions, and how-to documentation.
 
-### 🔒 Security & Quality
+**Setup & Installation:**
+- **[QUICK_START.md](guides/QUICK_START.md)** - Quick start guide for developers
+- **[PANDUAN_INSTALASI.md](guides/PANDUAN_INSTALASI.md)** - Indonesian installation guide
+- **[DEPLOYMENT_GUIDE.md](guides/DEPLOYMENT_GUIDE.md)** - Production deployment guide
+- **[REQUIREMENTS.md](guides/REQUIREMENTS.md)** - System requirements
 
-| Document | Description | Target Audience |
-|----------|-------------|-----------------|
-| [Security Audit Report](summary/SECURITY_AUDIT_REPORT.md) | Security checklist & findings | Developers, Admins |
-| [Bug Fixes Applied](summary/BUG_FIXES_APPLIED.md) | Historical bug fixes | Developers |
+**Email Configuration:**
+- **[GMAIL_APP_PASSWORD_SETUP.md](guides/GMAIL_APP_PASSWORD_SETUP.md)** - Gmail app password setup
+- **[GOOGLE_FORMS_SETUP_GUIDE.md](guides/GOOGLE_FORMS_SETUP_GUIDE.md)** - Google Forms integration guide
 
-### 📋 Planning & Specs
+**Feature Guides:**
+- **[LAYOUTS_COMPLETE_GUIDE.md](guides/LAYOUTS_COMPLETE_GUIDE.md)** - Template system guide
+- **[WAKAKUR_ROLE_GUIDE.md](guides/WAKAKUR_ROLE_GUIDE.md)** - Wakakur role documentation
+- **[WALIKELAS_HYBRID_STATISTICS_IMPLEMENTATION_GUIDE.md](guides/WALIKELAS_HYBRID_STATISTICS_IMPLEMENTATION_GUIDE.md)** - Wali Kelas statistics guide
+- **[ADMIN_UNLOCK_ABSENSI_QUICKSTART.md](guides/ADMIN_UNLOCK_ABSENSI_QUICKSTART.md)** - Admin unlock feature guide
 
-| Document | Description | Target Audience |
-|----------|-------------|-----------------|
-| [Wali Kelas Implementation Plan](summary/WALI_KELAS_MODULE_IMPLEMENTATION_PLAN.md) | Feature roadmap | Developers, PMs |
-| [Wali Kelas Monitoring Spec](summary/WALI_KELAS_MONITORING_KEHADIRAN_SPEC.md) | Feature specification | Developers |
+**User Feedback:**
+- **[FEEDBACK_QUESTIONS.md](guides/FEEDBACK_QUESTIONS.md)** - User feedback questions (detailed)
+- **[FEEDBACK_QUESTIONS_SHORT.md](guides/FEEDBACK_QUESTIONS_SHORT.md)** - User feedback questions (short)
+
+**Purpose:** Help users and developers get started, configure features, and understand functionality.
+
+---
+
+### 📋 Plans (`plans/`)
+Future implementation plans and technical design documents.
+
+**Absensi Guru (Teacher Attendance):**
+- **[ABSENSI_GURU_DECISIONS.md](plans/ABSENSI_GURU_DECISIONS.md)** - Design decisions
+- **[ABSENSI_GURU_DETAILED_REVIEW.md](plans/ABSENSI_GURU_DETAILED_REVIEW.md)** - Detailed review
+- **[ABSENSI_GURU_IMPLEMENTATION_PLAN.md](plans/ABSENSI_GURU_IMPLEMENTATION_PLAN.md)** - Implementation plan
+- **[ABSENSI_GURU_TIMELINE.md](plans/ABSENSI_GURU_TIMELINE.md)** - Timeline
+
+**Refactoring:**
+- **[REFACTORING_PLAN_PHASE1.md](plans/REFACTORING_PLAN_PHASE1.md)** - Phase 1 refactoring plan
+
+**Purpose:** Planning future development, documenting design decisions, tracking implementation progress.
 
 ---
 
@@ -112,16 +100,16 @@ Start building with SIMACCA:
 **Getting Started:**
 1. [Quick Start Guide](guides/QUICK_START.md) - Setup dev environment
 2. [Layouts Complete Guide](guides/LAYOUTS_COMPLETE_GUIDE.md) - Understand UI system
-3. [Routes Optimization Summary](summary/ROUTES_OPTIMIZATION_SUMMARY.md) - Learn route structure
+3. [Implementation Details](archive/IMPLEMENTATION_DETAILS.md) - Learn technical architecture
 
 **Development:**
-- [Database Fix Summary](summary/DATABASE_FIX_SUMMARY.md) - Database schema
-- [Security Audit Report](summary/SECURITY_AUDIT_REPORT.md) - Security checklist
-- [Bug Fixes Applied](summary/BUG_FIXES_APPLIED.md) - Known issues & fixes
+- [Security Audit Report](audit/SECURITY_AUDIT_REPORT.md) - Security checklist
+- [Code Quality Audit](audit/CODE_QUALITY_ARCHITECTURE_AUDIT_2026-01-30.md) - Code quality standards
+- [Bug Fixes History](archive/BUG_FIXES.md) - Known issues & fixes
 
 **Planning:**
-- [Wali Kelas Implementation Plan](summary/WALI_KELAS_MODULE_IMPLEMENTATION_PLAN.md)
-- [Wali Kelas Monitoring Spec](summary/WALI_KELAS_MONITORING_KEHADIRAN_SPEC.md)
+- [Absensi Guru Plans](plans/ABSENSI_GURU_IMPLEMENTATION_PLAN.md) - Future features
+- [Refactoring Plan](plans/REFACTORING_PLAN_PHASE1.md) - Code improvements
 
 ### 🖥️ For System Administrators
 
@@ -131,256 +119,97 @@ Start building with SIMACCA:
 3. [Gmail App Password Setup](guides/GMAIL_APP_PASSWORD_SETUP.md)
 
 **Maintenance:**
-- [Security Audit Report](summary/SECURITY_AUDIT_REPORT.md)
-- [Database Fix Summary](summary/DATABASE_FIX_SUMMARY.md)
-
----
-
-## 📁 Detailed File Listing
-
-### `/guides` - How-to Guides & Tutorials
-
-#### Installation & Setup
-- **[QUICK_START.md](guides/QUICK_START.md)**  
-  *5-minute quick start guide for fast setup*
-
-- **[PANDUAN_INSTALASI.md](guides/PANDUAN_INSTALASI.md)**  
-  *Complete installation guide in Bahasa Indonesia*
-
-- **[REQUIREMENTS.md](guides/REQUIREMENTS.md)**  
-  *System requirements: PHP, MySQL, extensions, etc.*
-
-- **[DEPLOYMENT_GUIDE.md](guides/DEPLOYMENT_GUIDE.md)**  
-  *Production deployment: server setup, optimization, security*
-
-#### Configuration
-- **[GMAIL_APP_PASSWORD_SETUP.md](guides/GMAIL_APP_PASSWORD_SETUP.md)**  
-  *Step-by-step email configuration with Gmail*
-
-#### Development
-- **[LAYOUTS_COMPLETE_GUIDE.md](guides/LAYOUTS_COMPLETE_GUIDE.md)**  
-  *Complete guide: desktop & mobile layouts, migration, testing*
-
-#### User Guides
-- **[ADMIN_UNLOCK_ABSENSI_QUICKSTART.md](guides/ADMIN_UNLOCK_ABSENSI_QUICKSTART.md)**  
-  *Admin feature: unlock attendance for editing*
-
-- **[WAKAKUR_ROLE_GUIDE.md](guides/WAKAKUR_ROLE_GUIDE.md)**  
-  *Wakakur (Vice Principal) role documentation*
-
----
-
-### `/summary` - Technical Summaries & Specifications
-
-#### Bug Fixes & Database
-- **[BUG_FIXES_APPLIED.md](summary/BUG_FIXES_APPLIED.md)**  
-  *Historical record of bugs and their fixes*
-
-- **[DATABASE_FIX_SUMMARY.md](summary/DATABASE_FIX_SUMMARY.md)**  
-  *Database schema fixes and migrations*
-
-#### Architecture
-- **[ROUTES_OPTIMIZATION_SUMMARY.md](summary/ROUTES_OPTIMIZATION_SUMMARY.md)**  
-  *Route structure optimization and best practices*
-
-#### Security
-- **[SECURITY_AUDIT_REPORT.md](summary/SECURITY_AUDIT_REPORT.md)**  
-  *Security audit findings and checklist*
-
-#### Planning & Specs
-- **[WALI_KELAS_MODULE_IMPLEMENTATION_PLAN.md](summary/WALI_KELAS_MODULE_IMPLEMENTATION_PLAN.md)**  
-  *Implementation plan for Wali Kelas features*
-
-- **[WALI_KELAS_MONITORING_KEHADIRAN_SPEC.md](summary/WALI_KELAS_MONITORING_KEHADIRAN_SPEC.md)**  
-  *Feature specification for attendance monitoring*
-
----
-
-### `/email` - Email Service Documentation
-
-- **[EMAIL_SERVICE_GUIDE.md](email/EMAIL_SERVICE_GUIDE.md)**  
-  *Email service configuration and troubleshooting*
+- [Security Audit Report](audit/SECURITY_AUDIT_REPORT.md)
+- [Implementation Details](archive/IMPLEMENTATION_DETAILS.md) - Database schema and architecture
 
 ---
 
 ## 🔍 Search by Topic
 
 ### Authentication & Authorization
-- [Security Audit Report](summary/SECURITY_AUDIT_REPORT.md) - Security best practices
+- [Security Audit Report](audit/SECURITY_AUDIT_REPORT.md) - Security best practices
 - [Wakakur Role Guide](guides/WAKAKUR_ROLE_GUIDE.md) - Role-based access
+- [Implementation Details](archive/IMPLEMENTATION_DETAILS.md) - Security implementation
 
 ### Database
-- [Database Fix Summary](summary/DATABASE_FIX_SUMMARY.md) - Schema fixes
-- [Bug Fixes Applied](summary/BUG_FIXES_APPLIED.md) - Database-related bugs
+- [Implementation Details](archive/IMPLEMENTATION_DETAILS.md) - Database fixes and schema
+- [Bug Fixes History](archive/BUG_FIXES.md) - Database-related bugs
 
 ### UI/UX
 - [Layouts Complete Guide](guides/LAYOUTS_COMPLETE_GUIDE.md) - Layout system
-- Migration guides (now in Layouts Complete Guide)
+- [Implementation Details](archive/IMPLEMENTATION_DETAILS.md) - Template system
 
 ### Email
 - [Gmail App Password Setup](guides/GMAIL_APP_PASSWORD_SETUP.md) - Gmail configuration
 - [Email Service Guide](email/EMAIL_SERVICE_GUIDE.md) - Email troubleshooting
+- [Implementation Details](archive/IMPLEMENTATION_DETAILS.md) - Email architecture
 
-### Routing
-- [Routes Optimization Summary](summary/ROUTES_OPTIMIZATION_SUMMARY.md) - Route structure
-
-### Features
-- [Admin Unlock Absensi](guides/ADMIN_UNLOCK_ABSENSI_QUICKSTART.md) - Admin features
-- [Wali Kelas Implementation Plan](summary/WALI_KELAS_MODULE_IMPLEMENTATION_PLAN.md) - Future features
-
----
-
-## 📝 Documentation Standards
-
-### For Contributors
-
-When creating new documentation:
-
-1. **File Naming:**
-   - Use `UPPER_SNAKE_CASE.md` for consistency
-   - Be descriptive but concise
-   - Example: `FEATURE_NAME_GUIDE.md`
-
-2. **Location:**
-   - **`/guides`** - How-to guides, tutorials, user guides
-   - **`/summary`** - Technical summaries, specs, architecture
-   - **`/email`** - Email-specific documentation
-
-3. **Structure:**
-   - Start with clear title and description
-   - Include table of contents for long docs
-   - Use examples and code snippets
-   - Add troubleshooting section if applicable
-
-4. **Style:**
-   - Use Markdown formatting
-   - Include emojis for visual clarity (optional)
-   - Write for your target audience
-   - Keep it concise but complete
-
-### Documentation Types
-
-| Type | Folder | Example |
-|------|--------|---------|
-| **Installation Guides** | `/guides` | QUICK_START.md |
-| **User Guides** | `/guides` | ADMIN_UNLOCK_ABSENSI_QUICKSTART.md |
-| **Developer Guides** | `/guides` | LAYOUTS_COMPLETE_GUIDE.md |
-| **Technical Specs** | `/summary` | WALI_KELAS_MONITORING_KEHADIRAN_SPEC.md |
-| **Architecture Docs** | `/summary` | ROUTES_OPTIMIZATION_SUMMARY.md |
-| **Bug Reports** | `/summary` | BUG_FIXES_APPLIED.md |
-
----
-
-## 🆘 Getting Help
-
-### Documentation Issues
-
-If you find issues with documentation:
-
-1. **Outdated Information:**  
-   Open an issue on GitHub with the file name and what needs updating
-
-2. **Missing Documentation:**  
-   Request new documentation via GitHub issues
-
-3. **Unclear Instructions:**  
-   Open an issue with specific questions
-
-### Technical Support
-
-For technical issues with SIMACCA:
-
-- **Email:** support@simacca.sch.id
-- **GitHub Issues:** [Report a bug](https://github.com/username/simacca/issues)
-- **Discussions:** [Community forum](https://github.com/username/simacca/discussions)
-
----
-
-## 🔄 Recently Updated
-
-| Document | Last Updated | Changes |
-|----------|-------------|---------|
-| [Layouts Complete Guide](guides/LAYOUTS_COMPLETE_GUIDE.md) | Jan 2026 | New: Merged 4 layout docs |
-| [Routes Optimization Summary](summary/ROUTES_OPTIMIZATION_SUMMARY.md) | Jan 2026 | Updated: Route structure |
-| [Security Audit Report](summary/SECURITY_AUDIT_REPORT.md) | Jan 2026 | Security checklist |
+### Performance & Optimization
+- [Implementation Details](archive/IMPLEMENTATION_DETAILS.md) - Routes optimization, image optimization
+- [Code Quality Audit](audit/CODE_QUALITY_ARCHITECTURE_AUDIT_2026-01-30.md) - Performance improvements
 
 ---
 
 ## 📊 Documentation Statistics
 
-- **Total Documents:** 14 files
-- **Guides:** 8 files
-- **Technical Summaries:** 6 files
-- **Languages:** English, Bahasa Indonesia
-- **Last Reorganization:** January 2026
+**Total Files:** 25 files across 5 directories
+
+**By Category:**
+- **Archive:** 4 files (historical records, achievements, features)
+- **Audit:** 2 files (code quality, security)
+- **Email:** 1 file (email service)
+- **Guides:** 13 files (installation, configuration, user guides)
+- **Plans:** 5 files (future implementations)
+
+**Recent Updates:**
+- 2026-01-30: Documentation cleanup and reorganization (-32% files)
+- 2026-01-30: Code quality and architecture audit
+- 2026-01-18: Security audit report
+- 2026-01-17: Hybrid statistics implementation
 
 ---
 
-## 🎯 Roadmap
+## 📝 Contributing to Documentation
 
-### Planned Documentation
+When adding new documentation:
 
-- [ ] API Documentation
-- [ ] Testing Guide
-- [ ] Contributing Guidelines
-- [ ] Code Style Guide
-- [ ] Troubleshooting FAQ
-- [ ] Video Tutorials
+1. **Choose the right directory:**
+   - `archive/` - Completed features, historical records
+   - `audit/` - Quality reviews, security audits
+   - `email/` - Email-related documentation
+   - `guides/` - How-to guides, tutorials
+   - `plans/` - Future implementations, design docs
 
-### Documentation Goals
+2. **Follow naming conventions:**
+   - Use UPPERCASE for file names
+   - Use underscores for spaces
+   - Include date for time-sensitive docs (e.g., `AUDIT_2026-01-30.md`)
 
-- ✅ Clear structure by role
-- ✅ Easy navigation
-- ✅ No duplicate information
-- ✅ Up-to-date content
-- ⏳ Multi-language support (expanding)
-- ⏳ Video tutorials
-- ⏳ Interactive guides
-
----
-
-## 🌟 Contributing to Documentation
-
-We welcome documentation contributions!
-
-### How to Contribute
-
-1. Fork the repository
-2. Create your documentation file
-3. Follow our [documentation standards](#documentation-standards)
-4. Submit a pull request
-5. Update this README.md index if adding new docs
-
-### What We Need
-
-- User guides for specific features
-- Troubleshooting guides
-- Video tutorials
-- Translations (Bahasa Indonesia, English)
-- Code examples
-- Best practices
+3. **Update this README:**
+   - Add your document to the appropriate section
+   - Update statistics
+   - Update search index if needed
 
 ---
 
-## 📜 License
+## 🔗 Related Documentation
 
-This documentation is part of SIMACCA project.  
-Licensed under [MIT License](../LICENSE)
-
----
-
-## 🙏 Acknowledgments
-
-Documentation maintained by SIMACCA Development Team.
-
-Special thanks to all contributors who helped improve this documentation!
+**Root Directory:**
+- [README.md](../README.md) - Project overview
+- [TODO.md](../TODO.md) - Current development tasks
+- [CHANGELOG.md](../CHANGELOG.md) - Version history
+- [ARCHIVE.md](../ARCHIVE.md) - Archive index
+- [CONTRIBUTING.md](../CONTRIBUTING.md) - Contribution guidelines
 
 ---
 
-**Last Updated:** January 2026  
-**Documentation Version:** 2.0  
-**SIMACCA Version:** Latest
+**Last Updated:** 2026-01-30  
+**Documentation Version:** 2.0 (After reorganization)
 
----
-
-*For more information, visit the [main README](../README.md)*
+**Changes in v2.0:**
+- ✅ Removed duplicate files (5 files)
+- ✅ Moved guides to correct location (4 files)
+- ✅ Consolidated summaries to archive (3 files)
+- ✅ Deleted empty `docs/summary/` directory
+- ✅ Updated all cross-references
+- ✅ Improved navigation and structure

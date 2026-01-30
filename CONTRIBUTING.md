@@ -522,7 +522,7 @@ Before submitting PR, test these scenarios:
 | README.md | Project overview & quick start |
 | PANDUAN_INSTALASI.md | Detailed installation guide |
 | DEPLOYMENT_GUIDE.md | Production deployment |
-| FEATURES.md | Feature documentation |
+| docs/archive/COMPLETED_FEATURES.md | Feature documentation |
 | CHANGELOG.md | Version history |
 
 ### Documentation Style

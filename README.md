@@ -98,10 +98,10 @@ php spark serve
 
 | Dokumen | Deskripsi |
 |---------|-----------|
-| [**Security Audit Report**](docs/summary/SECURITY_AUDIT_REPORT.md) | Security checklist & findings |
-| [**Routes Optimization**](docs/summary/ROUTES_OPTIMIZATION_SUMMARY.md) | Route architecture |
-| [**Bug Fixes Applied**](docs/summary/BUG_FIXES_APPLIED.md) | Historical bug fixes |
-| [**Database Fix Summary**](docs/summary/DATABASE_FIX_SUMMARY.md) | Database schema fixes |
+| [**Security Audit Report**](docs/audit/SECURITY_AUDIT_REPORT.md) | Security checklist & findings |
+| [**Implementation Details**](docs/archive/IMPLEMENTATION_DETAILS.md) | Technical implementation (routes, database, statistics) |
+| [**Bug Fixes History**](docs/archive/BUG_FIXES.md) | Historical bug fixes |
+| [**Code Quality Audit**](docs/audit/CODE_QUALITY_ARCHITECTURE_AUDIT_2026-01-30.md) | Code quality assessment |
 
 ### 🗂️ Dokumentasi Lengkap
 

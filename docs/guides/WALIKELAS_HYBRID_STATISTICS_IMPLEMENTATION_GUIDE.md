@@ -588,7 +588,7 @@ $siswaStats = $this->absensiDetailModel->getStatistikPerSiswa($startDate, $endDa
 
 ## 📚 REFERENCES
 
-- **Main Documentation:** `docs/summary/HYBRID_STATISTICS_IMPLEMENTATION.md`
+- **Main Documentation:** `docs/archive/IMPLEMENTATION_DETAILS.md` (Hybrid Statistics section)
 - **Wakakur Implementation:** `app/Views/wakakur/laporan/print.php`
 - **Admin Implementation:** `app/Views/admin/laporan/print_absensi_detail.php`
 - **Model Logic:** `app/Models/AbsensiDetailModel.php` (method `getStatistikPerSiswa()`)
