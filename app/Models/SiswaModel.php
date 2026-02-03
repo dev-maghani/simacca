@@ -110,10 +110,14 @@ class SiswaModel extends Model
      */
     public function searchSiswa($keyword)
     {
-        return $this->like('siswa.nama_lengkap', $keyword)
-            ->orLike('siswa.nis', $keyword)
+        return $this->select('siswa.*, users.username, users.email, users.is_active, users.profile_photo, kelas.nama_kelas')
+            ->join('users', 'users.id = siswa.user_id')
             ->join('kelas', 'kelas.id = siswa.kelas_id', 'left')
-            ->select('siswa.*, kelas.nama_kelas')
+            ->groupStart()
+                ->like('siswa.nama_lengkap', $keyword)
+                ->orLike('siswa.nis', $keyword)
+            ->groupEnd()
+            ->orderBy('siswa.nama_lengkap', 'ASC')
             ->findAll();
     }
 
