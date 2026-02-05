@@ -67,7 +67,7 @@
                     <i class="fas fa-list mr-2"></i>
                     Semua Izin
                     <span class="ml-2 bg-gray-200 text-gray-700 py-0.5 px-2 rounded-full text-xs">
-                        <?= count($izinData); ?>
+                        <?= $countPending + $countDisetujui + $countDitolak; ?>
                     </span>
                 </a>
                 <a href="<?= base_url('walikelas/izin?status=pending'); ?>" 
@@ -356,13 +356,13 @@ function processApprove() {
             'Content-Type': 'application/x-www-form-urlencoded',
             'X-Requested-With': 'XMLHttpRequest'
         },
-        body: 'catatan=' + encodeURIComponent(catatan)
+        body: 'catatan=' + encodeURIComponent(catatan) + '&<?= csrf_token() ?>=' + encodeURIComponent('<?= csrf_hash() ?>')
     })
     .then(response => response.json())
     .then(data => {
         if (data.status === 'success') {
             alert('Izin berhasil disetujui!');
-            location.reload();
+            location.reload(true); // Force reload from server, not cache
         } else {
             alert('Gagal menyetujui izin: ' + data.message);
         }
@@ -389,13 +389,13 @@ function processReject() {
             'Content-Type': 'application/x-www-form-urlencoded',
             'X-Requested-With': 'XMLHttpRequest'
         },
-        body: 'catatan=' + encodeURIComponent(catatan)
+        body: 'catatan=' + encodeURIComponent(catatan) + '&<?= csrf_token() ?>=' + encodeURIComponent('<?= csrf_hash() ?>')
     })
     .then(response => response.json())
     .then(data => {
         if (data.status === 'success') {
             alert('Izin berhasil ditolak!');
-            location.reload();
+            location.reload(true); // Force reload from server, not cache
         } else {
             alert('Gagal menolak izin: ' + data.message);
         }

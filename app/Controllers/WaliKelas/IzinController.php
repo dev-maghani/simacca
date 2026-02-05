@@ -59,15 +59,16 @@ class IzinController extends BaseController
 
         log_message('info', '[WALI KELAS IZIN] Total izin found: ' . count($izinData));
 
-        // Get statistics
+        // Get statistics - use proper service method
         $statsResult = $this->izinService->getIzinStatistics(['kelas_id' => $kelas['id']]);
         $stats = $statsResult['success'] ? $statsResult['data'] : [
             'pending' => 0,
             'disetujui' => 0,
-            'ditolak' => 0
+            'ditolak' => 0,
+            'total_izin' => 0
         ];
 
-        log_message('info', '[WALI KELAS IZIN] Count - Pending: ' . $stats['pending'] . ', Disetujui: ' . $stats['disetujui'] . ', Ditolak: ' . $stats['ditolak']);
+        log_message('info', '[WALI KELAS IZIN] Stats - Total: ' . $stats['total_izin'] . ', Pending: ' . $stats['pending'] . ', Disetujui: ' . $stats['disetujui'] . ', Ditolak: ' . $stats['ditolak']);
 
         $data = [
             'title' => 'Persetujuan Izin Siswa',

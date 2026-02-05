@@ -300,13 +300,18 @@ if (!function_exists('get_sidebar_menu')) {
                 ],
                 [
                     'title' => 'Jadwal Pelajaran',
-                    'icon' => 'fas fa-calender-alt',
+                    'icon' => 'fas fa-calendar-alt',
                     'url' => '/siswa/jadwal'
                 ],
                 [
                     'title' => 'Absensi',
                     'icon' => 'fas fa-clipboard-check',
                     'url' => '/siswa/absensi'
+                ],
+                [
+                    'title' => 'Pengajuan Izin',
+                    'icon' => 'fas fa-file-medical',
+                    'url' => '/siswa/izin'
                 ],
                 [
                     'title' => 'Profil',

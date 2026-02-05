@@ -44,8 +44,8 @@ class IzinSiswaService extends BaseService
                          siswa.nama_lengkap,
                          siswa.nis,
                          kelas.nama_kelas,
-                         users.name as disetujui_oleh_nama')
-                ->join('siswa', 'siswa.id = izin_siswa.siswa_id')
+                         users.username as disetujui_oleh_nama')
+                ->join('siswa', 'siswa.id = izin_siswa.siswa_id', 'left')
                 ->join('kelas', 'kelas.id = siswa.kelas_id', 'left')
                 ->join('users', 'users.id = izin_siswa.disetujui_oleh', 'left');
 
@@ -101,8 +101,8 @@ class IzinSiswaService extends BaseService
                          siswa.nama_lengkap,
                          siswa.nis,
                          kelas.nama_kelas,
-                         users.name as disetujui_oleh_nama')
-                ->join('siswa', 'siswa.id = izin_siswa.siswa_id')
+                         users.username as disetujui_oleh_nama')
+                ->join('siswa', 'siswa.id = izin_siswa.siswa_id', 'left')
                 ->join('kelas', 'kelas.id = siswa.kelas_id', 'left')
                 ->join('users', 'users.id = izin_siswa.disetujui_oleh', 'left')
                 ->where('izin_siswa.id', $id)
@@ -541,6 +541,10 @@ class IzinSiswaService extends BaseService
                 ->join('siswa', 'siswa.id = izin_siswa.siswa_id');
 
             // Apply filters
+            if (!empty($filters['siswa_id'])) {
+                $builder->where('izin_siswa.siswa_id', $filters['siswa_id']);
+            }
+
             if (!empty($filters['kelas_id'])) {
                 $builder->where('siswa.kelas_id', $filters['kelas_id']);
             }
@@ -553,16 +557,39 @@ class IzinSiswaService extends BaseService
                 $builder->where('izin_siswa.tanggal <=', $filters['end_date']);
             }
 
+            // Count total first
             $statistics = [
-                'total_izin' => $builder->countAllResults(false),
-                'pending' => $builder->where('izin_siswa.status', 'pending')->countAllResults(false),
-                'disetujui' => $builder->where('izin_siswa.status', 'disetujui')->countAllResults(false),
-                'ditolak' => $builder->where('izin_siswa.status', 'ditolak')->countAllResults(false)
+                'total_izin' => $builder->countAllResults(false)
             ];
+            
+            // Reset and count each status separately
+            $baseBuilder = $this->db->table('izin_siswa')
+                ->join('siswa', 'siswa.id = izin_siswa.siswa_id');
+            
+            if (!empty($filters['siswa_id'])) {
+                $baseBuilder->where('izin_siswa.siswa_id', $filters['siswa_id']);
+            }
+            if (!empty($filters['kelas_id'])) {
+                $baseBuilder->where('siswa.kelas_id', $filters['kelas_id']);
+            }
+            if (!empty($filters['start_date'])) {
+                $baseBuilder->where('izin_siswa.tanggal >=', $filters['start_date']);
+            }
+            if (!empty($filters['end_date'])) {
+                $baseBuilder->where('izin_siswa.tanggal <=', $filters['end_date']);
+            }
+            
+            $statistics['pending'] = (clone $baseBuilder)->where('izin_siswa.status', 'pending')->countAllResults();
+            $statistics['disetujui'] = (clone $baseBuilder)->where('izin_siswa.status', 'disetujui')->countAllResults();
+            $statistics['ditolak'] = (clone $baseBuilder)->where('izin_siswa.status', 'ditolak')->countAllResults();
 
             // Reset builder for jenis_izin stats
             $builder = $this->db->table('izin_siswa')
                 ->join('siswa', 'siswa.id = izin_siswa.siswa_id');
+
+            if (!empty($filters['siswa_id'])) {
+                $builder->where('izin_siswa.siswa_id', $filters['siswa_id']);
+            }
 
             if (!empty($filters['kelas_id'])) {
                 $builder->where('siswa.kelas_id', $filters['kelas_id']);
