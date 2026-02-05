@@ -221,6 +221,30 @@ abstract class BaseService
     }
 
     /**
+     * Short alias for successResponse()
+     * 
+     * @param mixed $data
+     * @param string $message
+     * @return array
+     */
+    protected function success($data = null, string $message = 'Success'): array
+    {
+        return $this->successResponse($data, $message);
+    }
+
+    /**
+     * Short alias for errorResponse()
+     * 
+     * @param string $message
+     * @param int $code
+     * @return array
+     */
+    protected function error(string $message, int $code = 400): array
+    {
+        return $this->errorResponse($message, $code);
+    }
+
+    /**
      * Validate data using CodeIgniter validation
      * 
      * @param array $data

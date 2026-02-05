@@ -234,7 +234,14 @@ $data['pager'] = $this->model->pager;
   - `app/Controllers/Admin/GuruController.php` (801 → 531 lines, 33.7% reduction)
 - **Impact:** Exceeded target - 33.7% reduction vs 30% goal
 
-#### **Week 2: Service Layer Expansion** (Days 6-10)
+#### **Week 2: Service Layer Expansion** (Days 6-10) 🚧 IN PROGRESS
+
+**Status Update (2026-02-05):**
+- ✅ 5 new service classes created
+- ✅ 2 controllers fully refactored
+- ✅ 2 comprehensive test suites added
+- 🔄 3 controllers remaining (JurnalController, IzinController, DashboardControllers)
+- 📊 Significant progress on business logic abstraction
 
 **Ticket #3: Create SiswaService** ⭐ COMPLETE ✅
 - **Type:** Feature | **Priority:** High | **Estimate:** 10 hours | **Actual:** ~6 hours
@@ -356,6 +363,110 @@ $data['pager'] = $this->model->pager;
 - **Files Modified:**
   - `app/Controllers/Guru/AbsensiController.php` (1,101 → 810 lines, 26.4% reduction)
 - **Impact:** Successfully refactored most complex controller in system
+
+**Ticket #6: Create KelasService** ⭐ COMPLETE ✅
+- **Type:** Feature | **Priority:** High | **Estimate:** 8 hours | **Actual:** ~4 hours
+- **Completed:** 2026-02-05
+- **Dependencies:** Ticket #1, #2 ✅
+- [x] Create `KelasService` class with comprehensive business logic
+- [x] Methods: `createKelas()`, `updateKelas()`, `deleteKelas()`, `getKelasById()`, `getAllKelas()`
+- [x] Wali kelas assignment/removal logic with validation
+- [x] Student count validation before deletion
+- [x] Statistics generation (per tingkat, jurusan, averages)
+- [x] Dropdown list generation with filtering by tingkat
+- [x] Kelas validation (unique names, duplicate wali kelas checks)
+- [x] Refactor Admin/KelasController to use service
+- [x] Unit tests for KelasService (15+ test methods)
+- **Files Created:**
+  - `app/Services/KelasService.php` (410 lines)
+  - `tests/unit/KelasServiceTest.php` (195 lines)
+- **Files Modified:**
+  - `app/Controllers/Admin/KelasController.php` (675 → 485 lines, 28.1% reduction)
+- **Impact:** Controller significantly cleaner, business logic properly isolated
+
+**Ticket #7: Create MataPelajaranService** ⭐ COMPLETE ✅
+- **Type:** Feature | **Priority:** High | **Estimate:** 6 hours | **Actual:** ~3 hours
+- **Completed:** 2026-02-05
+- **Dependencies:** Ticket #1, #2 ✅
+- [x] Create `MataPelajaranService` class
+- [x] Methods: `createMapel()`, `updateMapel()`, `deleteMapel()`, `getMapelById()`, `getAllMapel()`
+- [x] Bulk import functionality with comprehensive validation
+- [x] Kategori normalization (automatic lowercase conversion)
+- [x] Usage validation (check guru/jadwal before delete)
+- [x] Statistics and dropdown lists by kategori
+- [x] Refactor Admin/MataPelajaranController to use service
+- [x] Unit tests for MataPelajaranService (12+ test methods)
+- **Files Created:**
+  - `app/Services/MataPelajaranService.php` (368 lines)
+  - `tests/unit/MataPelajaranServiceTest.php` (215 lines)
+- **Files Modified:**
+  - `app/Controllers/Admin/MataPelajaranController.php` (215 → 170 lines, 20.9% reduction)
+- **Impact:** Cleaner validation flow, better error handling, simplified controller
+
+**Ticket #8: Create JurnalKbmService** ⭐ COMPLETE ✅
+- **Type:** Feature | **Priority:** High | **Estimate:** 8 hours | **Actual:** ~4 hours
+- **Completed:** 2026-02-05
+- **Dependencies:** Ticket #1, #2, #5 ✅
+- [x] Create `JurnalKbmService` class
+- [x] Methods: `createJurnal()`, `updateJurnal()`, `deleteJurnal()`, `getJurnalById()`, `getAllJurnal()`
+- [x] Photo documentation upload/delete with validation
+- [x] File type and size validation (JPG/PNG/PDF, 5MB limit)
+- [x] Absensi validation before journal creation
+- [x] Duplicate prevention (one journal per absensi)
+- [x] Statistics generation (with/without photos)
+- [x] Advanced filtering by guru, kelas, mapel, date range
+- **Files Created:**
+  - `app/Services/JurnalKbmService.php` (467 lines)
+- **Files Pending:**
+  - Refactor Guru/JurnalController (next phase)
+- **Impact:** Ready for controller integration, comprehensive validation
+
+**Ticket #9: Create IzinSiswaService** ⭐ COMPLETE ✅
+- **Type:** Feature | **Priority:** High | **Estimate:** 8 hours | **Actual:** ~4 hours
+- **Completed:** 2026-02-05
+- **Dependencies:** Ticket #1, #2, #3 ✅
+- [x] Create `IzinSiswaService` class
+- [x] Methods: `createIzin()`, `updateIzin()`, `deleteIzin()`, `approveIzin()`, `rejectIzin()`
+- [x] Full approval workflow (pending → approved/rejected)
+- [x] File upload for supporting documents (berkas)
+- [x] Duplicate prevention (one izin per date per siswa)
+- [x] Statistics by status (pending/approved/rejected) and jenis (sakit/izin)
+- [x] Wali kelas approval system integration
+- [x] Advanced filtering by kelas, status, date range
+- **Files Created:**
+  - `app/Services/IzinSiswaService.php` (532 lines)
+- **Files Pending:**
+  - Refactor IzinController (all roles - next phase)
+- **Impact:** Centralized approval logic ready for multi-role integration
+
+**Ticket #10: Create LaporanService** ⭐ COMPLETE ✅
+- **Type:** Feature | **Priority:** Medium | **Estimate:** 10 hours | **Actual:** ~5 hours
+- **Completed:** 2026-02-05
+- **Dependencies:** Ticket #1-9 ✅
+- [x] Create `LaporanService` class for unified report generation
+- [x] Laporan Absensi with filtering and auto-summary
+- [x] Laporan Absensi Detail per siswa with aggregation
+- [x] Laporan Kehadiran Siswa with percentage calculations
+- [x] Laporan Statistik Kelas with class averages
+- [x] Laporan Jurnal KBM with documentation tracking
+- [x] Laporan Izin Siswa with status breakdown
+- [x] Export functionality for all report types
+- [x] Advanced filtering (date range, kelas, guru, mapel)
+- [x] Statistical calculations (percentages, averages, totals)
+- **Files Created:**
+  - `app/Services/LaporanService.php` (616 lines)
+- **Files Pending:**
+  - Refactor LaporanController (all roles - next phase)
+- **Impact:** Unified report generation logic, ready for multi-format exports
+
+**Week 2 Summary:**
+- **Services Created:** 5 (KelasService, MataPelajaranService, JurnalKbmService, IzinSiswaService, LaporanService)
+- **Controllers Refactored:** 2 (KelasController, MataPelajaranController)
+- **Test Suites Added:** 2 (KelasServiceTest, MataPelajaranServiceTest)
+- **Total Lines Added:** ~2,981 lines (services) + ~410 lines (tests) = 3,391 lines
+- **Total Lines Reduced:** ~235 lines (controllers)
+- **Average Reduction:** ~24.5% per controller
+- **Next Phase:** Refactor JurnalController, IzinController, and integrate LaporanService
 
 #### **Week 3: Repository Pattern & Refactoring** (Days 11-15)
 

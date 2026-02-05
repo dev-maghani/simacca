@@ -3,17 +3,17 @@
 namespace App\Controllers\Admin;
 
 use App\Controllers\BaseController;
-use App\Models\MataPelajaranModel;
+use App\Services\MataPelajaranService;
 use CodeIgniter\Exceptions\PageNotFoundException;
 
 class MataPelajaranController extends BaseController
 {
-    protected $mataPelajaranModel;
+    protected $mapelService;
     protected $session;
 
     public function __construct()
     {
-        $this->mataPelajaranModel = new MataPelajaranModel();
+        $this->mapelService = new MataPelajaranService();
         $this->session = session();
     }
 
@@ -30,15 +30,17 @@ class MataPelajaranController extends BaseController
         $perPage = $this->request->getGet('per_page') ?? 50;
         $search = $this->request->getGet('search');
 
+        $result = $this->mapelService->getAllMapel($perPage, $search);
+        $statsResult = $this->mapelService->getMapelStatistics();
+
         $data = [
             'title' => 'Manajemen Mata Pelajaran',
             'pageTitle' => 'Mata Pelajaran',
             'pageDescription' => 'Kelola data mata pelajaran',
-            'mapel' => $this->mataPelajaranModel->getAllMapel($perPage, $search),
-            'pager' => $this->mataPelajaranModel->pager,
+            'mapel' => $result['success'] ? $result['data'] : ['mapel' => [], 'pager' => null],
             'search' => $search,
             'perPage' => $perPage,
-            'stats' => $this->mataPelajaranModel->countByKategori(),
+            'stats' => $statsResult['success'] ? $statsResult['data']['mapel_per_kategori'] : [],
         ];
 
         return view('admin/mata_pelajaran/index', $data);
@@ -74,24 +76,19 @@ class MataPelajaranController extends BaseController
             return redirect()->to('/login');
         }
 
-        // Validate input
-        if (!$this->validate($this->mataPelajaranModel->getValidationRules())) {
-            return redirect()->back()->withInput()->with('errors', $this->validator->getErrors());
-        }
-
-        // Prepare data
         $data = [
             'kode_mapel' => $this->request->getPost('kode_mapel'),
             'nama_mapel' => $this->request->getPost('nama_mapel'),
             'kategori' => $this->request->getPost('kategori')
         ];
 
-        // Save to database
-        if ($this->mataPelajaranModel->save($data)) {
+        $result = $this->mapelService->createMapel($data);
+
+        if ($result['success']) {
             $this->session->setFlashdata('success', 'Sip! Mapel baru sudah masuk.');
             return redirect()->to('/admin/mata-pelajaran');
         } else {
-            $this->session->setFlashdata('error', 'Oops, mapel gagal ditambahkan.');
+            $this->session->setFlashdata('error', $result['message']);
             return redirect()->back()->withInput();
         }
     }
@@ -106,9 +103,9 @@ class MataPelajaranController extends BaseController
             return redirect()->to('/login');
         }
 
-        $mapel = $this->mataPelajaranModel->find($id);
+        $result = $this->mapelService->getMapelById($id);
 
-        if (!$mapel) {
+        if (!$result['success']) {
             throw new PageNotFoundException('Mata pelajaran tidak ditemukan');
         }
 
@@ -116,7 +113,7 @@ class MataPelajaranController extends BaseController
             'title' => 'Edit Mata Pelajaran',
             'pageTitle' => 'Edit Mata Pelajaran',
             'pageDescription' => 'Edit data mata pelajaran',
-            'mapel' => $mapel,
+            'mapel' => $result['data'],
             'validation' => \Config\Services::validation()
         ];
 
@@ -133,35 +130,19 @@ class MataPelajaranController extends BaseController
             return redirect()->to('/login');
         }
 
-        // Check if exists
-        $mapel = $this->mataPelajaranModel->find($id);
-        if (!$mapel) {
-            throw new PageNotFoundException('Mata pelajaran tidak ditemukan');
-        }
-
-        // Custom validation rule for unique kode_mapel except current id
-        $validationRules = $this->mataPelajaranModel->getValidationRules();
-        $validationRules['kode_mapel'] = 'required|min_length[3]|max_length[10]|is_unique[mata_pelajaran.kode_mapel,id,' . $id . ']';
-
-        // Validate input
-        if (!$this->validate($validationRules)) {
-            return redirect()->back()->withInput()->with('errors', $this->validator->getErrors());
-        }
-
-        // Prepare data
         $data = [
-            'id' => $id,
             'kode_mapel' => $this->request->getPost('kode_mapel'),
             'nama_mapel' => $this->request->getPost('nama_mapel'),
             'kategori' => $this->request->getPost('kategori')
         ];
 
-        // Update database
-        if ($this->mataPelajaranModel->save($data)) {
+        $result = $this->mapelService->updateMapel($id, $data);
+
+        if ($result['success']) {
             $this->session->setFlashdata('success', 'Done! Mapel sudah diperbarui.');
             return redirect()->to('/admin/mata-pelajaran');
         } else {
-            $this->session->setFlashdata('error', 'Waduh, update mapel gagal nih.');
+            $this->session->setFlashdata('error', $result['message']);
             return redirect()->back()->withInput();
         }
     }
@@ -176,38 +157,12 @@ class MataPelajaranController extends BaseController
             return redirect()->to('/login');
         }
 
-        // Check if exists
-        $mapel = $this->mataPelajaranModel->find($id);
-        if (!$mapel) {
-            throw new PageNotFoundException('Mata pelajaran tidak ditemukan');
-        }
+        $result = $this->mapelService->deleteMapel($id);
 
-        // Check if mata pelajaran is used in jadwal_mengajar
-        $db = \Config\Database::connect();
-        $checkUsage = $db->table('jadwal_mengajar')
-            ->where('mata_pelajaran_id', $id)
-            ->countAllResults();
-
-        if ($checkUsage > 0) {
-            $this->session->setFlashdata('error', 'Mapel ini masih dipake di jadwal, belum bisa dihapus ya.');
-            return redirect()->back();
-        }
-
-        // Check if mata pelajaran is used in guru table
-        $checkGuruUsage = $db->table('guru')
-            ->where('mata_pelajaran_id', $id)
-            ->countAllResults();
-
-        if ($checkGuruUsage > 0) {
-            $this->session->setFlashdata('error', 'Ada guru yang ngajar mapel ini, belum bisa dihapus.');
-            return redirect()->back();
-        }
-
-        // Delete from database
-        if ($this->mataPelajaranModel->delete($id)) {
+        if ($result['success']) {
             $this->session->setFlashdata('success', 'Done, Mata pelajaran sudah dihapus!');
         } else {
-            $this->session->setFlashdata('error', 'Hmm, gagal hapus mapel.');
+            $this->session->setFlashdata('error', $result['message']);
         }
 
         return redirect()->to('/admin/mata-pelajaran');

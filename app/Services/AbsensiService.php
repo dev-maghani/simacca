@@ -141,7 +141,6 @@ class AbsensiService extends BaseService
         $rules = [
             'jadwal_mengajar_id' => 'required|numeric',
             'tanggal' => 'required|valid_date',
-            'pertemuan_ke' => 'required|numeric|greater_than[0]',
             'materi_pembelajaran' => 'permit_empty',
             'siswa' => 'required',
             'created_by' => 'required|numeric'
@@ -163,11 +162,19 @@ class AbsensiService extends BaseService
         }
 
         return $this->executeInTransaction(function () use ($data, $jadwal) {
+            // AUTO-CALCULATE pertemuan_ke (ignore user input for consistency)
+            $lastAbsensi = $this->absensiModel
+                ->where('jadwal_mengajar_id', $data['jadwal_mengajar_id'])
+                ->orderBy('pertemuan_ke', 'DESC')
+                ->first();
+            
+            $pertemuanKe = $lastAbsensi ? ($lastAbsensi['pertemuan_ke'] + 1) : 1;
+            
             // Prepare absensi data
             $absensiData = [
                 'jadwal_mengajar_id' => $data['jadwal_mengajar_id'],
                 'tanggal' => $data['tanggal'],
-                'pertemuan_ke' => $data['pertemuan_ke'],
+                'pertemuan_ke' => $pertemuanKe, // Auto-calculated, not from user input
                 'materi_pembelajaran' => $data['materi_pembelajaran'] ?? null,
                 'created_by' => $data['created_by'],
                 'guru_pengganti_id' => $data['guru_pengganti_id'] ?? null,

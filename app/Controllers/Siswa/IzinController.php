@@ -3,18 +3,18 @@
 namespace App\Controllers\Siswa;
 
 use App\Controllers\BaseController;
+use App\Services\IzinSiswaService;
 use App\Models\SiswaModel;
-use App\Models\IzinSiswaModel;
 
 class IzinController extends BaseController
 {
     protected $siswaModel;
-    protected $izinSiswaModel;
+    protected $izinService;
 
     public function __construct()
     {
         $this->siswaModel = new SiswaModel();
-        $this->izinSiswaModel = new IzinSiswaModel();
+        $this->izinService = new IzinSiswaService();
     }
 
     public function index()
@@ -30,23 +30,26 @@ class IzinController extends BaseController
         // Get filter status
         $status = $this->request->getGet('status') ?? null;
 
-        // Get izin data
-        $builder = $this->izinSiswaModel
-            ->select('izin_siswa.*, users.username as approved_by_username')
-            ->join('users', 'users.id = izin_siswa.disetujui_oleh', 'left')
-            ->where('izin_siswa.siswa_id', $siswa['id'])
-            ->orderBy('izin_siswa.tanggal', 'DESC');
-
+        // Get izin data using service
+        $filters = ['siswa_id' => $siswa['id']];
         if ($status) {
-            $builder->where('izin_siswa.status', $status);
+            $filters['status'] = $status;
         }
 
-        $izinData = $builder->findAll();
+        $result = $this->izinService->getAllIzin(100, $filters);
+        $izinData = $result['success'] ? $result['data']['izin'] : [];
 
-        // Count by status
-        $countPending = $this->izinSiswaModel->where('siswa_id', $siswa['id'])->where('status', 'pending')->countAllResults();
-        $countDisetujui = $this->izinSiswaModel->where('siswa_id', $siswa['id'])->where('status', 'disetujui')->countAllResults();
-        $countDitolak = $this->izinSiswaModel->where('siswa_id', $siswa['id'])->where('status', 'ditolak')->countAllResults();
+        // Get statistics
+        $statsResult = $this->izinService->getIzinStatistics(['siswa_id' => $siswa['id']]);
+        $stats = $statsResult['success'] ? $statsResult['data'] : [
+            'pending' => 0,
+            'disetujui' => 0,
+            'ditolak' => 0
+        ];
+
+        $countPending = $stats['pending'];
+        $countDisetujui = $stats['disetujui'];
+        $countDitolak = $stats['ditolak'];
 
         $data = [
             'title' => 'Pengajuan Izin',
@@ -119,13 +122,6 @@ class IzinController extends BaseController
 
         log_message('info', '[IZIN SISWA] Validation passed');
 
-        // Check if already submitted for same date
-        if ($this->izinSiswaModel->isIzinExist($siswa['id'], $this->request->getPost('tanggal'))) {
-            log_message('warning', '[IZIN SISWA] Duplicate izin for date: ' . $this->request->getPost('tanggal'));
-            session()->setFlashdata('error', 'Eh, udah ngajuin izin di tanggal ini kok 📅');
-            return redirect()->back()->withInput();
-        }
-
         // Create upload directory if not exists
         $uploadPath = WRITEPATH . 'uploads/izin';
         
@@ -189,58 +185,33 @@ class IzinController extends BaseController
             }
         }
 
-        // Save izin
+        // Save izin using service
         $data = [
             'siswa_id' => $siswa['id'],
             'tanggal' => $this->request->getPost('tanggal'),
             'jenis_izin' => $this->request->getPost('jenis_izin'),
             'alasan' => $this->request->getPost('alasan'),
-            'berkas' => $berkasName,
-            'status' => 'pending'
+            'berkas' => $berkasName
         ];
 
         log_message('info', '[IZIN SISWA] Inserting data: ' . json_encode($data));
 
-        try {
-            if ($this->izinSiswaModel->insert($data)) {
-                log_message('info', '[IZIN SISWA] Insert successful');
-                session()->setFlashdata('success', 'Izin dikirim! Tunggu persetujuan wali kelas ya 📨✨');
-                return redirect()->to('/siswa/izin');
-            } else {
-                $modelErrors = $this->izinSiswaModel->errors();
-                log_message('error', '[IZIN SISWA] Model insert failed: ' . json_encode($modelErrors));
-                
-                // Delete uploaded file if database insert fails
-                if ($berkasName && file_exists($uploadPath . '/' . $berkasName)) {
-                    unlink($uploadPath . '/' . $berkasName);
-                    log_message('info', '[IZIN SISWA] Rolled back file upload');
-                }
-                
-                if (!empty($modelErrors)) {
-                    $errorList = '<ul class="list-disc ml-4">';
-                    foreach ($modelErrors as $field => $error) {
-                        $errorList .= '<li>' . $error . '</li>';
-                    }
-                    $errorList .= '</ul>';
-                    session()->setFlashdata('error', '❌ Gagal mengajukan izin:' . $errorList);
-                } else {
-                    session()->setFlashdata('error', 'Oops, izin gagal dikirim. Coba lagi yuk 😅');
-                }
-                
-                return redirect()->back()->withInput();
-            }
-        } catch (\Exception $e) {
-            log_message('error', '[IZIN SISWA] Exception: ' . $e->getMessage());
-            log_message('error', '[IZIN SISWA] Stack trace: ' . $e->getTraceAsString());
+        $result = $this->izinService->createIzin($data);
+
+        if ($result['success']) {
+            log_message('info', '[IZIN SISWA] Insert successful');
+            session()->setFlashdata('success', 'Izin dikirim! Tunggu persetujuan wali kelas ya 📨✨');
+            return redirect()->to('/siswa/izin');
+        } else {
+            log_message('error', '[IZIN SISWA] Insert failed: ' . $result['message']);
             
-            // Delete uploaded file if error occurs
+            // Delete uploaded file if database insert fails
             if ($berkasName && file_exists($uploadPath . '/' . $berkasName)) {
                 unlink($uploadPath . '/' . $berkasName);
-                log_message('info', '[IZIN SISWA] Rolled back file upload after exception');
+                log_message('info', '[IZIN SISWA] Rolled back file upload');
             }
             
-            $safeMessage = safe_error_message($e, '❌ Gagal mengajukan izin');
-            session()->setFlashdata('error', $safeMessage);
+            session()->setFlashdata('error', $result['message']);
             return redirect()->back()->withInput();
         }
     }
