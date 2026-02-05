@@ -132,6 +132,51 @@ abstract class BaseService
     }
 
     /**
+     * Log info message
+     * 
+     * @param string $method
+     * @param string $message
+     * @return void
+     */
+    protected function logInfo(string $method, string $message): void
+    {
+        $this->logger->info(static::class . '::' . $method . ' - ' . $message);
+    }
+
+    /**
+     * Log error message
+     * 
+     * @param string $method
+     * @param \Exception|string $error
+     * @return void
+     */
+    protected function logError(string $method, $error): void
+    {
+        if ($error instanceof \Exception) {
+            $message = $error->getMessage();
+            $this->logger->error(static::class . '::' . $method . ' - ' . $message, [
+                'exception' => get_class($error),
+                'file' => $error->getFile(),
+                'line' => $error->getLine()
+            ]);
+        } else {
+            $this->logger->error(static::class . '::' . $method . ' - ' . $error);
+        }
+    }
+
+    /**
+     * Log warning message
+     * 
+     * @param string $method
+     * @param string $message
+     * @return void
+     */
+    protected function logWarning(string $method, string $message): void
+    {
+        $this->logger->warning(static::class . '::' . $method . ' - ' . $message);
+    }
+
+    /**
      * Create success response
      * 
      * @param mixed $data
@@ -151,16 +196,28 @@ abstract class BaseService
      * Create error response
      * 
      * @param string $message
-     * @param array $errors
+     * @param int|array $codeOrErrors HTTP status code or array of errors
+     * @param array $errors Additional errors (if code is provided)
      * @return array
      */
-    protected function errorResponse(string $message, array $errors = []): array
+    protected function errorResponse(string $message, $codeOrErrors = 400, array $errors = []): array
     {
-        return [
+        $response = [
             'success' => false,
-            'message' => $message,
-            'errors' => !empty($errors) ? $errors : $this->errors
+            'message' => $message
         ];
+
+        // If second parameter is an integer, treat it as HTTP code
+        if (is_int($codeOrErrors)) {
+            $response['code'] = $codeOrErrors;
+            $response['errors'] = !empty($errors) ? $errors : $this->errors;
+        } 
+        // Otherwise treat it as errors array (backward compatibility)
+        else if (is_array($codeOrErrors)) {
+            $response['errors'] = !empty($codeOrErrors) ? $codeOrErrors : $this->errors;
+        }
+
+        return $response;
     }
 
     /**
