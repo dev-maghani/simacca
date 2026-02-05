@@ -42,11 +42,6 @@ class SiswaController extends BaseController
         if ($keyword) {
             $siswa = $this->siswaModel->searchSiswa($keyword);
             $total = count($siswa);
-            
-            // Debug: Log the first result to check fields
-            if (!empty($siswa)) {
-                log_message('debug', 'Search result fields: ' . json_encode(array_keys($siswa[0])));
-            }
         } else {
             $siswa = $this->siswaModel->getAllSiswa();
             $total = $this->siswaModel->countAll();
