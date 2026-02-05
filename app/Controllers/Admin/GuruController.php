@@ -3,24 +3,15 @@
 namespace App\Controllers\Admin;
 
 use App\Controllers\BaseController;
-use App\Models\UserModel;
-use App\Models\GuruModel;
-use App\Models\MataPelajaranModel;
-use App\Models\KelasModel;
+use App\Services\GuruService;
 
 class GuruController extends BaseController
 {
-    protected $userModel;
-    protected $guruModel;
-    protected $mapelModel;
-    protected $kelasModel;
+    protected $guruService;
 
     public function __construct()
     {
-        $this->userModel = new UserModel();
-        $this->guruModel = new GuruModel();
-        $this->mapelModel = new MataPelajaranModel();
-        $this->kelasModel = new KelasModel();
+        $this->guruService = new GuruService();
 
         // Cek role admin
         if (!session()->get('isLoggedIn') || session()->get('role') !== 'admin') {
@@ -33,15 +24,18 @@ class GuruController extends BaseController
      */
     public function index()
     {
+        $guruResult = $this->guruService->getAllGuru();
+        $statsResult = $this->guruService->getStatistics();
+
         $data = [
             'title' => 'Manajemen Guru',
             'pageTitle' => 'Data Guru',
             'pageDescription' => 'Kelola data guru dan wali kelas',
             'user' => $this->getUserData(),
-            'guru' => $this->guruModel->getAllGuru(),
-            'totalGuru' => $this->guruModel->countAll(),
-            'waliKelas' => $this->guruModel->getWaliKelas(),
-            'guruNonWali' => $this->guruModel->getGuruNonWali()
+            'guru' => $guruResult['data'] ?? [],
+            'totalGuru' => $statsResult['data']['totalGuru'] ?? 0,
+            'waliKelas' => $statsResult['data']['waliKelas'] ?? [],
+            'guruNonWali' => $statsResult['data']['guruNonWali'] ?? []
         ];
 
         return view('admin/guru/index', $data);
@@ -52,13 +46,15 @@ class GuruController extends BaseController
      */
     public function create()
     {
+        $listsResult = $this->guruService->getFormLists();
+
         $data = [
             'title' => 'Tambah Guru Baru',
             'pageTitle' => 'Tambah Data Guru',
             'pageDescription' => 'Form untuk menambahkan guru baru',
             'user' => $this->getUserData(),
-            'mapelList' => $this->mapelModel->getListMapel(),
-            'kelasList' => $this->kelasModel->getListKelas(),
+            'mapelList' => $listsResult['data']['mapelList'] ?? [],
+            'kelasList' => $listsResult['data']['kelasList'] ?? [],
             'validation' => \Config\Services::validation()
         ];
 
@@ -70,75 +66,27 @@ class GuruController extends BaseController
      */
     public function store()
     {
-        // Validation rules
-        $rules = [
-            'nip' => 'required|is_unique[guru.nip]',
-            'nama_lengkap' => 'required',
-            'jenis_kelamin' => 'required',
-            'username' => 'required|is_unique[users.username]',
-            'password' => 'required|min_length[6]',
-            'email' => 'valid_email',
-            'role' => 'required|in_list[guru_mapel,wali_kelas,wakakur]',
-            'mata_pelajaran_id' => 'permit_empty',
-            'is_wali_kelas' => 'permit_empty'
+        $data = [
+            'nip' => $this->request->getPost('nip'),
+            'nama_lengkap' => $this->request->getPost('nama_lengkap'),
+            'jenis_kelamin' => $this->request->getPost('jenis_kelamin'),
+            'username' => $this->request->getPost('username'),
+            'password' => $this->request->getPost('password'),
+            'email' => $this->request->getPost('email'),
+            'role' => $this->request->getPost('role'),
+            'mata_pelajaran_id' => $this->request->getPost('mata_pelajaran_id') ?: null,
+            'is_wali_kelas' => $this->request->getPost('is_wali_kelas') ? 1 : 0,
+            'kelas_id' => $this->request->getPost('kelas_id') ?: null
         ];
 
-        if (!$this->validate($rules)) {
-            return redirect()->back()->withInput()->with('errors', $this->validator->getErrors());
+        $result = $this->guruService->createGuru($data);
+
+        if (!$result['success']) {
+            return redirect()->back()->withInput()->with('errors', $result['errors']);
         }
 
-        // Start transaction
-        $db = \Config\Database::connect();
-        $db->transStart();
-
-        try {
-            // 1. Create user account
-            $userData = [
-                'username' => $this->request->getPost('username'),
-                'password' => $this->request->getPost('password'),
-                'role' => $this->request->getPost('role'),
-                'email' => $this->request->getPost('email'),
-                'is_active' => 1,
-                'created_at' => date('Y-m-d H:i:s')
-            ];
-
-            $userId = $this->userModel->insert($userData);
-
-            // 2. Create guru data
-            $guruData = [
-                'user_id' => $userId,
-                'nip' => $this->request->getPost('nip'),
-                'nama_lengkap' => $this->request->getPost('nama_lengkap'),
-                'jenis_kelamin' => $this->request->getPost('jenis_kelamin'),
-                'mata_pelajaran_id' => $this->request->getPost('mata_pelajaran_id') ?: null,
-                'is_wali_kelas' => $this->request->getPost('is_wali_kelas') ? 1 : 0,
-                'kelas_id' => $this->request->getPost('kelas_id') ?: null,
-                'created_at' => date('Y-m-d H:i:s')
-            ];
-
-            $this->guruModel->insert($guruData);
-
-            // 3. If this guru is a wali kelas, update kelas table
-            if ($this->request->getPost('is_wali_kelas') && $this->request->getPost('kelas_id')) {
-                $guruId = $this->guruModel->getInsertID();
-                $this->kelasModel->update($this->request->getPost('kelas_id'), [
-                    'wali_kelas_id' => $guruId
-                ]);
-            }
-
-            $db->transComplete();
-
-            if ($db->transStatus() === FALSE) {
-                throw new \Exception('Gagal menyimpan data');
-            }
-
-            session()->setFlashdata('success', 'Yeay! Guru baru berhasil ditambahkan 🎓✨');
-            return redirect()->to('/admin/guru');
-        } catch (\Exception $e) {
-            $db->transRollback();
-            session()->setFlashdata('error', $e->getMessage());
-            return redirect()->back()->withInput();
-        }
+        session()->setFlashdata('success', 'Yeay! Guru baru berhasil ditambahkan 🎓✨');
+        return redirect()->to('/admin/guru');
     }
 
     /**
@@ -146,25 +94,24 @@ class GuruController extends BaseController
      */
     public function edit($id)
     {
-        $guru = $this->guruModel->getGuruWithMapel($id);
+        $guruResult = $this->guruService->getGuruById($id);
 
-        if (!$guru) {
+        if (!$guruResult['success']) {
             session()->setFlashdata('error', 'Ups, guru ini nggak ketemu 🔍');
             return redirect()->to('/admin/guru');
         }
 
-        // Get user data
-        $user = $this->userModel->find($guru['user_id']);
+        $listsResult = $this->guruService->getFormLists();
 
         $data = [
             'title' => 'Edit Data Guru',
             'pageTitle' => 'Edit Data Guru',
             'pageDescription' => 'Form untuk mengubah data guru',
             'user' => $this->getUserData(),
-            'guru' => $guru,
-            'userData' => $user,
-            'mapelList' => $this->mapelModel->getListMapel(),
-            'kelasList' => $this->kelasModel->getListKelas(),
+            'guru' => $guruResult['data']['guru'],
+            'userData' => $guruResult['data']['user'],
+            'mapelList' => $listsResult['data']['mapelList'] ?? [],
+            'kelasList' => $listsResult['data']['kelasList'] ?? [],
             'validation' => \Config\Services::validation()
         ];
 
@@ -176,138 +123,28 @@ class GuruController extends BaseController
      */
     public function update($id)
     {
-        $guru = $this->guruModel->find($id);
-
-        if (!$guru) {
-            session()->setFlashdata('error', 'Ups, guru ini nggak ketemu 🔍');
-            return redirect()->to('/admin/guru');
-        }
-
-        // Validation rules
-        $rules = [
-            'nip' => 'required|is_unique[guru.nip,id,' . $id . ']',
-            'nama_lengkap' => 'required',
-            'jenis_kelamin' => 'required',
-            'email' => 'valid_email',
-            'role' => 'required|in_list[guru_mapel,wali_kelas,wakakur]',
-            'mata_pelajaran_id' => 'permit_empty',
-            'is_wali_kelas' => 'permit_empty'
+        $data = [
+            'nip' => $this->request->getPost('nip'),
+            'nama_lengkap' => $this->request->getPost('nama_lengkap'),
+            'jenis_kelamin' => $this->request->getPost('jenis_kelamin'),
+            'username' => $this->request->getPost('username'),
+            'password' => $this->request->getPost('password'),
+            'email' => $this->request->getPost('email'),
+            'role' => $this->request->getPost('role'),
+            'mata_pelajaran_id' => $this->request->getPost('mata_pelajaran_id') ?: null,
+            'is_wali_kelas' => $this->request->getPost('is_wali_kelas') ? 1 : 0,
+            'kelas_id' => $this->request->getPost('kelas_id') ?: null
         ];
 
-        // Jika username berubah
-        $userData = $this->userModel->find($guru['user_id']);
-        if ($this->request->getPost('username') != $userData['username']) {
-            $rules['username'] = 'required|is_unique[users.username]';
+        $result = $this->guruService->updateGuru($id, $data);
+
+        if (!$result['success']) {
+            session()->setFlashdata('error', $result['message']);
+            return redirect()->back()->withInput()->with('errors', $result['errors']);
         }
 
-        // Jika password diisi
-        if ($this->request->getPost('password')) {
-            $rules['password'] = 'min_length[6]';
-        }
-
-        if (!$this->validate($rules)) {
-            return redirect()->back()->withInput()->with('errors', $this->validator->getErrors());
-        }
-
-        // Start transaction
-        $db = \Config\Database::connect();
-        $db->transStart();
-
-        try {
-            // 1. Update user account
-            $userUpdateData = [
-                'username' => $this->request->getPost('username'),
-                'role' => $this->request->getPost('role'),
-                'email' => $this->request->getPost('email')
-            ];
-
-            // Update password jika diisi
-            $plainPassword = null;
-            if ($this->request->getPost('password')) {
-                $plainPassword = $this->request->getPost('password');
-                // $userUpdateData['password'] = password_hash($this->request->getPost('password'), PASSWORD_DEFAULT);
-                $userUpdateData['password'] = $plainPassword;
-                log_message('info', 'GuruController update - Password will be updated for user_id: ' . $guru['user_id']);
-            }
-
-            // Skip Model validation since we already validated in controller
-            $this->userModel->skipValidation(true);
-            $result = $this->userModel->update($guru['user_id'], $userUpdateData);
-            $this->userModel->skipValidation(false);
-            
-            log_message('info', 'GuruController update - User update result: ' . ($result ? 'SUCCESS' : 'FAILED'));
-            
-            if (!$result) {
-                log_message('error', 'GuruController update - Failed to update user. Errors: ' . json_encode($this->userModel->errors()));
-                throw new \Exception('Gagal mengupdate data user');
-            }
-
-            // 2. Update guru data
-            $guruData = [
-                'nip' => $this->request->getPost('nip'),
-                'nama_lengkap' => $this->request->getPost('nama_lengkap'),
-                'jenis_kelamin' => $this->request->getPost('jenis_kelamin'),
-                'mata_pelajaran_id' => $this->request->getPost('mata_pelajaran_id') ?: null,
-                'is_wali_kelas' => $this->request->getPost('is_wali_kelas') ? 1 : 0,
-                'kelas_id' => $this->request->getPost('kelas_id') ?: null
-            ];
-
-            $this->guruModel->update($id, $guruData);
-
-            // 3. Handle wali kelas assignment
-            $kelasId = $this->request->getPost('kelas_id');
-            $isWaliKelas = $this->request->getPost('is_wali_kelas');
-
-            // Reset wali kelas sebelumnya jika ada
-            if ($guru['is_wali_kelas'] && $guru['kelas_id']) {
-                $this->kelasModel->update($guru['kelas_id'], ['wali_kelas_id' => null]);
-            }
-
-            // Set wali kelas baru jika dipilih
-            if ($isWaliKelas && $kelasId) {
-                // Cek apakah kelas sudah punya wali kelas lain
-                $currentWali = $this->kelasModel->where('id', $kelasId)->first();
-                if ($currentWali && $currentWali['wali_kelas_id'] && $currentWali['wali_kelas_id'] != $id) {
-                    throw new \Exception('Kelas ini sudah memiliki wali kelas');
-                }
-
-                $this->kelasModel->update($kelasId, ['wali_kelas_id' => $id]);
-            }
-
-            $db->transComplete();
-
-            if ($db->transStatus() === FALSE) {
-                throw new \Exception('Gagal mengupdate data');
-            }
-
-            // Send email notification if password was changed
-            if ($plainPassword && !empty($userData['email'])) {
-                helper('email');
-                
-                // Get full name
-                $fullName = $guru['nama_lengkap'] ?? $userData['username'];
-                
-                $emailSent = send_password_changed_by_admin_notification(
-                    $userData['email'],
-                    $fullName,
-                    $userData['username'],
-                    $plainPassword
-                );
-                
-                if ($emailSent) {
-                    log_message('info', 'GuruController update - Password change notification sent to: ' . $userData['email']);
-                } else {
-                    log_message('warning', 'GuruController update - Failed to send password notification to: ' . $userData['email']);
-                }
-            }
-
-            session()->setFlashdata('success', 'Sip! Data guru sudah diperbarui 👍');
-            return redirect()->to('/admin/guru');
-        } catch (\Exception $e) {
-            $db->transRollback();
-            session()->setFlashdata('error', $e->getMessage());
-            return redirect()->back()->withInput();
-        }
+        session()->setFlashdata('success', 'Sip! Data guru sudah diperbarui 👍');
+        return redirect()->to('/admin/guru');
     }
 
     /**
@@ -315,42 +152,15 @@ class GuruController extends BaseController
      */
     public function delete($id)
     {
-        $guru = $this->guruModel->find($id);
+        $result = $this->guruService->deleteGuru($id);
 
-        if (!$guru) {
-            session()->setFlashdata('error', 'Ups, guru ini nggak ketemu 🔍');
-            return redirect()->to('/admin/guru');
-        }
-
-        // Start transaction
-        $db = \Config\Database::connect();
-        $db->transStart();
-
-        try {
-            // 1. Reset wali kelas jika guru ini adalah wali kelas
-            if ($guru['is_wali_kelas'] && $guru['kelas_id']) {
-                $this->kelasModel->update($guru['kelas_id'], ['wali_kelas_id' => null]);
-            }
-
-            // 2. Delete guru data
-            $this->guruModel->delete($id);
-
-            // 3. Delete user account
-            $this->userModel->delete($guru['user_id']);
-
-            $db->transComplete();
-
-            if ($db->transStatus() === FALSE) {
-                throw new \Exception('Gagal menghapus data');
-            }
-
+        if (!$result['success']) {
+            session()->setFlashdata('error', $result['message']);
+        } else {
             session()->setFlashdata('success', 'Done! Data guru sudah dihapus ✓');
-            return redirect()->to('/admin/guru');
-        } catch (\Exception $e) {
-            $db->transRollback();
-            session()->setFlashdata('error', $e->getMessage());
-            return redirect()->to('/admin/guru');
         }
+
+        return redirect()->to('/admin/guru');
     }
 
     /**
@@ -358,20 +168,11 @@ class GuruController extends BaseController
      */
     public function show($id)
     {
-        $guru = $this->guruModel->getGuruWithMapel($id);
+        $guruResult = $this->guruService->getGuruById($id);
 
-        if (!$guru) {
+        if (!$guruResult['success']) {
             session()->setFlashdata('error', 'Ups, guru ini nggak ketemu 🔍');
             return redirect()->to('/admin/guru');
-        }
-
-        // Get user data
-        $user = $this->userModel->find($guru['user_id']);
-
-        // Get kelas data if wali kelas
-        $kelas = null;
-        if ($guru['is_wali_kelas'] && $guru['kelas_id']) {
-            $kelas = $this->kelasModel->find($guru['kelas_id']);
         }
 
         $data = [
@@ -379,9 +180,9 @@ class GuruController extends BaseController
             'pageTitle' => 'Detail Data Guru',
             'pageDescription' => 'Informasi lengkap data guru',
             'user' => $this->getUserData(),
-            'guru' => $guru,
-            'userData' => $user,
-            'kelas' => $kelas
+            'guru' => $guruResult['data']['guru'],
+            'userData' => $guruResult['data']['user'],
+            'kelas' => $guruResult['data']['kelas']
         ];
 
         return view('admin/guru/show', $data);
@@ -399,18 +200,9 @@ class GuruController extends BaseController
         $nip = $this->request->getPost('nip');
         $id = $this->request->getPost('id');
 
-        $query = $this->guruModel->where('nip', $nip);
+        $result = $this->guruService->checkNipAvailability($nip, $id);
 
-        if ($id) {
-            $query->where('id !=', $id);
-        }
-
-        $exists = $query->countAllResults() > 0;
-
-        return $this->response->setJSON([
-            'available' => !$exists,
-            'message' => $exists ? 'NIP sudah digunakan' : 'NIP tersedia'
-        ]);
+        return $this->response->setJSON($result['data']);
     }
 
     /**
@@ -425,18 +217,9 @@ class GuruController extends BaseController
         $username = $this->request->getPost('username');
         $userId = $this->request->getPost('user_id');
 
-        $query = $this->userModel->where('username', $username);
+        $result = $this->guruService->checkUsernameAvailability($username, $userId);
 
-        if ($userId) {
-            $query->where('id !=', $userId);
-        }
-
-        $exists = $query->countAllResults() > 0;
-
-        return $this->response->setJSON([
-            'available' => !$exists,
-            'message' => $exists ? 'Username sudah digunakan' : 'Username tersedia'
-        ]);
+        return $this->response->setJSON($result['data']);
     }
 
     /**
@@ -444,28 +227,15 @@ class GuruController extends BaseController
      */
     public function changeStatus($id)
     {
-        $guru = $this->guruModel->find($id);
+        $result = $this->guruService->changeStatus($id);
 
-        if (!$guru) {
-            session()->setFlashdata('error', 'Ups, guru ini nggak ketemu 🔍');
-            return redirect()->to('/admin/guru');
+        if (!$result['success']) {
+            session()->setFlashdata('error', $result['message']);
+        } else {
+            $newStatus = $result['data']['new_status'];
+            $message = $newStatus ? 'Guru diaktifkan! Siap mengajar lagi 🚀' : 'Guru dinonaktifkan. See you soon! 👋';
+            session()->setFlashdata('success', $message);
         }
-
-        $user = $this->userModel->find($guru['user_id']);
-
-        if (!$user) {
-            session()->setFlashdata('error', 'Ups, user ini nggak ketemu 🔍');
-            return redirect()->to('/admin/guru');
-        }
-
-        // Toggle status
-        $newStatus = $user['is_active'] ? 0 : 1;
-
-        $this->userModel->update($guru['user_id'], ['is_active' => $newStatus]);
-
-        $statusText = $newStatus ? 'diaktifkan' : 'dinonaktifkan';
-        $newMessage = $statusText == 'diaktifkan' ? 'Guru diaktifkan! Siap mengajar lagi 🚀' : 'Guru dinonaktifkan. See you soon! 👋';
-        session()->setFlashdata('success', $newMessage);
 
         return redirect()->to('/admin/guru');
     }
@@ -475,7 +245,8 @@ class GuruController extends BaseController
      */
     public function export()
     {
-        $guru = $this->guruModel->getAllGuru();
+        $guruResult = $this->guruService->getAllGuru();
+        $guru = $guruResult['data'] ?? [];
 
         // Create Excel file using PhpSpreadsheet
         $spreadsheet = new \PhpOffice\PhpSpreadsheet\Spreadsheet();
@@ -590,10 +361,6 @@ class GuruController extends BaseController
             foreach ($rows as $index => $row) {
                 if (empty($row[0])) continue; // Skip empty rows
 
-                // Start transaction for each row
-                $db = \Config\Database::connect();
-                $db->transStart();
-
                 try {
                     $nip = trim($row[0]);
                     $namaLengkap = trim($row[1]);
@@ -617,65 +384,28 @@ class GuruController extends BaseController
                     // Validasi role
                     $role = in_array($role, ['guru_mapel', 'wali_kelas', 'wakakur']) ? $role : 'guru_mapel';
 
-                    // Cek duplikasi NIP
-                    $existingNip = $this->guruModel->where('nip', $nip)->first();
-                    if ($existingNip) {
-                        throw new \Exception("NIP sudah terdaftar: {$nip}");
-                    }
-
-                    // Cek duplikasi username
-                    $existingUsername = $this->userModel->where('username', $username)->first();
-                    if ($existingUsername) {
-                        throw new \Exception("Username sudah terdaftar: {$username}");
-                    }
-
-                    // 1. Create user account
-                    $userData = [
-                        'username' => $username,
-                        'password' => $password,
-                        'role' => $role,
-                        'email' => !empty($email) ? $email : null,
-                        'is_active' => 1,
-                        'created_at' => date('Y-m-d H:i:s')
-                    ];
-
-                    $userId = $this->userModel->insert($userData);
-
-                    if (!$userId) {
-                        throw new \Exception("Gagal membuat akun user");
-                    }
-
-                    // 2. Create Guru data
+                    // Create guru using service
                     $guruData = [
-                        'user_id' => $userId,
                         'nip' => $nip,
                         'nama_lengkap' => $namaLengkap,
                         'jenis_kelamin' => $jenisKelamin,
+                        'username' => $username,
+                        'password' => $password,
+                        'email' => !empty($email) ? $email : null,
+                        'role' => $role,
                         'mata_pelajaran_id' => !empty($mapelId) ? $mapelId : null,
                         'kelas_id' => !empty($kelasId) ? $kelasId : null,
-                        'is_wali_kelas' => $isWaliKelas,
-                        'created_at' => date('Y-m-d H:i:s')
+                        'is_wali_kelas' => $isWaliKelas
                     ];
 
-                    $this->guruModel->insert($guruData);
+                    $result = $this->guruService->createGuru($guruData);
 
-                    // 3. Jika wali kelas, update kelas
-                    if ($isWaliKelas && !empty($kelasId)) {
-                        $guruId = $this->guruModel->getInsertID();
-                        $this->kelasModel->update($kelasId, [
-                            'wali_kelas_id' => $guruId
-                        ]);
-                    }
-
-                    $db->transComplete();
-
-                    if ($db->transStatus() === false) {
-                        throw new \Exception('Gagal menyimpan data transaksi');
+                    if (!$result['success']) {
+                        throw new \Exception(implode(', ', $result['errors']));
                     }
 
                     $successCount++;
                 } catch (\Exception $e) {
-                    $db->transRollback();
                     $errorCount++;
                     $errors[] = "Baris " . ($index + 2) . ": " . $e->getMessage();
                 }
