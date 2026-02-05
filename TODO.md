@@ -143,14 +143,16 @@ $data['pager'] = $this->model->pager;
 **Complexity:** HIGH - 15 hari kerja  
 **Duration:** 3 weeks
 
-**Phase 1 & 2 Complete (2026-02-05):** ✅
+**Phase 1, 2 & 3 Complete (2026-02-05):** ✅
 - ✅ Service Layer Foundation established
 - ✅ GuruService implemented (reference implementation)
 - ✅ AbsensiService implemented (most complex controller)
+- ✅ SiswaService implemented (largest controller with complex import logic)
 - ✅ GuruController refactored (801 → 531 lines, 33.7% reduction)
 - ✅ AbsensiController refactored (1,101 → 810 lines, 26.4% reduction)
+- ✅ SiswaController refactored (966 → 376 lines, 61.1% reduction) ⭐ BEST
 - ✅ BaseService with transaction management, validation, logging
-- ✅ Unit tests created (25 tests total: 10 GuruService + 15 AbsensiService)
+- ✅ Unit tests created (45 tests total: 10 GuruService + 15 AbsensiService + 20 SiswaService)
 - ✅ Comprehensive documentation (1,918 lines)
 
 **Why Moved Down:**
@@ -170,10 +172,10 @@ $data['pager'] = $this->model->pager;
 - `app/Services/README.md` ✅
 
 **Success Criteria:**
-- 🔄 3 core services implemented (Guru ✅, Absensi ✅, Siswa ⏳)
+- ✅ 3 core services implemented (Guru ✅, Absensi ✅, Siswa ✅)
 - ⏳ 4 repositories with interfaces
 - ⏳ Top 5 long methods refactored
-- ✅ Controllers reduced by 30% (GuruController: 33.7% ✅, AbsensiController: 26.4% ✅)
+- ✅ Controllers reduced by 30% (GuruController: 33.7% ✅, AbsensiController: 26.4% ✅, SiswaController: 61.1% ✅)
 - ✅ All changes tested and documented
 
 #### **Week 1: Service Layer Foundation** (Days 1-5) ✅ COMPLETE
@@ -227,13 +229,49 @@ $data['pager'] = $this->model->pager;
 
 #### **Week 2: Service Layer Expansion** (Days 6-10)
 
-**Ticket #3: Create SiswaService** (Planned)
-- **Type:** Feature | **Priority:** High | **Estimate:** 10 hours
-- Similar to GuruService pattern
-- Extract business logic from SiswaController
-- Handle kelas auto-create logic
-- Excel import with validation
-- Unit tests (60% coverage)
+**Ticket #3: Create SiswaService** ⭐ COMPLETE ✅
+- **Type:** Feature | **Priority:** High | **Estimate:** 10 hours | **Actual:** ~6 hours
+- **Completed:** 2026-02-05
+- **Dependencies:** Ticket #1, #2 ✅
+- [x] Create `SiswaService` class with all business logic
+- [x] Extract methods: `create()`, `update()`, `delete()`, `getById()`, `getAll()`
+- [x] Handle kelas auto-creation with caching (N+1 prevention)
+- [x] Excel import with validation and partial success handling
+- [x] Kelas name parsing (Roman numerals, multiple formats)
+- [x] Email notification on password change
+- [x] Bulk actions (activate, deactivate, delete)
+- [x] Availability checks (NIS, username)
+- [x] Export to Excel functionality
+- [x] Import template generation
+- [x] Refactor SiswaController to use service
+- [x] Unit tests for SiswaService (20 test methods)
+- **Testing Checklist:**
+  - [x] Test service instantiation
+  - [x] Test getAllSiswa returns proper structure
+  - [x] Test getAllSiswa with search filter
+  - [x] Test getStatistics returns proper structure
+  - [x] Test createSiswa validation with empty data
+  - [x] Test createSiswa validation with incomplete data
+  - [x] Test getSiswaById with invalid ID returns error
+  - [x] Test updateSiswa with invalid ID returns error
+  - [x] Test deleteSiswa with invalid ID returns error
+  - [x] Test changeStatus with invalid ID returns error
+  - [x] Test checkNisAvailability returns proper structure
+  - [x] Test checkUsernameAvailability returns proper structure
+  - [x] Test getFormLists returns proper structure
+  - [x] Test bulkAction with empty array returns error
+  - [x] Test bulkAction with invalid action
+  - [x] Test exportToExcel returns proper structure
+  - [x] Test generateImportTemplate returns proper structure
+  - [x] Test processExcelImport with invalid file
+  - [x] Test validation with invalid jenis_kelamin
+  - [x] Test validation with short password
+- **Files Created:**
+  - `app/Services/SiswaService.php` (891 lines)
+  - `tests/unit/SiswaServiceTest.php` (320 lines)
+- **Files Modified:**
+  - `app/Controllers/Admin/SiswaController.php` (966 → 376 lines, 61.1% reduction)
+- **Impact:** Exceeded target - 61.1% reduction vs 30% goal (best refactoring so far!)
 
 **Ticket #4: Create AbsensiService** ⭐ COMPLETE ✅
 - **Type:** Feature | **Priority:** High | **Estimate:** 10 hours | **Actual:** ~2 hours
