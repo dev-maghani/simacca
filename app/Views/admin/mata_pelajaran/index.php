@@ -59,16 +59,8 @@
     <!-- Stats Cards -->
     <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
         <?php
-        $totalUmum = 0;
-        $totalKejuruan = 0;
-
-        foreach ($stats as $stat) {
-            if ($stat['kategori'] == 'umum') {
-                $totalUmum = $stat['total'];
-            } else if ($stat['kategori'] == 'kejuruan') {
-                $totalKejuruan = $stat['total'];
-            }
-        }
+        $totalUmum = $stats['umum'] ?? 0;
+        $totalKejuruan = $stats['kejuruan'] ?? 0;
         $totalAll = $totalUmum + $totalKejuruan;
         ?>
         <div class="bg-white rounded-lg shadow p-4">

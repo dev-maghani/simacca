@@ -3,21 +3,21 @@
 namespace App\Controllers\WaliKelas;
 
 use App\Controllers\BaseController;
+use App\Services\IzinSiswaService;
 use App\Models\GuruModel;
 use App\Models\KelasModel;
-use App\Models\IzinSiswaModel;
 
 class IzinController extends BaseController
 {
     protected $guruModel;
     protected $kelasModel;
-    protected $izinSiswaModel;
+    protected $izinService;
 
     public function __construct()
     {
         $this->guruModel = new GuruModel();
         $this->kelasModel = new KelasModel();
-        $this->izinSiswaModel = new IzinSiswaModel();
+        $this->izinService = new IzinSiswaService();
     }
 
     public function index()
@@ -53,17 +53,22 @@ class IzinController extends BaseController
 
         log_message('info', '[WALI KELAS IZIN] Filter status: ' . ($status ?? 'all'));
 
-        // Get izin data
-        $izinData = $this->izinSiswaModel->getByKelas($kelas['id'], $status);
+        // Get izin data using service
+        $result = $this->izinService->getIzinByKelas($kelas['id'], $status);
+        $izinData = $result['success'] ? $result['data'] : [];
 
         log_message('info', '[WALI KELAS IZIN] Total izin found: ' . count($izinData));
 
-        // Count by status
-        $countPending = $this->izinSiswaModel->getByKelas($kelas['id'], 'pending');
-        $countDisetujui = $this->izinSiswaModel->getByKelas($kelas['id'], 'disetujui');
-        $countDitolak = $this->izinSiswaModel->getByKelas($kelas['id'], 'ditolak');
+        // Get statistics - use proper service method
+        $statsResult = $this->izinService->getIzinStatistics(['kelas_id' => $kelas['id']]);
+        $stats = $statsResult['success'] ? $statsResult['data'] : [
+            'pending' => 0,
+            'disetujui' => 0,
+            'ditolak' => 0,
+            'total_izin' => 0
+        ];
 
-        log_message('info', '[WALI KELAS IZIN] Count - Pending: ' . count($countPending) . ', Disetujui: ' . count($countDisetujui) . ', Ditolak: ' . count($countDitolak));
+        log_message('info', '[WALI KELAS IZIN] Stats - Total: ' . $stats['total_izin'] . ', Pending: ' . $stats['pending'] . ', Disetujui: ' . $stats['disetujui'] . ', Ditolak: ' . $stats['ditolak']);
 
         $data = [
             'title' => 'Persetujuan Izin Siswa',
@@ -71,9 +76,9 @@ class IzinController extends BaseController
             'kelas' => $kelas,
             'izinData' => $izinData,
             'status' => $status,
-            'countPending' => count($countPending),
-            'countDisetujui' => count($countDisetujui),
-            'countDitolak' => count($countDitolak)
+            'countPending' => $stats['pending'],
+            'countDisetujui' => $stats['disetujui'],
+            'countDitolak' => $stats['ditolak']
         ];
 
         return view('walikelas/izin/index', $data);
@@ -86,9 +91,9 @@ class IzinController extends BaseController
         $userId = session()->get('user_id');
         $catatan = $this->request->getPost('catatan');
 
-        $result = $this->izinSiswaModel->approveIzin($id, $userId, $catatan);
+        $result = $this->izinService->approveIzin($id, $userId, $catatan);
 
-        if ($result) {
+        if ($result['success']) {
             log_message('info', '[WALI KELAS IZIN] Approve successful');
             return $this->response->setJSON([
                 'status' => 'success',
@@ -96,10 +101,10 @@ class IzinController extends BaseController
             ]);
         }
 
-        log_message('error', '[WALI KELAS IZIN] Approve failed');
+        log_message('error', '[WALI KELAS IZIN] Approve failed: ' . $result['message']);
         return $this->response->setJSON([
             'status' => 'error',
-            'message' => 'Oops, gagal approve izin 😅'
+            'message' => $result['message']
         ]);
     }
 
@@ -110,9 +115,9 @@ class IzinController extends BaseController
         $userId = session()->get('user_id');
         $catatan = $this->request->getPost('catatan');
 
-        $result = $this->izinSiswaModel->rejectIzin($id, $userId, $catatan);
+        $result = $this->izinService->rejectIzin($id, $userId, $catatan);
 
-        if ($result) {
+        if ($result['success']) {
             log_message('info', '[WALI KELAS IZIN] Reject successful');
             return $this->response->setJSON([
                 'status' => 'success',
@@ -120,10 +125,10 @@ class IzinController extends BaseController
             ]);
         }
 
-        log_message('error', '[WALI KELAS IZIN] Reject failed');
+        log_message('error', '[WALI KELAS IZIN] Reject failed: ' . $result['message']);
         return $this->response->setJSON([
             'status' => 'error',
-            'message' => 'Hmm, gagal reject izin 😕'
+            'message' => $result['message']
         ]);
     }
 }

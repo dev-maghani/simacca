@@ -333,6 +333,7 @@
                     ['url' => 'siswa/dashboard', 'icon' => 'fas fa-home', 'label' => 'Beranda'],
                     ['url' => 'siswa/jadwal', 'icon' => 'fas fa-calendar', 'label' => 'Jadwal'],
                     ['url' => 'siswa/absensi', 'icon' => 'fas fa-clipboard-check', 'label' => 'Absensi'],
+                    ['url' => 'siswa/izin', 'icon' => 'fas fa-file-medical', 'label' => 'Izin'],
                     ['url' => 'siswa/profil', 'icon' => 'fas fa-user', 'label' => 'Profil'],
                 ];
             }

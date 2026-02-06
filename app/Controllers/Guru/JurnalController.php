@@ -3,30 +3,26 @@
 namespace App\Controllers\Guru;
 
 use App\Controllers\BaseController;
-use App\Models\JurnalKbmModel;
+use App\Services\JurnalKbmService;
 use App\Models\AbsensiModel;
 use App\Models\GuruModel;
-use App\Models\JadwalMengajarModel;
 
 class JurnalController extends BaseController
 {
-    protected $jurnalModel;
+    protected $jurnalService;
     protected $absensiModel;
     protected $guruModel;
-    protected $jadwalModel;
 
     public function __construct()
     {
-        $this->jurnalModel = new JurnalKbmModel();
+        $this->jurnalService = new JurnalKbmService();
         $this->absensiModel = new AbsensiModel();
         $this->guruModel = new GuruModel();
-        $this->jadwalModel = new JadwalMengajarModel();
     }
 
     public function index()
     {
         // Get guru data from session
-        // Support both 'user_id' and 'userId' for backward compatibility
         $userId = session()->get('user_id') ?? session()->get('userId');
         $guru = $this->guruModel->getByUserId($userId);
 
@@ -38,8 +34,14 @@ class JurnalController extends BaseController
         $startDate = $this->request->getGet('start_date');
         $endDate = $this->request->getGet('end_date');
 
-        // Get jurnal by guru (grouped by kelas)
-        $jurnalRaw = $this->jurnalModel->getByGuru($guru['id'], $startDate, $endDate);
+        // Get jurnal by guru using service
+        $result = $this->jurnalService->getJurnalByGuru($guru['id'], $startDate, $endDate);
+        
+        if (!$result['success']) {
+            return redirect()->to('/guru/dashboard')->with('error', $result['message']);
+        }
+
+        $jurnalRaw = $result['data'];
         
         // Group by kelas
         $kelasList = [];
@@ -89,11 +91,12 @@ class JurnalController extends BaseController
         }
 
         // Cek apakah sudah ada jurnal untuk absensi ini
-        // Jika sudah ada, redirect ke edit jurnal
-        $existingJurnal = $this->jurnalModel->getByAbsensi($absensiId);
-        if ($existingJurnal) {
-            return redirect()->to('/guru/jurnal/edit/' . $existingJurnal['id'])
-                ->with('info', 'Jurnal untuk pertemuan ini sudah ada. Anda dapat mengeditnya di sini.');
+        if ($this->jurnalService->isJurnalExist($absensiId)) {
+            $existingResult = $this->jurnalService->getJurnalByAbsensi($absensiId);
+            if ($existingResult['success']) {
+                return redirect()->to('/guru/jurnal/edit/' . $existingResult['data']['id'])
+                    ->with('info', 'Jurnal untuk pertemuan ini sudah ada. Anda dapat mengeditnya di sini.');
+            }
         }
 
         // Cek apakah guru yang login adalah pembuat absensi (created_by)
@@ -137,10 +140,12 @@ class JurnalController extends BaseController
 
         // Cek apakah sudah ada jurnal untuk absensi ini
         $absensiId = $this->request->getPost('absensi_id');
-        $existingJurnal = $this->jurnalModel->getByAbsensi($absensiId);
-        if ($existingJurnal) {
-            session()->setFlashdata('info', 'Jurnal pertemuan ini udah ada nih. Edit aja ya! 📝');
-            return redirect()->to('/guru/jurnal/edit/' . $existingJurnal['id']);
+        if ($this->jurnalService->isJurnalExist($absensiId)) {
+            $existingResult = $this->jurnalService->getJurnalByAbsensi($absensiId);
+            if ($existingResult['success']) {
+                session()->setFlashdata('info', 'Jurnal pertemuan ini udah ada nih. Edit aja ya! 📝');
+                return redirect()->to('/guru/jurnal/edit/' . $existingResult['data']['id']);
+            }
         }
 
         // Handle foto dokumentasi upload
@@ -197,7 +202,7 @@ class JurnalController extends BaseController
             }
         }
 
-        // Insert jurnal
+        // Insert jurnal using service
         $data = [
             'absensi_id' => $absensiId,
             'tujuan_pembelajaran' => $this->request->getPost('tujuan_pembelajaran') ?? '-',
@@ -205,42 +210,21 @@ class JurnalController extends BaseController
             'media_alat' => $this->request->getPost('media_ajar') ?? '-',
             'penilaian' => $this->request->getPost('penilaian') ?? '-',
             'catatan_khusus' => $this->request->getPost('catatan_khusus') ?? '-',
-            'foto_dokumentasi' => $fotoName,
-            'created_at' => date('Y-m-d H:i:s')
+            'foto_dokumentasi' => $fotoName
         ];
 
-        try {
-            if ($this->jurnalModel->insert($data)) {
-                session()->setFlashdata('success', 'Yeay! Jurnal tersimpan. Good job! 📚✨');
-                return redirect()->to('/guru/jurnal');
-            } else {
-                // Delete uploaded file if database insert fails
-                if ($fotoName && file_exists(WRITEPATH . 'uploads/jurnal/' . $fotoName)) {
-                    unlink(WRITEPATH . 'uploads/jurnal/' . $fotoName);
-                }
-                
-                $modelErrors = $this->jurnalModel->errors();
-                if (!empty($modelErrors)) {
-                    $errorList = '<ul class="list-disc ml-4">';
-                    foreach ($modelErrors as $field => $error) {
-                        $errorList .= '<li>' . $error . '</li>';
-                    }
-                    $errorList .= '</ul>';
-                    session()->setFlashdata('error', '❌ Gagal menyimpan jurnal KBM:' . $errorList);
-                } else {
-                    session()->setFlashdata('error', '❌ Gagal menyimpan jurnal KBM. Silakan coba lagi atau hubungi administrator.');
-                }
-                
-                return redirect()->back()->withInput();
-            }
-        } catch (\Exception $e) {
-            // Delete uploaded file if error occurs
+        $result = $this->jurnalService->createJurnal($data);
+
+        if ($result['success']) {
+            session()->setFlashdata('success', 'Yeay! Jurnal tersimpan. Good job! 📚✨');
+            return redirect()->to('/guru/jurnal');
+        } else {
+            // Delete uploaded file if database insert fails
             if ($fotoName && file_exists(WRITEPATH . 'uploads/jurnal/' . $fotoName)) {
                 unlink(WRITEPATH . 'uploads/jurnal/' . $fotoName);
             }
             
-            $safeMessage = safe_error_message($e, '❌ Gagal menyimpan jurnal KBM');
-            session()->setFlashdata('error', $safeMessage);
+            session()->setFlashdata('error', $result['message']);
             return redirect()->back()->withInput();
         }
     }
@@ -256,29 +240,14 @@ class JurnalController extends BaseController
             return redirect()->to('/guru/dashboard')->with('error', 'Data guru tidak ditemukan');
         }
 
-        // Get jurnal with detail including kelas_id
-        $jurnal = $this->jurnalModel->select('jurnal_kbm.*,
-                                            absensi.tanggal,
-                                            absensi.pertemuan_ke,
-                                            absensi.materi_pembelajaran,
-                                            jadwal_mengajar.jam_mulai,
-                                            jadwal_mengajar.jam_selesai,
-                                            guru.nama_lengkap as nama_guru,
-                                            guru.nip,
-                                            mata_pelajaran.nama_mapel,
-                                            kelas.id as kelas_id,
-                                            kelas.nama_kelas')
-                    ->join('absensi', 'absensi.id = jurnal_kbm.absensi_id')
-                    ->join('jadwal_mengajar', 'jadwal_mengajar.id = absensi.jadwal_mengajar_id')
-                    ->join('guru', 'guru.id = jadwal_mengajar.guru_id')
-                    ->join('mata_pelajaran', 'mata_pelajaran.id = jadwal_mengajar.mata_pelajaran_id')
-                    ->join('kelas', 'kelas.id = jadwal_mengajar.kelas_id')
-                    ->where('jurnal_kbm.id', $jurnalId)
-                    ->first();
+        // Get jurnal using service
+        $result = $this->jurnalService->getJurnalById($jurnalId);
 
-        if (!$jurnal) {
-            return redirect()->to('/guru/jurnal')->with('error', 'Data jurnal tidak ditemukan');
+        if (!$result['success']) {
+            return redirect()->to('/guru/jurnal')->with('error', $result['message']);
         }
+
+        $jurnal = $result['data'];
 
         // Cek apakah jurnal dibuat oleh guru yang login
         // Check via absensi's created_by to support substitute teacher mode
@@ -299,7 +268,6 @@ class JurnalController extends BaseController
     public function show($kelasId)
     {
         // Get guru data from session
-        // Support both 'user_id' and 'userId' for backward compatibility
         $userId = session()->get('user_id') ?? session()->get('userId');
         $guru = $this->guruModel->getByUserId($userId);
 
@@ -307,12 +275,14 @@ class JurnalController extends BaseController
             return redirect()->to('/guru/dashboard')->with('error', 'Data guru tidak ditemukan');
         }
 
-        // Get all jurnal for this kelas
-        $jurnalList = $this->jurnalModel->getByGuruAndKelas($guru['id'], $kelasId);
+        // Get jurnal for this kelas AND this guru only (security-safe)
+        $result = $this->jurnalService->getJurnalByGuruAndKelas($guru['id'], $kelasId);
 
-        if (empty($jurnalList)) {
+        if (!$result['success'] || empty($result['data'])) {
             return redirect()->to('/guru/jurnal')->with('error', 'Data jurnal tidak ditemukan untuk kelas ini');
         }
+
+        $jurnalList = $result['data'];
 
         $data = [
             'title' => 'Daftar Pertemuan - ' . $jurnalList[0]['nama_kelas'],
@@ -350,14 +320,15 @@ class JurnalController extends BaseController
 
         log_message('info', '[JURNAL UPDATE] Validation passed');
 
-        // Cek apakah jurnal ada
-        $jurnal = $this->jurnalModel->find($jurnalId);
-        if (!$jurnal) {
+        // Get existing jurnal
+        $jurnalResult = $this->jurnalService->getJurnalById($jurnalId);
+        if (!$jurnalResult['success']) {
             log_message('error', '[JURNAL UPDATE] Jurnal not found: ' . $jurnalId);
-            session()->setFlashdata('error', 'Data jurnal tidak ditemukan');
+            session()->setFlashdata('error', $jurnalResult['message']);
             return redirect()->to('/guru/jurnal');
         }
 
+        $jurnal = $jurnalResult['data'];
         log_message('info', '[JURNAL UPDATE] Jurnal found: ' . json_encode($jurnal));
 
         // Prepare update data
@@ -472,65 +443,32 @@ class JurnalController extends BaseController
 
         log_message('info', '[JURNAL UPDATE] Final data for update: ' . json_encode($data));
 
-        // Update jurnal
-        try {
-            $updateResult = $this->jurnalModel->update($jurnalId, $data);
-            log_message('info', '[JURNAL UPDATE] Update result: ' . ($updateResult ? 'success' : 'failed'));
+        // Update jurnal using service
+        $updateResult = $this->jurnalService->updateJurnal($jurnalId, $data);
+        log_message('info', '[JURNAL UPDATE] Update result: ' . ($updateResult['success'] ? 'success' : 'failed'));
+        
+        if ($updateResult['success']) {
+            log_message('info', '[JURNAL UPDATE] Jurnal updated successfully');
             
-            if ($updateResult) {
-                log_message('info', '[JURNAL UPDATE] Jurnal updated successfully');
-                
-                // Get kelas_id for redirect
-                $jurnalDetail = $this->jurnalModel->select('jurnal_kbm.*, jadwal_mengajar.kelas_id')
-                    ->join('absensi', 'absensi.id = jurnal_kbm.absensi_id')
-                    ->join('jadwal_mengajar', 'jadwal_mengajar.id = absensi.jadwal_mengajar_id')
-                    ->where('jurnal_kbm.id', $jurnalId)
-                    ->first();
-                    
-                $kelasId = $jurnalDetail['kelas_id'] ?? null;
-                
-                session()->setFlashdata('success', '✅ Jurnal KBM berhasil diperbarui! Perubahan telah disimpan.');
-                
-                if ($kelasId) {
-                    return redirect()->to('/guru/jurnal/show/' . $kelasId);
-                }
-                return redirect()->to('/guru/jurnal');
-            } else {
-                // Get model errors
-                $modelErrors = $this->jurnalModel->errors();
-                log_message('error', '[JURNAL UPDATE] Model update failed: ' . json_encode($modelErrors));
-                
-                // Rollback: delete uploaded file if database update fails
-                if (isset($fotoName) && file_exists(WRITEPATH . 'uploads/jurnal/' . $fotoName)) {
-                    unlink(WRITEPATH . 'uploads/jurnal/' . $fotoName);
-                    log_message('info', '[JURNAL UPDATE] Rolled back foto upload');
-                }
-                
-                if (!empty($modelErrors)) {
-                    $errorList = '<ul class="list-disc ml-4">';
-                    foreach ($modelErrors as $field => $error) {
-                        $errorList .= '<li>' . $error . '</li>';
-                    }
-                    $errorList .= '</ul>';
-                    session()->setFlashdata('error', '❌ Gagal memperbarui jurnal KBM:' . $errorList);
-                } else {
-                    session()->setFlashdata('error', '❌ Gagal memperbarui jurnal KBM. Silakan coba lagi atau hubungi administrator.');
-                }
-                
-                return redirect()->back()->withInput();
+            // Get kelas_id for redirect from jurnal data
+            $kelasId = $jurnal['kelas_id'] ?? null;
+            
+            session()->setFlashdata('success', '✅ Jurnal KBM berhasil diperbarui! Perubahan telah disimpan.');
+            
+            if ($kelasId) {
+                return redirect()->to('/guru/jurnal/show/' . $kelasId);
             }
-        } catch (\Exception $e) {
-            log_message('error', '[JURNAL UPDATE] Exception occurred: ' . $e->getMessage());
-            log_message('error', '[JURNAL UPDATE] Stack trace: ' . $e->getTraceAsString());
+            return redirect()->to('/guru/jurnal');
+        } else {
+            log_message('error', '[JURNAL UPDATE] Update failed: ' . $updateResult['message']);
             
-            // Rollback: delete uploaded file if error occurs
+            // Rollback: delete uploaded file if database update fails
             if (isset($fotoName) && file_exists(WRITEPATH . 'uploads/jurnal/' . $fotoName)) {
                 unlink(WRITEPATH . 'uploads/jurnal/' . $fotoName);
-                log_message('info', '[JURNAL UPDATE] Rolled back foto upload after exception');
+                log_message('info', '[JURNAL UPDATE] Rolled back foto upload');
             }
             
-            $safeMessage = safe_error_message($e, '❌ Gagal memperbarui jurnal KBM');
-            session()->setFlashdata('error', $safeMessage);
+            session()->setFlashdata('error', $updateResult['message']);
             return redirect()->back()->withInput();
         }
     }
@@ -558,36 +496,32 @@ class JurnalController extends BaseController
             $endDate = date('Y-m-t', strtotime($startDate));
         }
 
-        // Get jurnal list based on kelas
-        if ($kelasId) {
-            $jurnalList = $this->jurnalModel->select('jurnal_kbm.*,
-                                    absensi.tanggal,
-                                    absensi.pertemuan_ke,
-                                    absensi.materi_pembelajaran,
-                                    mata_pelajaran.nama_mapel,
-                                    kelas.nama_kelas')
-                ->join('absensi', 'absensi.id = jurnal_kbm.absensi_id')
-                ->join('jadwal_mengajar', 'jadwal_mengajar.id = absensi.jadwal_mengajar_id')
-                ->join('mata_pelajaran', 'mata_pelajaran.id = jadwal_mengajar.mata_pelajaran_id')
-                ->join('kelas', 'kelas.id = jadwal_mengajar.kelas_id')
-                ->where('jadwal_mengajar.guru_id', $guru['id'])
-                ->where('kelas.id', $kelasId);
-
-            if ($startDate && $endDate) {
-                $jurnalList->where('absensi.tanggal >=', $startDate)
-                           ->where('absensi.tanggal <=', $endDate);
-            }
-
-            $jurnalList = $jurnalList->orderBy('absensi.tanggal', 'ASC')->findAll();
-            
-            // Get kelas info
-            $kelasModel = new \App\Models\KelasModel();
-            $kelasInfo = $kelasModel->find($kelasId);
-            $mapelInfo = !empty($jurnalList) ? ['nama_mapel' => $jurnalList[0]['nama_mapel']] : null;
-        } else {
-            // Redirect to jurnal index if no kelas specified
+        // Validate kelas parameter
+        if (!$kelasId) {
             return redirect()->to('/guru/jurnal')->with('error', 'Pilih kelas untuk mencetak jurnal');
         }
+
+        // SECURITY FIX: Get jurnal filtered by BOTH guru AND kelas
+        // First get all jurnal by this guru
+        $result = $this->jurnalService->getJurnalByGuru($guru['id'], $startDate, $endDate);
+        
+        if (!$result['success']) {
+            return redirect()->to('/guru/jurnal')->with('error', $result['message']);
+        }
+
+        // Filter by the specific kelas
+        $allJurnal = $result['data'];
+        $jurnalList = array_filter($allJurnal, function($jurnal) use ($kelasId) {
+            return $jurnal['kelas_id'] == $kelasId;
+        });
+
+        // Reset array keys
+        $jurnalList = array_values($jurnalList);
+        
+        // Get kelas info
+        $kelasModel = new \App\Models\KelasModel();
+        $kelasInfo = $kelasModel->find($kelasId);
+        $mapelInfo = !empty($jurnalList) ? ['nama_mapel' => $jurnalList[0]['nama_mapel']] : null;
 
         if (empty($jurnalList)) {
             return redirect()->to('/guru/jurnal')->with('error', 'Tidak ada data jurnal untuk dicetak');

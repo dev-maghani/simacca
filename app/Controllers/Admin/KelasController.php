@@ -3,19 +3,19 @@
 namespace App\Controllers\Admin;
 
 use App\Controllers\BaseController;
-use App\Models\KelasModel;
+use App\Services\KelasService;
 use App\Models\GuruModel;
 use App\Models\SiswaModel;
 
 class KelasController extends BaseController
 {
-    protected $kelasModel;
+    protected $kelasService;
     protected $guruModel;
     protected $siswaModel;
 
     public function __construct()
     {
-        $this->kelasModel = new KelasModel();
+        $this->kelasService = new KelasService();
         $this->guruModel = new GuruModel();
         $this->siswaModel = new SiswaModel();
 
@@ -30,13 +30,15 @@ class KelasController extends BaseController
      */
     public function index()
     {
+        $result = $this->kelasService->getAllKelas(100); // Get all for index page
+        
         $data = [
             'title' => 'Manajemen Kelas',
             'pageTitle' => 'Data Kelas',
             'pageDescription' => 'Kelola data kelas dan wali kelas',
             'user' => $this->getUserData(),
-            'kelas' => $this->kelasModel->getKelasWithJumlahSiswa(),
-            'kelasTanpaWali' => $this->kelasModel->getKelasWithoutWali(),
+            'kelas' => $result['success'] ? $result['data']['kelas'] : [],
+            'kelasTanpaWali' => [], // Will be shown in kelas list with conditional
             'guruTersedia' => $this->guruModel->getGuruNonWali(),
             'jurusanList' => $this->getJurusanList(),
             'tingkatList' => $this->getTingkatList()
@@ -69,45 +71,28 @@ class KelasController extends BaseController
      */
     public function store()
     {
-        // Validation rules
-        $rules = [
-            'nama_kelas' => 'required|is_unique[kelas.nama_kelas]',
-            'tingkat' => 'required|in_list[10,11,12]',
-            'jurusan' => 'required',
-            'wali_kelas_id' => 'permit_empty|numeric'
+        $data = [
+            'nama_kelas' => $this->request->getPost('nama_kelas'),
+            'tingkat' => $this->request->getPost('tingkat'),
+            'jurusan' => $this->request->getPost('jurusan'),
+            'wali_kelas_id' => $this->request->getPost('wali_kelas_id') ?: null
         ];
 
-        if (!$this->validate($rules)) {
-            return redirect()->back()->withInput()->with('errors', $this->validator->getErrors());
-        }
+        $result = $this->kelasService->createKelas($data);
 
-        try {
-            $data = [
-                'nama_kelas' => $this->request->getPost('nama_kelas'),
-                'tingkat' => $this->request->getPost('tingkat'),
-                'jurusan' => $this->request->getPost('jurusan'),
-                'wali_kelas_id' => $this->request->getPost('wali_kelas_id') ?: null
-            ];
-
-            $this->kelasModel->insert($data);
-
-            // Jika wali kelas dipilih, update status guru
-            if ($this->request->getPost('wali_kelas_id')) {
-                $guruId = $this->request->getPost('wali_kelas_id');
-                $kelasId = $this->kelasModel->getInsertID();
-                
-                // Update guru menjadi wali kelas
-                $this->guruModel->update($guruId, [
+        if ($result['success']) {
+            // Update guru status if wali kelas assigned
+            if (!empty($data['wali_kelas_id'])) {
+                $this->guruModel->update($data['wali_kelas_id'], [
                     'is_wali_kelas' => 1,
-                    'kelas_id' => $kelasId
+                    'kelas_id' => $result['data']['id']
                 ]);
             }
-
+            
             session()->setFlashdata('success', 'Yeay! Kelas baru sudah dibuat.');
             return redirect()->to('/admin/kelas');
-
-        } catch (\Exception $e) {
-            session()->setFlashdata('error', 'Gagal menyimpan data: ' . $e->getMessage());
+        } else {
+            session()->setFlashdata('error', $result['message']);
             return redirect()->back()->withInput();
         }
     }
@@ -117,12 +102,14 @@ class KelasController extends BaseController
      */
     public function edit($id)
     {
-        $kelas = $this->kelasModel->find($id);
+        $result = $this->kelasService->getKelasById($id);
         
-        if (!$kelas) {
+        if (!$result['success']) {
             session()->setFlashdata('error', 'Wah, kelas ini nggak ketemu');
             return redirect()->to('/admin/kelas');
         }
+
+        $kelas = $result['data'];
 
         // Get wali kelas data if exists
         $waliKelas = null;
@@ -141,7 +128,7 @@ class KelasController extends BaseController
             'validation' => \Config\Services::validation(),
             'jurusanList' => $this->getJurusanList(),
             'tingkatList' => $this->getTingkatList(),
-            'siswaCount' => $this->siswaModel->where('kelas_id', $id)->countAllResults()
+            'siswaCount' => isset($kelas['siswa']) ? count($kelas['siswa']) : 0
         ];
 
         return view('admin/kelas/edit', $data);
@@ -152,44 +139,28 @@ class KelasController extends BaseController
      */
     public function update($id)
     {
-        $kelas = $this->kelasModel->find($id);
+        $result = $this->kelasService->getKelasById($id);
         
-        if (!$kelas) {
+        if (!$result['success']) {
             session()->setFlashdata('error', 'Wah, kelas ini nggak ketemu');
             return redirect()->to('/admin/kelas');
         }
 
-        // Validation rules
-        $rules = [
-            'nama_kelas' => "required|is_unique[kelas.nama_kelas,id,{$id}]",
-            'tingkat' => 'required|in_list[10,11,12]',
-            'jurusan' => 'required',
-            'wali_kelas_id' => 'permit_empty|numeric'
+        $kelas = $result['data'];
+        $oldWaliKelasId = $kelas['wali_kelas_id'];
+        $newWaliKelasId = $this->request->getPost('wali_kelas_id') ?: null;
+
+        $data = [
+            'nama_kelas' => $this->request->getPost('nama_kelas'),
+            'tingkat' => $this->request->getPost('tingkat'),
+            'jurusan' => $this->request->getPost('jurusan'),
+            'wali_kelas_id' => $newWaliKelasId
         ];
 
-        if (!$this->validate($rules)) {
-            return redirect()->back()->withInput()->with('errors', $this->validator->getErrors());
-        }
+        $updateResult = $this->kelasService->updateKelas($id, $data);
 
-        // Start transaction
-        $db = \Config\Database::connect();
-        $db->transStart();
-
-        try {
-            $oldWaliKelasId = $kelas['wali_kelas_id'];
-            $newWaliKelasId = $this->request->getPost('wali_kelas_id') ?: null;
-
-            // 1. Update kelas data
-            $data = [
-                'nama_kelas' => $this->request->getPost('nama_kelas'),
-                'tingkat' => $this->request->getPost('tingkat'),
-                'jurusan' => $this->request->getPost('jurusan'),
-                'wali_kelas_id' => $newWaliKelasId
-            ];
-
-            $this->kelasModel->update($id, $data);
-
-            // 2. Handle wali kelas changes
+        if ($updateResult['success']) {
+            // Handle wali kelas changes in guru table
             if ($oldWaliKelasId != $newWaliKelasId) {
                 // Remove old wali kelas
                 if ($oldWaliKelasId) {
@@ -208,18 +179,10 @@ class KelasController extends BaseController
                 }
             }
 
-            $db->transComplete();
-
-            if ($db->transStatus() === FALSE) {
-                throw new \Exception('Gagal mengupdate data');
-            }
-
             session()->setFlashdata('success', 'Oke! Data kelas sudah diperbarui');
             return redirect()->to('/admin/kelas');
-
-        } catch (\Exception $e) {
-            $db->transRollback();
-            session()->setFlashdata('error', $e->getMessage());
+        } else {
+            session()->setFlashdata('error', $updateResult['message']);
             return redirect()->back()->withInput();
         }
     }
@@ -229,26 +192,18 @@ class KelasController extends BaseController
      */
     public function delete($id)
     {
-        $kelas = $this->kelasModel->find($id);
+        $result = $this->kelasService->getKelasById($id);
         
-        if (!$kelas) {
+        if (!$result['success']) {
             session()->setFlashdata('error', 'Wah, kelas ini nggak ketemu');
             return redirect()->to('/admin/kelas');
         }
 
-        // Check if kelas has siswa
-        $siswaCount = $this->siswaModel->where('kelas_id', $id)->countAllResults();
-        if ($siswaCount > 0) {
-            session()->setFlashdata('error', "Kelas masih ada {$siswaCount} siswa nih. Pindahkan dulu ya");
-            return redirect()->to('/admin/kelas');
-        }
+        $kelas = $result['data'];
+        $deleteResult = $this->kelasService->deleteKelas($id);
 
-        // Start transaction
-        $db = \Config\Database::connect();
-        $db->transStart();
-
-        try {
-            // Remove wali kelas assignment if exists
+        if ($deleteResult['success']) {
+            // Remove wali kelas assignment from guru if exists
             if ($kelas['wali_kelas_id']) {
                 $this->guruModel->update($kelas['wali_kelas_id'], [
                     'is_wali_kelas' => 0,
@@ -256,21 +211,10 @@ class KelasController extends BaseController
                 ]);
             }
 
-            // Delete kelas
-            $this->kelasModel->delete($id);
-
-            $db->transComplete();
-
-            if ($db->transStatus() === FALSE) {
-                throw new \Exception('Gagal menghapus data');
-            }
-
             session()->setFlashdata('success', 'Kelas berhasil dihapus ✓');
             return redirect()->to('/admin/kelas');
-
-        } catch (\Exception $e) {
-            $db->transRollback();
-            session()->setFlashdata('error', $e->getMessage());
+        } else {
+            session()->setFlashdata('error', $deleteResult['message']);
             return redirect()->to('/admin/kelas');
         }
     }
@@ -280,12 +224,14 @@ class KelasController extends BaseController
      */
     public function show($id)
     {
-        $kelas = $this->kelasModel->getKelasWithJumlahSiswa($id);
+        $result = $this->kelasService->getKelasById($id);
         
-        if (!$kelas) {
+        if (!$result['success']) {
             session()->setFlashdata('error', 'Wah, kelas ini nggak ketemu');
             return redirect()->to('/admin/kelas');
         }
+
+        $kelas = $result['data'];
 
         // Get wali kelas data
         $waliKelas = null;
@@ -293,12 +239,18 @@ class KelasController extends BaseController
             $waliKelas = $this->guruModel->find($kelas['wali_kelas_id']);
         }
 
-        // Get siswa list in this kelas
-        $siswa = $this->siswaModel->getByKelas($id);
+        // Get siswa list (already included in service response)
+        $siswa = $kelas['siswa'] ?? [];
 
-        // Get absensi statistics for this kelas
+        // Get absensi statistics for this kelas (this month)
         $absensiModel = new \App\Models\AbsensiModel();
-        $absensiStats = $absensiModel->getByKelas($id, date('Y-m-01'), date('Y-m-t'));
+        $absensiList = $absensiModel->getByKelas($id, date('Y-m-01'), date('Y-m-t'));
+        
+        // Format statistics as expected by view
+        $absensiStats = [
+            'total_sesi' => count($absensiList),
+            'list' => $absensiList
+        ];
 
         $data = [
             'title' => 'Detail Kelas',
@@ -320,58 +272,37 @@ class KelasController extends BaseController
      */
     public function assignWaliKelas($kelasId)
     {
-        $kelas = $this->kelasModel->find($kelasId);
-        
-        if (!$kelas) {
-            return $this->response->setJSON(['success' => false, 'message' => 'Kelas tidak ditemukan']);
-        }
-
         $guruId = $this->request->getPost('guru_id');
         
         if (!$guruId) {
             return $this->response->setJSON(['success' => false, 'message' => 'Guru harus dipilih']);
         }
 
-        // Start transaction
-        $db = \Config\Database::connect();
-        $db->transStart();
+        $result = $this->kelasService->assignWaliKelas($kelasId, $guruId);
 
-        try {
-            // Remove old wali kelas if exists
-            if ($kelas['wali_kelas_id']) {
-                $this->guruModel->update($kelas['wali_kelas_id'], [
-                    'is_wali_kelas' => 0,
-                    'kelas_id' => null
-                ]);
+        if ($result['success']) {
+            // Get kelas data to handle old wali kelas
+            $kelasResult = $this->kelasService->getKelasById($kelasId);
+            if ($kelasResult['success']) {
+                $kelas = $kelasResult['data'];
+                
+                // Remove old wali kelas from guru table if exists
+                if ($kelas['wali_kelas_id'] && $kelas['wali_kelas_id'] != $guruId) {
+                    $this->guruModel->update($kelas['wali_kelas_id'], [
+                        'is_wali_kelas' => 0,
+                        'kelas_id' => null
+                    ]);
+                }
             }
 
-            // Assign new wali kelas
+            // Update new guru as wali kelas
             $this->guruModel->update($guruId, [
                 'is_wali_kelas' => 1,
                 'kelas_id' => $kelasId
             ]);
-
-            // Update kelas
-            $this->kelasModel->update($kelasId, ['wali_kelas_id' => $guruId]);
-
-            $db->transComplete();
-
-            if ($db->transStatus() === FALSE) {
-                throw new \Exception('Gagal menugaskan wali kelas');
-            }
-
-            return $this->response->setJSON([
-                'success' => true,
-                'message' => 'Wali kelas berhasil ditugaskan'
-            ]);
-
-        } catch (\Exception $e) {
-            $db->transRollback();
-            return $this->response->setJSON([
-                'success' => false,
-                'message' => $e->getMessage()
-            ]);
         }
+
+        return $this->response->setJSON($result);
     }
 
     /**
@@ -379,48 +310,30 @@ class KelasController extends BaseController
      */
     public function removeWaliKelas($kelasId)
     {
-        $kelas = $this->kelasModel->find($kelasId);
+        // Get kelas data first
+        $kelasResult = $this->kelasService->getKelasById($kelasId);
         
-        if (!$kelas) {
+        if (!$kelasResult['success']) {
             return $this->response->setJSON(['success' => false, 'message' => 'Kelas tidak ditemukan']);
         }
+
+        $kelas = $kelasResult['data'];
 
         if (!$kelas['wali_kelas_id']) {
             return $this->response->setJSON(['success' => false, 'message' => 'Kelas ini tidak memiliki wali kelas']);
         }
 
-        // Start transaction
-        $db = \Config\Database::connect();
-        $db->transStart();
+        $result = $this->kelasService->removeWaliKelas($kelasId);
 
-        try {
+        if ($result['success']) {
             // Remove wali kelas status from guru
             $this->guruModel->update($kelas['wali_kelas_id'], [
                 'is_wali_kelas' => 0,
                 'kelas_id' => null
             ]);
-
-            // Remove wali kelas from kelas
-            $this->kelasModel->update($kelasId, ['wali_kelas_id' => null]);
-
-            $db->transComplete();
-
-            if ($db->transStatus() === FALSE) {
-                throw new \Exception('Gagal menghapus wali kelas');
-            }
-
-            return $this->response->setJSON([
-                'success' => true,
-                'message' => 'Wali kelas berhasil dihapus ✓'
-            ]);
-
-        } catch (\Exception $e) {
-            $db->transRollback();
-            return $this->response->setJSON([
-                'success' => false,
-                'message' => $e->getMessage()
-            ]);
         }
+
+        return $this->response->setJSON($result);
     }
 
     /**
@@ -518,7 +431,9 @@ class KelasController extends BaseController
      */
     public function export()
     {
-        $kelas = $this->kelasModel->getAllKelas();
+        // Get all kelas using service
+        $result = $this->kelasService->getAllKelas(1000); // Large number to get all
+        $kelas = $result['success'] ? $result['data']['kelas'] : [];
 
         // Create Excel file using PhpSpreadsheet
         $spreadsheet = new \PhpOffice\PhpSpreadsheet\Spreadsheet();
@@ -601,7 +516,9 @@ class KelasController extends BaseController
      */
     private function getKelasStatistics()
     {
-        $kelas = $this->kelasModel->getKelasWithJumlahSiswa();
+        // Get all kelas using service
+        $result = $this->kelasService->getAllKelas(1000);
+        $kelas = $result['success'] ? $result['data']['kelas'] : [];
         $stats = [];
 
         foreach ($kelas as $k) {
@@ -624,7 +541,9 @@ class KelasController extends BaseController
      */
     private function getJurusanStatistics()
     {
-        $kelas = $this->kelasModel->findAll();
+        // Get all kelas using service
+        $result = $this->kelasService->getAllKelas(1000);
+        $kelas = $result['success'] ? $result['data']['kelas'] : [];
         $jurusanStats = [];
 
         foreach ($kelas as $k) {
@@ -650,7 +569,9 @@ class KelasController extends BaseController
      */
     private function getTingkatStatistics()
     {
-        $kelas = $this->kelasModel->findAll();
+        // Get all kelas using service
+        $result = $this->kelasService->getAllKelas(1000);
+        $kelas = $result['success'] ? $result['data']['kelas'] : [];
         $tingkatStats = [];
 
         foreach ($kelas as $k) {

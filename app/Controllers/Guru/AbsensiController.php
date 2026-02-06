@@ -3,34 +3,28 @@
 namespace App\Controllers\Guru;
 
 use App\Controllers\BaseController;
-use App\Models\AbsensiModel;
-use App\Models\AbsensiDetailModel;
+use App\Services\AbsensiService;
 use App\Models\JadwalMengajarModel;
 use App\Models\GuruModel;
 use App\Models\SiswaModel;
-use App\Models\KelasModel;
 use App\Models\IzinSiswaModel;
 use CodeIgniter\Exceptions\PageNotFoundException;
 
 class AbsensiController extends BaseController
 {
-    protected $absensiModel;
-    protected $absensiDetailModel;
+    protected $absensiService;
     protected $jadwalModel;
     protected $guruModel;
     protected $siswaModel;
-    protected $kelasModel;
     protected $izinModel;
     protected $session;
 
     public function __construct()
     {
-        $this->absensiModel = new AbsensiModel();
-        $this->absensiDetailModel = new AbsensiDetailModel();
+        $this->absensiService = new AbsensiService();
         $this->jadwalModel = new JadwalMengajarModel();
         $this->guruModel = new GuruModel();
         $this->siswaModel = new SiswaModel();
-        $this->kelasModel = new KelasModel();
         $this->izinModel = new IzinSiswaModel();
         $this->session = session();
     }
@@ -51,73 +45,21 @@ class AbsensiController extends BaseController
         }
 
         $guruId = $guru['id'];
-        $perPage = $this->request->getGet('per_page') ?? 10;
         $search = $this->request->getGet('search');
         $tanggal = $this->request->getGet('tanggal');
         $kelasId = $this->request->getGet('kelas_id');
 
-        // Get absensi by guru
-        $absensi = $this->absensiModel->getByGuru($guruId, $tanggal);
+        // Get absensi by guru using service
+        $absensiResult = $this->absensiService->getByGuru($guruId, $tanggal);
+        $absensi = $absensiResult['data'] ?? [];
 
-        // Add can_edit and can_delete flags to each absensi
-        foreach ($absensi as &$item) {
-            $item['can_edit'] = $this->isAbsensiEditable($item);
-            $item['can_delete'] = $this->isAbsensiEditable($item);
-        }
-        unset($item); // CRITICAL: Break reference to avoid bugs in next foreach!
+        // Get kelas summary
+        $kelasSummary = $this->absensiService->getKelasSummary($absensi);
 
-        // Group absensi by kelas and mata pelajaran to handle multiple sessions per day
-        $kelasSummary = [];
-        foreach ($absensi as $item) {
-            $kelasId = $item['kelas_id'];
-            $kelasName = $item['nama_kelas'];
-            $mapelName = $item['nama_mapel'];
-            
-            // Create unique key: kelas_id + mata_pelajaran to separate different subjects
-            $summaryKey = $kelasId . '_' . $mapelName;
-            
-            if (!isset($kelasSummary[$summaryKey])) {
-                $kelasSummary[$summaryKey] = [
-                    'kelas_id' => $kelasId,
-                    'kelas_nama' => $kelasName,
-                    'mata_pelajaran' => $mapelName,
-                    'total_pertemuan' => 0,
-                    'total_hadir' => 0,
-                    'total_siswa' => 0,
-                    'avg_kehadiran' => 0,
-                    'last_absensi' => null,
-                    'jam_mulai' => $item['jam_mulai'] ?? null,
-                    'jam_selesai' => $item['jam_selesai'] ?? null,
-                    'hari' => $item['hari'] ?? null
-                ];
-            }
-            
-            // Accumulate data
-            $kelasSummary[$summaryKey]['total_pertemuan']++;
-            $kelasSummary[$summaryKey]['total_hadir'] += $item['hadir'] ?? 0;
-            $kelasSummary[$summaryKey]['total_siswa'] = max($kelasSummary[$summaryKey]['total_siswa'], $item['total_siswa'] ?? 0);
-            
-            // Track latest absensi date
-            if (!$kelasSummary[$summaryKey]['last_absensi'] || $item['tanggal'] > $kelasSummary[$summaryKey]['last_absensi']) {
-                $kelasSummary[$summaryKey]['last_absensi'] = $item['tanggal'];
-            }
-        }
-        
-        // Calculate average kehadiran for each kelas
-        foreach ($kelasSummary as &$summary) {
-            $totalExpected = $summary['total_pertemuan'] * $summary['total_siswa'];
-            if ($totalExpected > 0) {
-                $summary['avg_kehadiran'] = round(($summary['total_hadir'] / $totalExpected) * 100, 1);
-            }
-        }
-        unset($summary); // Break reference to avoid bugs in next operations
-        
-        // Sort by kelas name (use uasort to preserve associative keys)
-        uasort($kelasSummary, function($a, $b) {
-            return strcmp($a['kelas_nama'], $b['kelas_nama']);
-        });
+        // Get stats
+        $statsResult = $this->absensiService->getAbsensiStats($guruId, $tanggal);
+        $stats = $statsResult['data'] ?? [];
 
-        $absensiId = $this->request->getGet('absensi_id');
         // Get all classes taught by this teacher
         $kelasOptions = $this->getKelasOptions($guruId);
 
@@ -131,7 +73,7 @@ class AbsensiController extends BaseController
             'kelasId' => $kelasId,
             'kelasOptions' => $kelasOptions,
             'guru' => $guru,
-            'stats' => $this->getAbsensiStats($guruId, $tanggal),
+            'stats' => $stats,
         ];
 
         return view('guru/absensi/index', $data);
@@ -175,28 +117,32 @@ class AbsensiController extends BaseController
         }
 
         // Check if absensi already exists for this schedule and date
-        if ($jadwal && $this->absensiModel->isAlreadyAbsen($jadwal['id'], $tanggal)) {
-            $existingAbsensi = $this->absensiModel->getByJadwalAndTanggal($jadwal['id'], $tanggal);
+        if ($jadwal) {
+            $checkResult = $this->absensiService->checkAbsensiExists($jadwal['id'], $tanggal);
+            
+            if ($checkResult['success'] && $checkResult['data']['exists']) {
+                $existingAbsensi = $checkResult['data']['absensi'];
 
-            // Check if this is a substitute teacher trying to access already-filled absensi
-            $isSubstituteMode = ($jadwal['guru_id'] != $guru['id']);
+                // Check if this is a substitute teacher trying to access already-filled absensi
+                $isSubstituteMode = ($jadwal['guru_id'] != $guru['id']);
 
-            if ($isSubstituteMode) {
-                // Get the original teacher's name who filled the absensi
-                $absensiDetail = $this->absensiModel->getAbsensiWithDetail($existingAbsensi['id']);
-                $namaGuruAsli = $absensiDetail['nama_guru'] ?? 'guru asli';
+                if ($isSubstituteMode) {
+                    // Get the original teacher's name
+                    $detailResult = $this->absensiService->getAbsensiDetail($existingAbsensi['id']);
+                    $namaGuruAsli = $detailResult['data']['absensi']['nama_guru'] ?? 'guru asli';
 
-                // Show friendly message for substitute teacher
-                $this->session->setFlashdata('success_custom', [
-                    'title' => 'Sudah Beres! ⚡',
-                    'message' => "Ternyata absen sudah diisi <strong>{$namaGuruAsli}</strong>. Bapak/Ibu tidak perlu input ulang. Terima kasih bantuannya!"
-                ]);
-                return redirect()->to('/guru/absensi');
+                    // Show friendly message for substitute teacher
+                    $this->session->setFlashdata('success_custom', [
+                        'title' => 'Sudah Beres! ⚡',
+                        'message' => "Ternyata absen sudah diisi <strong>{$namaGuruAsli}</strong>. Bapak/Ibu tidak perlu input ulang. Terima kasih bantuannya!"
+                    ]);
+                    return redirect()->to('/guru/absensi');
+                }
+
+                // For original teacher, allow editing
+                $this->session->setFlashdata('info', 'Absen di tanggal ' . $tanggal . ' udah diisi sebelumnya 📝');
+                return redirect()->to('/guru/absensi/edit/' . $existingAbsensi['id']);
             }
-
-            // For original teacher, allow editing
-            $this->session->setFlashdata('info', 'Absen di tanggal ' . $tanggal . ' udah diisi sebelumnya 📝');
-            return redirect()->to('/guru/absensi/edit/' . $existingAbsensi['id']);
         }
 
         // Get next pertemuan number
@@ -252,22 +198,8 @@ class AbsensiController extends BaseController
             return redirect()->to('/login');
         }
 
-        // Validate input
-        $rules = [
-            'jadwal_mengajar_id' => 'required|numeric',
-            'tanggal' => 'required|valid_date',
-            'pertemuan_ke' => 'required|numeric|greater_than[0]',
-            'materi_pembelajaran' => 'permit_empty',
-            'siswa' => 'required'
-        ];
-
-        if (!$this->validate($rules)) {
-            return redirect()->back()->withInput()->with('errors', $this->validator->getErrors());
-        }
-
         $jadwalId = $this->request->getPost('jadwal_mengajar_id');
-        $tanggal = $this->request->getPost('tanggal');
-
+        
         // Verify jadwal exists
         $jadwal = $this->jadwalModel->find($jadwalId);
         if (!$jadwal) {
@@ -281,83 +213,42 @@ class AbsensiController extends BaseController
         // Set guru_pengganti_id based on mode
         $guruPenggantiId = null;
         if ($isSubstituteMode) {
-            // Substitute mode: current teacher is the substitute
             $guruPenggantiId = $guru['id'];
         } else {
-            // Normal mode: can optionally have a substitute (from form input)
             $guruPenggantiId = $this->request->getPost('guru_pengganti_id') ?: null;
         }
 
-        // Check if absensi already exists
-        if ($this->absensiModel->isAlreadyAbsen($jadwalId, $tanggal)) {
-            $this->session->setFlashdata('error', 'Absen di tanggal ini udah diisi sebelumnya.');
-            return redirect()->back()->withInput();
-        }
-
-        // Prepare absensi data
-        $absensiData = [
+        // Prepare data for service
+        $data = [
             'jadwal_mengajar_id' => $jadwalId,
-            'tanggal' => $tanggal,
+            'tanggal' => $this->request->getPost('tanggal'),
             'pertemuan_ke' => $this->request->getPost('pertemuan_ke'),
             'materi_pembelajaran' => $this->request->getPost('materi_pembelajaran'),
             'created_by' => $userId,
             'guru_pengganti_id' => $guruPenggantiId,
-            'created_at' => date('Y-m-d H:i:s')
+            'siswa' => $this->request->getPost('siswa')
         ];
 
-        // Start database transaction
-        $db = \Config\Database::connect();
-        $db->transStart();
+        // Create absensi using service
+        $result = $this->absensiService->createAbsensi($data);
 
-        try {
-            // Insert absensi
-            $absensiId = $this->absensiModel->insert($absensiData);
-
-            if (!$absensiId) {
-                throw new \Exception('Gagal menyimpan data absensi.');
-            }
-
-            // Insert absensi details
-            $siswaData = $this->request->getPost('siswa');
-            $batchData = [];
-
-            foreach ($siswaData as $siswaId => $data) {
-                $batchData[] = [
-                    'absensi_id' => $absensiId,
-                    'siswa_id' => $siswaId,
-                    'status' => $data['status'],
-                    'keterangan' => $data['keterangan'] ?? null,
-                    'waktu_absen' => date('Y-m-d H:i:s')
-                ];
-            }
-
-            if (!empty($batchData)) {
-                $this->absensiDetailModel->insertBatch($batchData);
-            }
-
-            $db->transComplete();
-
-            if ($db->transStatus() === FALSE) {
-                throw new \Exception('Gagal menyimpan data detail absensi.');
-            }
-
-            $this->session->setFlashdata('success', 'Mantap! Absen tersimpan.');
-
-            // Check next action from form
-            $nextAction = $this->request->getPost('next_action');
-
-            if ($nextAction === 'jurnal') {
-                // Redirect to jurnal create with absensi_id
-                return redirect()->to('/guru/jurnal/tambah/' . $absensiId);
-            }
-
-            // Default: Redirect to absensi index
-            return redirect()->to('/guru/absensi');
-        } catch (\Exception $e) {
-            $db->transRollback();
-            $this->session->setFlashdata('error', $e->getMessage());
-            return redirect()->back()->withInput();
+        if (!$result['success']) {
+            $this->session->setFlashdata('error', $result['message']);
+            return redirect()->back()->withInput()->with('errors', $result['errors']);
         }
+
+        $this->session->setFlashdata('success', 'Mantap! Absen tersimpan.');
+
+        // Check next action from form
+        $nextAction = $this->request->getPost('next_action');
+
+        if ($nextAction === 'jurnal') {
+            // Redirect to jurnal create with absensi_id
+            return redirect()->to('/guru/jurnal/tambah/' . $result['data']['absensi_id']);
+        }
+
+        // Default: Redirect to absensi index
+        return redirect()->to('/guru/absensi');
     }
 
     /**
@@ -378,12 +269,6 @@ class AbsensiController extends BaseController
         $guruId = $guru['id'];
         $tanggal = $this->request->getGet('tanggal');
 
-        // Get kelas info
-        $kelas = $this->kelasModel->find($kelasId);
-        if (!$kelas) {
-            throw new PageNotFoundException('Data kelas tidak ditemukan.');
-        }
-
         // Verify this teacher teaches this class
         $teachesThisClass = $this->jadwalModel
             ->where('guru_id', $guruId)
@@ -395,15 +280,9 @@ class AbsensiController extends BaseController
             return redirect()->to('/guru/absensi');
         }
 
-        // Get absensi for this kelas
-        $absensiList = $this->absensiModel->getByGuruAndKelas($guruId, $kelasId, $tanggal);
-        
-        // Add can_edit and can_delete flags
-        foreach ($absensiList as &$item) {
-            $item['can_edit'] = $this->isAbsensiEditable($item);
-            $item['can_delete'] = $this->isAbsensiEditable($item);
-        }
-        unset($item); // CRITICAL: Break reference to avoid bugs!
+        // Get absensi for this kelas using service
+        $absensiResult = $this->absensiService->getByGuruAndKelas($guruId, $kelasId, $tanggal);
+        $absensiList = $absensiResult['data'] ?? [];
 
         // Calculate stats for this kelas
         $kelasStats = [
@@ -421,6 +300,13 @@ class AbsensiController extends BaseController
         if ($kelasStats['total_pertemuan'] > 0 && $kelasStats['total_siswa'] > 0) {
             $totalExpected = $kelasStats['total_pertemuan'] * $kelasStats['total_siswa'];
             $kelasStats['avg_kehadiran'] = round(($kelasStats['total_hadir'] / $totalExpected) * 100, 1);
+        }
+
+        // Get kelas info (we still need KelasModel for this)
+        $kelasModel = new \App\Models\KelasModel();
+        $kelas = $kelasModel->find($kelasId);
+        if (!$kelas) {
+            throw new PageNotFoundException('Data kelas tidak ditemukan.');
         }
 
         $data = [
@@ -452,42 +338,34 @@ class AbsensiController extends BaseController
             return redirect()->to('/login');
         }
 
-        // Get absensi with details
-        $absensi = $this->absensiModel->getAbsensiWithDetail($id);
+        // Get absensi detail using service
+        $result = $this->absensiService->getAbsensiDetail($id);
 
-        if (!$absensi) {
+        if (!$result['success']) {
             throw new PageNotFoundException('Data absensi tidak ditemukan.');
         }
 
-        // Verify access: Allow if:
-        // 1. User created the absensi
-        // 2. Schedule belongs to this teacher (original teacher)
-        // 3. This teacher is the substitute teacher for this absensi
-        $jadwal = $this->jadwalModel->find($absensi['jadwal_mengajar_id']);
-        $hasAccess = ($absensi['created_by'] == $userId)
-            || ($jadwal && $jadwal['guru_id'] == $guru['id'])
-            || ($absensi['guru_pengganti_id'] == $guru['id']);
+        // Verify access
+        $accessResult = $this->absensiService->verifyAccess(
+            $result['data']['absensi'], 
+            $userId, 
+            $guru['id']
+        );
 
-        if (!$hasAccess) {
+        if (!$accessResult['success']) {
             $this->session->setFlashdata('error', 'Sorry, ini bukan jadwal kamu.');
             return redirect()->to('/guru/absensi');
         }
-
-        // Get absensi details
-        $absensiDetails = $this->absensiDetailModel->getByAbsensi($id);
-
-        // Calculate statistics
-        $statistics = $this->calculateStatistics($absensiDetails);
 
         $data = [
             'title' => 'Detail Absensi',
             'pageTitle' => 'Detail Absensi',
             'pageDescription' => 'Lihat detail data absensi',
-            'absensi' => $absensi,
-            'absensiDetails' => $absensiDetails,
-            'statistics' => $statistics,
+            'absensi' => $result['data']['absensi'],
+            'absensiDetails' => $result['data']['absensiDetails'],
+            'statistics' => $result['data']['statistics'],
             'guru' => $guru,
-            'isEditable' => $this->isAbsensiEditable($absensi)
+            'isEditable' => $result['data']['isEditable']
         ];
 
         return view('guru/absensi/show', $data);
@@ -508,35 +386,29 @@ class AbsensiController extends BaseController
             return redirect()->to('/login');
         }
 
-        // Get absensi with details
-        $absensi = $this->absensiModel->getAbsensiWithDetail($id);
+        // Get absensi detail using service
+        $result = $this->absensiService->getAbsensiDetail($id);
 
-        if (!$absensi) {
+        if (!$result['success']) {
             throw new PageNotFoundException('Data absensi tidak ditemukan.');
         }
 
-        // Verify access: Allow if:
-        // 1. User created the absensi
-        // 2. Schedule belongs to this teacher (original teacher)
-        // 3. This teacher is the substitute teacher for this absensi
-        $jadwal = $this->jadwalModel->find($absensi['jadwal_mengajar_id']);
-        $hasAccess = ($absensi['created_by'] == $userId)
-            || ($jadwal && $jadwal['guru_id'] == $guru['id'])
-            || ($absensi['guru_pengganti_id'] == $guru['id']);
+        $absensi = $result['data']['absensi'];
+        $absensiDetails = $result['data']['absensiDetails'];
 
-        if (!$hasAccess) {
+        // Verify access
+        $accessResult = $this->absensiService->verifyAccess($absensi, $userId, $guru['id']);
+
+        if (!$accessResult['success']) {
             $this->session->setFlashdata('error', 'Sorry, ini bukan jadwal kamu.');
             return redirect()->to('/guru/absensi');
         }
 
-        // Check if absensi is editable (within 24 hours)
-        if (!$this->isAbsensiEditable($absensi)) {
+        // Check if editable
+        if (!$result['data']['isEditable']) {
             $this->session->setFlashdata('error', 'Absen ini udah lewat 24 jam, nggak bisa diedit lagi ya ?');
             return redirect()->to('/guru/absensi/show/' . $id);
         }
-
-        // Get absensi details
-        $absensiDetails = $this->absensiDetailModel->getByAbsensi($id);
 
         // Get students in the class
         $kelasId = $absensi['kelas_id'] ?? null;
@@ -579,165 +451,35 @@ class AbsensiController extends BaseController
             return redirect()->to('/login');
         }
 
-        // Check if absensi exists
-        $absensi = $this->absensiModel->find($id);
-        if (!$absensi) {
-            throw new PageNotFoundException('Data absensi tidak ditemukan.');
-        }
-
-        // Verify access: Allow if:
-        // 1. User created the absensi
-        // 2. Schedule belongs to this teacher (original teacher)
-        // 3. This teacher is the substitute teacher for this absensi
-        $jadwal = $this->jadwalModel->find($absensi['jadwal_mengajar_id']);
-        $hasAccess = ($absensi['created_by'] == $userId)
-            || ($jadwal && $jadwal['guru_id'] == $guru['id'])
-            || ($absensi['guru_pengganti_id'] == $guru['id']);
-
-        if (!$hasAccess) {
-            $this->session->setFlashdata('error', 'Sorry, ini bukan jadwal kamu.');
-            return redirect()->to('/guru/absensi');
-        }
-
-        // Check if absensi is editable
-        if (!$this->isAbsensiEditable($absensi)) {
-            $this->session->setFlashdata('error', 'Absen ini udah lewat 24 jam, nggak bisa diedit lagi ya ?');
-            return redirect()->to('/guru/absensi/show/' . $id);
-        }
-
-        // Validate input
-        $rules = [
-            'tanggal' => 'required|valid_date',
-            'pertemuan_ke' => 'required|numeric|greater_than[0]',
-            'siswa' => 'required'
-        ];
-
-        if (!$this->validate($rules)) {
-            // Log validation errors for debugging
-            log_message('error', 'Validation failed in AbsensiController::update: ' . json_encode($this->validator->getErrors()));
-            $this->session->setFlashdata('error', 'Validasi gagal: ' . implode(', ', $this->validator->getErrors()));
-            return redirect()->back()->withInput()->with('errors', $this->validator->getErrors());
-        }
-
-        // Get siswa data and validate
-        $siswaData = $this->request->getPost('siswa');
-        if (empty($siswaData) || !is_array($siswaData)) {
-            log_message('error', 'No siswa data received in AbsensiController::update');
-            $this->session->setFlashdata('error', 'Data siswa tidak ditemukan. Mohon refresh halaman dan coba lagi.');
-            return redirect()->back()->withInput();
-        }
-
-        // Log for debugging
-        log_message('info', 'Updating absensi ID: ' . $id . ' with ' . count($siswaData) . ' students');
-
-        // Update absensi data
-        $absensiData = [
-            'id' => $id,
+        // Prepare data for service
+        $data = [
             'tanggal' => $this->request->getPost('tanggal'),
             'pertemuan_ke' => $this->request->getPost('pertemuan_ke'),
-            'updated_at' => date('Y-m-d H:i:s')
+            'materi_pembelajaran' => $this->request->getPost('materi_pembelajaran'),
+            'siswa' => $this->request->getPost('siswa')
         ];
 
-        // Start database transaction
-        $db = \Config\Database::connect();
-        $db->transStart();
+        // Update using service
+        $result = $this->absensiService->updateAbsensi($id, $data);
 
-        try {
-            // Update absensi
-            if (!$this->absensiModel->save($absensiData)) {
-                throw new \Exception('Gagal mengupdate data absensi utama.');
-            }
-
-            // Update absensi details
-            $updateCount = 0;
-            $insertCount = 0;
-
-            foreach ($siswaData as $siswaId => $data) {
-                // Validate siswa_id
-                if (!is_numeric($siswaId)) {
-                    log_message('warning', 'Invalid siswa_id: ' . $siswaId);
-                    continue;
-                }
-
-                // Validate status
-                if (!isset($data['status']) || empty($data['status'])) {
-                    log_message('warning', 'Empty status for siswa_id: ' . $siswaId);
-                    continue;
-                }
-
-                // Normalize status to lowercase and handle Alpha -> alpa conversion
-                $status = strtolower(trim($data['status']));
-                if ($status === 'alpha') {
-                    $status = 'alpa';
-                }
-
-                // Validate status value
-                $validStatuses = ['hadir', 'izin', 'sakit', 'alpa'];
-                if (!in_array($status, $validStatuses)) {
-                    log_message('warning', 'Invalid status "' . $data['status'] . '" for siswa_id: ' . $siswaId);
-                    continue;
-                }
-
-                $existing = $this->absensiDetailModel
-                    ->where('absensi_id', $id)
-                    ->where('siswa_id', $siswaId)
-                    ->first();
-
-                if ($existing) {
-                    // Update existing record
-                    $updateResult = $this->absensiDetailModel->update($existing['id'], [
-                        'status' => $status,
-                        'keterangan' => $data['keterangan'] ?? null
-                    ]);
-
-                    if ($updateResult) {
-                        $updateCount++;
-                        log_message('debug', 'Updated siswa_id: ' . $siswaId . ' with status: ' . $status);
-                    }
-                } else {
-                    // Insert new record
-                    $insertResult = $this->absensiDetailModel->insert([
-                        'absensi_id' => $id,
-                        'siswa_id' => $siswaId,
-                        'status' => $status,
-                        'keterangan' => $data['keterangan'] ?? null,
-                        'waktu_absen' => date('Y-m-d H:i:s')
-                    ]);
-
-                    if ($insertResult) {
-                        $insertCount++;
-                        log_message('debug', 'Inserted siswa_id: ' . $siswaId . ' with status: ' . $status);
-                    }
-                }
-            }
-
-            $db->transComplete();
-
-            if ($db->transStatus() === FALSE) {
-                throw new \Exception('Gagal memperbarui data absensi.');
-            }
-
-            // Log success
-            log_message('info', 'Absensi updated successfully. Updated: ' . $updateCount . ', Inserted: ' . $insertCount);
-
-            $this->session->setFlashdata('success', 'Nice! Absen sudah diupdate, (Diubah: ' . $updateCount . ', Ditambah: ' . $insertCount . ')');
-
-            // Check next action from form
-            $nextAction = $this->request->getPost('next_action');
-
-            if ($nextAction === 'jurnal') {
-                // Redirect to jurnal create with absensi_id
-                return redirect()->to('/guru/jurnal/tambah/' . $id);
-            }
-
-            // Default: Redirect to absensi index
-            return redirect()->to('/guru/absensi');
-        } catch (\Exception $e) {
-            $db->transRollback();
-            log_message('error', 'Error updating absensi: ' . $e->getMessage());
-            $this->session->setFlashdata('error', 'Gagal menyimpan: ' . $e->getMessage());
-            return redirect()->back()->withInput();
+        if (!$result['success']) {
+            $this->session->setFlashdata('error', $result['message']);
+            return redirect()->back()->withInput()->with('errors', $result['errors']);
         }
+
+        $updateCount = $result['data']['updated'] ?? 0;
+        $insertCount = $result['data']['inserted'] ?? 0;
+
+        $this->session->setFlashdata('success', 'Nice! Absen sudah diupdate, (Diubah: ' . $updateCount . ', Ditambah: ' . $insertCount . ')');
+
+        // Check next action from form
+        $nextAction = $this->request->getPost('next_action');
+
+        if ($nextAction === 'jurnal') {
+            return redirect()->to('/guru/jurnal/tambah/' . $id);
+        }
+
+        return redirect()->to('/guru/absensi');
     }
 
     /**
@@ -755,37 +497,13 @@ class AbsensiController extends BaseController
             return redirect()->to('/login');
         }
 
-        // Check if absensi exists
-        $absensi = $this->absensiModel->find($id);
-        if (!$absensi) {
-            throw new PageNotFoundException('Data absensi tidak ditemukan.');
-        }
+        // Delete using service
+        $result = $this->absensiService->deleteAbsensi($id);
 
-        // Verify access: Allow if:
-        // 1. User created the absensi
-        // 2. Schedule belongs to this teacher (original teacher)
-        // 3. This teacher is the substitute teacher for this absensi
-        $jadwal = $this->jadwalModel->find($absensi['jadwal_mengajar_id']);
-        $hasAccess = ($absensi['created_by'] == $userId)
-            || ($jadwal && $jadwal['guru_id'] == $guru['id'])
-            || ($absensi['guru_pengganti_id'] == $guru['id']);
-
-        if (!$hasAccess) {
-            $this->session->setFlashdata('error', 'Sorry, ini bukan jadwal kamu.');
-            return redirect()->to('/guru/absensi');
-        }
-
-        // Check if absensi is editable
-        if (!$this->isAbsensiEditable($absensi)) {
-            $this->session->setFlashdata('error', 'Absen udah lewat 24 jam nih, udah nggak bisa dihapus ya 🙏');
-            return redirect()->to('/guru/absensi/show/' . $id);
-        }
-
-        // Delete absensi (cascade will delete absensi_detail)
-        if ($this->absensiModel->delete($id)) {
-            $this->session->setFlashdata('success', 'Sip, Absen sudah dihapus ya!');
+        if (!$result['success']) {
+            $this->session->setFlashdata('error', $result['message']);
         } else {
-            $this->session->setFlashdata('error', 'Hmm, gagal hapus absen 🤔');
+            $this->session->setFlashdata('success', 'Sip, Absen sudah dihapus ya!');
         }
 
         return redirect()->to('/guru/absensi');
@@ -889,18 +607,17 @@ class AbsensiController extends BaseController
             return $this->response->setJSON(['success' => false, 'message' => 'Jadwal ID diperlukan']);
         }
 
-        // Get next pertemuan number for this jadwal
-        $lastAbsensi = $this->absensiModel
-            ->where('jadwal_mengajar_id', $jadwalId)
-            ->orderBy('pertemuan_ke', 'DESC')
-            ->first();
+        // Get next pertemuan number using service
+        $userId = $this->session->get('userId');
+        $guru = $this->guruModel->getByUserId($userId);
+        
+        if (!$guru) {
+            return $this->response->setJSON(['success' => false, 'message' => 'Data guru tidak ditemukan']);
+        }
+        
+        $result = $this->absensiService->getNextPertemuan($guru['id'], null, $jadwalId);
 
-        $nextPertemuan = $lastAbsensi ? ($lastAbsensi['pertemuan_ke'] + 1) : 1;
-
-        return $this->response->setJSON([
-            'success' => true,
-            'pertemuan_ke' => $nextPertemuan
-        ]);
+        return $this->response->setJSON($result['data']);
     }
 
     /**
@@ -918,32 +635,24 @@ class AbsensiController extends BaseController
             return redirect()->to('/login');
         }
 
-        // Get absensi with details
-        $absensi = $this->absensiModel->getAbsensiWithDetail($id);
+        // Get absensi detail using service
+        $result = $this->absensiService->getAbsensiDetail($id);
 
-        if (!$absensi) {
+        if (!$result['success']) {
             throw new PageNotFoundException('Data absensi tidak ditemukan.');
         }
 
-        // Verify access: Allow if:
-        // 1. User created the absensi
-        // 2. Schedule belongs to this teacher (original teacher)
-        // 3. This teacher is the substitute teacher for this absensi
-        $jadwal = $this->jadwalModel->find($absensi['jadwal_mengajar_id']);
-        $hasAccess = ($absensi['created_by'] == $userId)
-            || ($jadwal && $jadwal['guru_id'] == $guru['id'])
-            || ($absensi['guru_pengganti_id'] == $guru['id']);
+        $absensi = $result['data']['absensi'];
+        $absensiDetails = $result['data']['absensiDetails'];
+        $statistics = $result['data']['statistics'];
 
-        if (!$hasAccess) {
+        // Verify access
+        $accessResult = $this->absensiService->verifyAccess($absensi, $userId, $guru['id']);
+
+        if (!$accessResult['success']) {
             $this->session->setFlashdata('error', 'Sorry, ini bukan jadwal kamu.');
             return redirect()->to('/guru/absensi');
         }
-
-        // Get absensi details
-        $absensiDetails = $this->absensiDetailModel->getByAbsensi($id);
-
-        // Calculate statistics
-        $statistics = $this->calculateStatistics($absensiDetails);
 
         $data = [
             'title' => 'Cetak Absensi',
@@ -1004,53 +713,11 @@ class AbsensiController extends BaseController
         return $options;
     }
 
-    private function getAbsensiStats($guruId, $tanggal = null)
-    {
-        $stats = [
-            'total' => 0,
-            'hadir' => 0,
-            'izin' => 0,
-            'sakit' => 0,
-            'alpa' => 0
-        ];
-
-        $builder = $this->absensiDetailModel
-            ->join('absensi', 'absensi.id = absensi_detail.absensi_id')
-            ->join('jadwal_mengajar', 'jadwal_mengajar.id = absensi.jadwal_mengajar_id')
-            ->where('jadwal_mengajar.guru_id', $guruId);
-
-        if ($tanggal) {
-            $builder->where('absensi.tanggal', $tanggal);
-        }
-
-        $details = $builder->select('absensi_detail.status, COUNT(*) as jumlah')
-            ->groupBy('absensi_detail.status')
-            ->findAll();
-
-        foreach ($details as $detail) {
-            $stats[$detail['status']] = $detail['jumlah'];
-            $stats['total'] += $detail['jumlah'];
-        }
-
-        return $stats;
-    }
-
     private function getNextPertemuan($guruId, $kelasId = null, $jadwalId = null)
     {
-        // If jadwal_id is provided, use it to get the last pertemuan for that specific schedule
-        // This ensures each jadwal has its own pertemuan counter
-        if ($jadwalId) {
-            $lastAbsensi = $this->absensiModel
-                ->where('jadwal_mengajar_id', $jadwalId)
-                ->orderBy('pertemuan_ke', 'DESC')
-                ->first();
-
-            return $lastAbsensi ? ($lastAbsensi['pertemuan_ke'] + 1) : 1;
-        }
-
-        // If jadwal_id not provided, always return 1 for initial form load
-        // User will select jadwal first, then AJAX will get the correct pertemuan number
-        return 1;
+        // Use service to get next pertemuan
+        $result = $this->absensiService->getNextPertemuan($guruId, $kelasId, $jadwalId);
+        return $result['data']['pertemuan_ke'] ?? 1;
     }
 
     private function getHariList()
@@ -1074,28 +741,4 @@ class AbsensiController extends BaseController
         ];
     }
 
-    private function calculateStatistics($absensiDetails)
-    {
-        $total = count($absensiDetails);
-        $statistics = [
-            'hadir' => 0,
-            'izin' => 0,
-            'sakit' => 0,
-            'alpa' => 0,
-            'percentage' => 0
-        ];
-
-        foreach ($absensiDetails as $detail) {
-            if (isset($statistics[$detail['status']])) {
-                $statistics[$detail['status']]++;
-            }
-        }
-
-        if ($total > 0) {
-            $hadir = $statistics['hadir'];
-            $statistics['percentage'] = round(($hadir / $total) * 100, 2);
-        }
-
-        return $statistics;
-    }
 }
